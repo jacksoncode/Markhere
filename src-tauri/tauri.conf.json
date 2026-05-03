@@ -1,0 +1,68 @@
+{
+  "productName": "Markhere",
+  "version": "0.1.0",
+  "identifier": "com.markhere.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Markhere - Markdown Editor",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: blob: https:; script-src 'self'; style-src 'self' 'unsafe-inline'",
+      "dangerousDisableAssetCspModification": false
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "Editor",
+    "shortDescription": "WYSIWYG Markdown Editor",
+    "longDescription": "A modern, cross-platform Markdown editor with real-time WYSIWYG editing, multiple export formats, and powerful image handling",
+    "macOS": {
+      "minimumSystemVersion": "10.15"
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    }
+  },
+  "plugins": {
+    "shell": {
+      "open": true,
+      "scope": [
+        {
+          "name": "pandoc",
+          "cmd": "pandoc",
+          "args": true
+        }
+      ]
+    },
+    "fs": {
+      "all": true,
+      "scope": ["$HOME/**", "$APP/**", "$DOCUMENT/**"]
+    }
+  }
+}
