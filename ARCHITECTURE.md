@@ -55,9 +55,20 @@ Markhere is a cross-platform WYSIWYG Markdown editor built with Tauri + React + 
 
 ### File Module
 
+- **FileService**: TypeScript IPC wrapper for Tauri commands
+- **FileStore**: Zustand slice for file state (path, content, dirty flag)
+- **SaveWorker**: Debounced save worker (500ms delay, prevents data loss)
+- **file_exists**: Tauri command checking file existence
 - **save_file**: Tauri command for saving documents
 - **read_file**: Tauri command for reading files
 - **Image Storage**: Local image management
+- **Auto-save**: Real-time content persistence on every edit
+
+### UI Components
+
+- **MenuBar**: Top navigation bar with file operations
+- **Keyboard Shortcuts**: Cmd+S (save), Cmd+N (new), Cmd+O (open)
+- **Dirty Indicator**: Visual flag for unsaved changes
 
 ### Export Module
 
@@ -77,13 +88,14 @@ React Components ← Zustand Store ← IPC Response
 
 ## IPC Commands
 
-| Command | Purpose |
-|---------|---------|
-| save_file | Save document to disk |
-| read_file | Read file content |
-| export_to_pdf | Generate PDF |
-| export_to_word | Generate Word doc |
-| save_image | Save pasted image |
+| Command | Purpose | Parameters |
+|---------|---------|------------|
+| save_file | Save document to disk | path: String, content: String |
+| read_file | Read file content | path: String |
+| file_exists | Check if file exists | path: String |
+| export_to_pdf | Generate PDF | html: String, output_path: String |
+| export_to_word | Generate Word doc | markdown: String, output_path: String |
+| save_image | Save pasted image | image_data: String (base64), filename: String |
 
 ## Security
 
