@@ -1,0 +1,43 @@
+.menu-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.file-name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.dirty-indicator {
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+.menu-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.menu-actions button {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.menu-actions button:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
