@@ -26,6 +26,12 @@ async fn read_file(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
+async fn file_exists(path: String) -> Result<bool, String> {
+    let exists = std::path::Path::new(&path).exists();
+    Ok(exists)
+}
+
+#[tauri::command]
 async fn export_to_pdf(html: String, output_path: String) -> Result<String, String> {
     Ok(format!("PDF export to {} with {} bytes", output_path, html.len()))
 }
@@ -64,6 +70,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             save_file,
             read_file,
+            file_exists,
             export_to_pdf,
             export_to_word,
             save_image,
