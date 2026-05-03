@@ -6,14 +6,20 @@ import { Toolbar } from './components/Toolbar/Toolbar';
 import { MenuBar } from './components/MenuBar/MenuBar';
 import { useFileStore } from './store/fileStore';
 import { useEditorState } from './store/editorStore';
+import { initTheme } from './store/themeStore';
 import { FileService } from './services/FileService';
 import { saveWorker } from './workers/SaveWorker';
 import './styles/App.css';
+import './styles/theme.css';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { currentPath, setCurrentPath, setSavedContent } = useFileStore();
   const { editorInstance } = useEditorState();
+
+  useEffect(() => {
+    initTheme();
+  }, []);
 
   const handleSave = async () => {
     if (!currentPath) {

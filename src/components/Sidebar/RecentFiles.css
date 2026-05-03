@@ -1,0 +1,53 @@
+.recent-files {
+  margin-top: 16px;
+  padding: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.recent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.recent-header button {
+  padding: 2px 6px;
+  font-size: 11px;
+  background: transparent;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+}
+
+.recent-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px;
+  margin: 4px 0;
+  background: var(--hover-bg);
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.recent-name {
+  color: var(--text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-time {
+  color: var(--text-color);
+  opacity: 0.6;
+  font-size: 11px;
+}
