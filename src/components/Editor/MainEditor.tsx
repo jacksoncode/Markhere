@@ -15,10 +15,14 @@ import { TaskList } from '@tiptap/extension-task-list';
 import { TaskItem } from '@tiptap/extension-task-item';
 import { Markdown } from 'tiptap-markdown';
 import { useEditorState } from '../../store/editorStore';
+import { useFileStore } from '../../store/fileStore';
+import { FileService } from '../../services/FileService';
+import { saveWorker } from '../../workers/SaveWorker';
 import './Editor.css';
 
 export function MainEditor() {
   const { setContent, setEditorInstance } = useEditorState();
+  const { currentPath, setSavedContent } = useFileStore();
 
   const editor = useEditor({
     extensions: [
@@ -61,7 +65,17 @@ export function MainEditor() {
     ],
     content: '',
     onUpdate: ({ editor }) => {
-      setContent(editor.getHTML());
+      const html = editor.getHTML();
+      setContent(html);
+
+      // Auto-save with debounce
+      if (currentPath) {
+        saveWorker.triggerSave(async () => {
+          const markdown = (editor.storage as any)?.markdown?.getMarkdown?.() || '';
+          await FileService.saveFile(currentPath, markdown);
+          setSavedContent(markdown);
+        });
+      }
     },
     onCreate: ({ editor }) => {
       setEditorInstance(editor);
