@@ -29,7 +29,7 @@ function saveRecentFiles(files: RecentFile[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(files));
 }
 
-export const useRecentFilesStore = create<RecentFilesState>((set, get) => ({
+export const useRecentFilesStore = create<RecentFilesState>((set) => ({
   files: loadRecentFiles(),
   maxFiles: 10,
   
