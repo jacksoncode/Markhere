@@ -118,7 +118,104 @@
     "language": "语言",
     "theme": "主题",
     "autoSave": "自动保存",
-    "editor": "编辑器设置"
+    "editor": "编辑器设置",
+    "general": "通用",
+    "appearance": "外观",
+    "markdown": "Markdown",
+    "codeFences": "代码块",
+    "image": "图片",
+    "files": "文件",
+    "export": "导出",
+    "apply": "应用",
+    "save": "保存",
+    "cancel": "取消",
+    "generalSection": {
+      "startup": "启动选项",
+      "reopenLastFiles": "启动时重新打开上次文件",
+      "reopenLastFilesDesc": "启动应用程序时自动打开上次编辑的文件"
+    },
+    "appearanceSection": {
+      "themeTitle": "主题",
+      "themeLight": "浅色主题",
+      "themeDark": "深色主题",
+      "themeSepia": "复古主题",
+      "fontTitle": "字体",
+      "fontFamily": "字体族",
+      "fontSize": "字号",
+      "sidebarTitle": "侧边栏",
+      "sidebarWidth": "侧边栏宽度",
+      "wordCountTitle": "字数统计",
+      "showWordCount": "显示字数统计",
+      "lineNumberTitle": "行号",
+      "showLineNumber": "在代码块显示行号"
+    },
+    "editorSection": {
+      "indentTitle": "缩进",
+      "indentSize": "默认缩进空格数",
+      "indentSizeDesc": "设置 Tab 键的缩进空格数",
+      "lineEndingTitle": "行尾格式",
+      "lineEndingLf": "Unix 格式 (LF)",
+      "lineEndingCrlf": "Windows 格式 (CRLF)",
+      "lineEndingDesc": "设置新文件的默认行尾格式",
+      "behaviorTitle": "编辑行为",
+      "smartPaste": "智能粘贴",
+      "smartPasteDesc": "自动识别并转换粘贴的内容（URL、图片等）",
+      "autoMatchBrackets": "自动匹配括号",
+      "autoMatchBracketsDesc": "输入括号时自动补全配对符号",
+      "spellCheckTitle": "拼写检查",
+      "enableSpellCheck": "启用拼写检查",
+      "spellCheckLanguage": "拼写检查语言"
+    },
+    "markdownSection": {
+      "syntaxTitle": "语法支持",
+      "enableDiagrams": "启用图表（Mermaid/Flowchart）",
+      "enableMath": "启用数学公式",
+      "enableFootnotes": "启用脚注",
+      "enableYaml": "启用 YAML 元数据",
+      "enableAutoLinks": "启用自动链接识别",
+      "syntaxDesc": "开启或关闭 Markdown 扩展语法支持"
+    },
+    "codeFencesSection": {
+      "defaultLanguage": "默认代码语言",
+      "defaultLanguageDesc": "创建代码块时自动应用的编程语言",
+      "codeBlockTitle": "代码块设置",
+      "highlightCurrentLine": "高亮当前行"
+    },
+    "imageSection": {
+      "insertBehavior": "图片插入行为",
+      "insertCopy": "复制到资源文件夹",
+      "insertLink": "保持原始路径",
+      "insertUpload": "上传到云端",
+      "insertBehaviorDesc": "插入图片时的默认处理方式",
+      "globalFolder": "全局图片文件夹",
+      "globalFolderDesc": "保存图片的默认文件夹路径"
+    },
+    "filesSection": {
+      "dropBehavior": "拖放文件行为",
+      "dropInsertLink": "插入文件链接",
+      "dropOpen": "打开或导入文件",
+      "dropBehaviorDesc": "拖放文件或文件夹到编辑器时的行为"
+    },
+    "exportSection": {
+      "exportFolder": "导出文件夹",
+      "exportAuto": "自动选择",
+      "exportSame": "与当前文件同目录",
+      "exportCustom": "自定义位置",
+      "exportFolderDesc": "设置导出文件的默认保存位置",
+      "customPath": "自定义路径",
+      "openAfterExport": "导出后打开文件位置"
+    },
+    "autoSaveSection": {
+      "enableAutoSave": "启用自动保存",
+      "autoSaveInterval": "自动保存间隔（秒）",
+      "autoSaveDesc": "设置自动保存的时间间隔"
+    },
+    "modesSection": {
+      "focusMode": "专注模式",
+      "focusModeDesc": "隐藏除当前段落外的其他内容",
+      "typewriterMode": "打字机模式",
+      "typewriterModeDesc": "保持当前行在屏幕中央"
+    }
   },
   "search": {
     "title": "查找与替换",

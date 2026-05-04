@@ -118,7 +118,104 @@
     "language": "Language",
     "theme": "Theme",
     "autoSave": "Auto Save",
-    "editor": "Editor Settings"
+    "editor": "Editor Settings",
+    "general": "General",
+    "appearance": "Appearance",
+    "markdown": "Markdown",
+    "codeFences": "Code Fences",
+    "image": "Image",
+    "files": "Files",
+    "export": "Export",
+    "apply": "Apply",
+    "save": "Save",
+    "cancel": "Cancel",
+    "generalSection": {
+      "startup": "Startup Options",
+      "reopenLastFiles": "Reopen last files on startup",
+      "reopenLastFilesDesc": "Automatically open files from last session when app starts"
+    },
+    "appearanceSection": {
+      "themeTitle": "Theme",
+      "themeLight": "Light Theme",
+      "themeDark": "Dark Theme",
+      "themeSepia": "Sepia Theme",
+      "fontTitle": "Font",
+      "fontFamily": "Font Family",
+      "fontSize": "Font Size",
+      "sidebarTitle": "Sidebar",
+      "sidebarWidth": "Sidebar Width",
+      "wordCountTitle": "Word Count",
+      "showWordCount": "Show Word Count",
+      "lineNumberTitle": "Line Numbers",
+      "showLineNumber": "Show line numbers in code blocks"
+    },
+    "editorSection": {
+      "indentTitle": "Indentation",
+      "indentSize": "Default indent size",
+      "indentSizeDesc": "Number of spaces for Tab key indentation",
+      "lineEndingTitle": "Line Ending",
+      "lineEndingLf": "Unix Style (LF)",
+      "lineEndingCrlf": "Windows Style (CRLF)",
+      "lineEndingDesc": "Default line ending for new files",
+      "behaviorTitle": "Editing Behavior",
+      "smartPaste": "Smart Paste",
+      "smartPasteDesc": "Auto detect and convert pasted content (URLs, images, etc)",
+      "autoMatchBrackets": "Auto Match Brackets",
+      "autoMatchBracketsDesc": "Auto complete paired brackets when typing",
+      "spellCheckTitle": "Spell Check",
+      "enableSpellCheck": "Enable Spell Check",
+      "spellCheckLanguage": "Spell Check Language"
+    },
+    "markdownSection": {
+      "syntaxTitle": "Syntax Support",
+      "enableDiagrams": "Enable Diagrams (Mermaid/Flowchart)",
+      "enableMath": "Enable Math Equations",
+      "enableFootnotes": "Enable Footnotes",
+      "enableYaml": "Enable YAML Front Matter",
+      "enableAutoLinks": "Enable Auto Links",
+      "syntaxDesc": "Enable or disable Markdown extended syntax support"
+    },
+    "codeFencesSection": {
+      "defaultLanguage": "Default Code Language",
+      "defaultLanguageDesc": "Programming language auto-applied when creating code blocks",
+      "codeBlockTitle": "Code Block Settings",
+      "highlightCurrentLine": "Highlight current line"
+    },
+    "imageSection": {
+      "insertBehavior": "Image Insert Behavior",
+      "insertCopy": "Copy to asset folder",
+      "insertLink": "Keep original path",
+      "insertUpload": "Upload to cloud",
+      "insertBehaviorDesc": "Default behavior when inserting images",
+      "globalFolder": "Global Image Folder",
+      "globalFolderDesc": "Default folder for saving images"
+    },
+    "filesSection": {
+      "dropBehavior": "Drop File Behavior",
+      "dropInsertLink": "Insert file link",
+      "dropOpen": "Open or import file",
+      "dropBehaviorDesc": "Behavior when dropping files or folders into editor"
+    },
+    "exportSection": {
+      "exportFolder": "Export Folder",
+      "exportAuto": "Auto select",
+      "exportSame": "Same folder with current file",
+      "exportCustom": "Custom location",
+      "exportFolderDesc": "Default save location for exported files",
+      "customPath": "Custom Path",
+      "openAfterExport": "Open exported file location"
+    },
+    "autoSaveSection": {
+      "enableAutoSave": "Enable Auto Save",
+      "autoSaveInterval": "Auto save interval (seconds)",
+      "autoSaveDesc": "Time interval for automatic saving"
+    },
+    "modesSection": {
+      "focusMode": "Focus Mode",
+      "focusModeDesc": "Hide content except current paragraph",
+      "typewriterMode": "Typewriter Mode",
+      "typewriterModeDesc": "Keep current line at screen center"
+    }
   },
   "search": {
     "title": "Find & Replace",
