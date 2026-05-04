@@ -1,32 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useEditorState } from '../../store/editorStore';
 import { SearchService, SearchResult } from '../../services/SearchService';
+import { useTranslation } from '../../i18n';
 import './SearchPanel.css';
 
 export function SearchPanel() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(true);
   const [query, setQuery] = useState('');
   const [replacement, setReplacement] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showReplace, setShowReplace] = useState(false);
   const { editorInstance } = useEditorState();
-
-  useEffect(() => {
-    const handleKeyboard = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
-        e.preventDefault();
-        setIsOpen(true);
-      }
-      if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false);
-        setQuery('');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyboard);
-    return () => window.removeEventListener('keydown', handleKeyboard);
-  }, [isOpen]);
 
   useEffect(() => {
     if (query && editorInstance) {
@@ -86,8 +72,8 @@ export function SearchPanel() {
   return (
     <div className="search-panel">
       <div className="search-header">
-        <span>查找</span>
-        <button onClick={() => setIsOpen(false)} title="关闭">✕</button>
+        <span>{t('search.title')}</span>
+        <button onClick={() => setIsOpen(false)} title={t('search.close')}>✕</button>
       </div>
       
       <div className="search-input-group">
@@ -95,18 +81,18 @@ export function SearchPanel() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="查找内容..."
+          placeholder={t('search.findPlaceholder')}
           autoFocus
         />
         <span className="search-count">
-          {results.length > 0 ? `${currentIndex + 1}/${results.length}` : '无结果'}
+          {results.length > 0 ? `${currentIndex + 1}/${results.length}` : t('search.noResults')}
         </span>
       </div>
 
       <div className="search-actions">
-        <button onClick={handleFindPrev} disabled={results.length === 0}>上一个</button>
-        <button onClick={handleFindNext} disabled={results.length === 0}>下一个</button>
-        <button onClick={() => setShowReplace(!showReplace)}>替换</button>
+        <button onClick={handleFindPrev} disabled={results.length === 0}>{t('edit.findPrevious')}</button>
+        <button onClick={handleFindNext} disabled={results.length === 0}>{t('edit.findNext')}</button>
+        <button onClick={() => setShowReplace(!showReplace)}>{t('search.replace')}</button>
       </div>
 
       {showReplace && (
@@ -115,10 +101,10 @@ export function SearchPanel() {
             type="text"
             value={replacement}
             onChange={(e) => setReplacement(e.target.value)}
-            placeholder="替换为..."
+            placeholder={t('search.replacePlaceholder')}
           />
-          <button onClick={handleReplace}>替换</button>
-          <button onClick={handleReplaceAll}>全部替换</button>
+          <button onClick={handleReplace}>{t('search.replace')}</button>
+          <button onClick={handleReplaceAll}>{t('search.replaceAll')}</button>
         </div>
       )}
     </div>

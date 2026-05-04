@@ -12,13 +12,21 @@ import { ThemeEditor } from '../ThemeEditor';
 import { VersionHistory } from '../VersionHistory';
 import { CollaborationPanel } from '../Collaboration';
 import { Settings } from '../Settings/Settings';
+import { SearchPanel } from '../Search/SearchPanel';
 import './TitleBar.css';
 
 export function TitleBar() {
   const { t } = useTranslation();
   const { currentPath, setCurrentPath, setSavedContent } = useFileStore();
   const { editorInstance } = useEditorState();
-  const { sidebarOpen, toggleSidebar, focusMode, toggleFocusMode, typewriterMode, toggleTypewriterMode, sourceMode, toggleSourceMode, pomodoroEnabled, togglePomodoro, wordGoalEnabled, toggleWordGoal } = useUIState();
+  const { 
+    sidebarOpen, toggleSidebar, 
+    focusMode, toggleFocusMode, 
+    typewriterMode, toggleTypewriterMode, 
+    sourceMode, toggleSourceMode, 
+    pomodoroEnabled, togglePomodoro, 
+    wordGoalEnabled, toggleWordGoal 
+  } = useUIState();
   
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [showShortcutSettings, setShowShortcutSettings] = useState(false);
@@ -28,11 +36,13 @@ export function TitleBar() {
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [showCollaboration, setShowCollaboration] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [recentFiles, setRecentFiles] = useState<string[]>([]);
   const menuRef = useRef<HTMLDivElement>(null);
   
   const fileName = currentPath ? currentPath.split('/').pop() : 'Untitled';
   
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -43,23 +53,65 @@ export function TitleBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
-  // File operations
+  useEffect(() => {
+    const saved = localStorage.getItem('markhere-recent-files');
+    if (saved) {
+      setRecentFiles(JSON.parse(saved));
+    }
+  }, []);
+  
+  const addToRecentFiles = (path: string) => {
+    const updated = [path, ...recentFiles.filter(f => f !== path)].slice(0, 10);
+    setRecentFiles(updated);
+    localStorage.setItem('markhere-recent-files', JSON.stringify(updated));
+  };
+  
+  const handleNewFile = () => {
+    setActiveMenu(null);
+    editorInstance?.commands.clearContent();
+    setCurrentPath(null);
+    setSavedContent('');
+  };
+  
   const handleOpen = async () => {
     setActiveMenu(null);
     try {
       const selected = await open({
         multiple: false,
-        filters: [{ name: 'Markdown', extensions: ['md', 'txt'] }],
+        filters: [{ name: 'Markdown', extensions: ['md', 'txt', 'markdown'] }],
       });
       if (selected) {
         const content = await invoke<string>('read_file', { path: selected });
         editorInstance?.commands.setContent(content);
         setCurrentPath(selected as string);
         setSavedContent(content);
+        addToRecentFiles(selected as string);
       }
     } catch (err) {
       console.error('Open failed:', err);
     }
+  };
+  
+  const handleOpenRecent = async (path: string) => {
+    setActiveMenu(null);
+    try {
+      const content = await invoke<string>('read_file', { path });
+      editorInstance?.commands.setContent(content);
+      setCurrentPath(path);
+      setSavedContent(content);
+      addToRecentFiles(path);
+    } catch (err) {
+      console.error('Open recent failed:', err);
+      const updated = recentFiles.filter(f => f !== path);
+      setRecentFiles(updated);
+      localStorage.setItem('markhere-recent-files', JSON.stringify(updated));
+    }
+  };
+  
+  const handleClearRecent = () => {
+    setActiveMenu(null);
+    setRecentFiles([]);
+    localStorage.removeItem('markhere-recent-files');
   };
   
   const handleSave = async () => {
@@ -89,6 +141,7 @@ export function TitleBar() {
         await invoke('save_file', { path, content });
         setCurrentPath(path);
         setSavedContent(content);
+        addToRecentFiles(path);
       }
     } catch (err) {
       console.error('Save As failed:', err);
@@ -185,7 +238,6 @@ ${html}
     }
   };
   
-  // Edit operations
   const handleUndo = () => {
     setActiveMenu(null);
     editorInstance?.commands.undo();
@@ -215,6 +267,26 @@ ${html}
     }
   };
   
+  const handleCopyAsMarkdown = async () => {
+    setActiveMenu(null);
+    try {
+      const markdown = (editorInstance?.storage as any)?.markdown?.getMarkdown?.() || editorInstance?.getText() || '';
+      await navigator.clipboard.writeText(markdown);
+    } catch (err) {
+      console.error('Copy as Markdown failed:', err);
+    }
+  };
+  
+  const handleCopyAsHTML = async () => {
+    setActiveMenu(null);
+    try {
+      const html = editorInstance?.getHTML() || '';
+      await navigator.clipboard.writeText(html);
+    } catch (err) {
+      console.error('Copy as HTML failed:', err);
+    }
+  };
+  
   const handlePaste = async () => {
     setActiveMenu(null);
     try {
@@ -225,7 +297,175 @@ ${html}
     }
   };
   
-  // View operations
+  const handleSelectAll = () => {
+    setActiveMenu(null);
+    editorInstance?.commands.selectAll();
+  };
+  
+  const handleSelectLine = () => {
+    setActiveMenu(null);
+    const { from } = editorInstance?.state.selection || { from: 0 };
+    const doc = editorInstance?.state.doc;
+    if (!doc) return;
+    
+    const $pos = doc.resolve(from);
+    const start = $pos.before($pos.depth);
+    const end = $pos.after($pos.depth);
+    editorInstance?.commands.setTextSelection({ from: start, to: end });
+  };
+  
+  const handleSelectWord = () => {
+    setActiveMenu(null);
+    const { from } = editorInstance?.state.selection || { from: 0 };
+    const doc = editorInstance?.state.doc;
+    if (!doc) return;
+    
+    const $pos = doc.resolve(from);
+    const node = $pos.nodeBefore || $pos.nodeAfter;
+    if (node && node.isText) {
+      const start = $pos.before();
+      const end = $pos.after();
+      editorInstance?.commands.setTextSelection({ from: start, to: end });
+    }
+  };
+  
+  const handleFind = () => {
+    setActiveMenu(null);
+    setShowSearchPanel(true);
+  };
+  
+  const handleReplace = () => {
+    setActiveMenu(null);
+    setShowSearchPanel(true);
+  };
+  
+  const handleHeading = (level: 1 | 2 | 3 | 4 | 5 | 6) => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleHeading({ level }).run();
+  };
+  
+  const handleNormalText = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().setParagraph().run();
+  };
+  
+  const handleBulletList = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleBulletList().run();
+  };
+  
+  const handleOrderedList = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleOrderedList().run();
+  };
+  
+  const handleTaskList = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleTaskList().run();
+  };
+  
+  const handleCodeBlock = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleCodeBlock().run();
+  };
+  
+  const handleQuoteBlock = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleBlockquote().run();
+  };
+  
+  const handleInsertTable = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  };
+  
+  const handleMathBlock = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().insertContent('$$\n\n$$').run();
+  };
+  
+  const handleIndent = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().sinkListItem('listItem').run();
+  };
+  
+  const handleOutdent = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().liftListItem('listItem').run();
+  };
+  
+  const handleBold = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleBold().run();
+  };
+  
+  const handleItalic = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleItalic().run();
+  };
+  
+  const handleUnderline = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleUnderline().run();
+  };
+  
+  const handleStrikethrough = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleStrike().run();
+  };
+  
+  const handleHighlight = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleHighlight().run();
+  };
+  
+  const handleInlineCode = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().toggleCode().run();
+  };
+  
+  const handleInlineMath = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().insertContent('$ $').run();
+  };
+  
+  const handleInsertLink = async () => {
+    setActiveMenu(null);
+    const url = await promptForURL();
+    if (url) {
+      editorInstance?.chain().focus().setLink({ href: url }).run();
+    }
+  };
+  
+  const handleInsertImage = async () => {
+    setActiveMenu(null);
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [{ name: 'Image', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'] }],
+      });
+      if (selected) {
+        editorInstance?.chain().focus().setImage({ src: selected as string }).run();
+      }
+    } catch (err) {
+      console.error('Insert image failed:', err);
+    }
+  };
+  
+  const handleClearFormat = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus()
+      .unsetBold()
+      .unsetItalic()
+      .unsetUnderline()
+      .unsetStrike()
+      .unsetHighlight()
+      .unsetCode()
+      .unsetLink()
+      .setParagraph()
+      .run();
+  };
+
   const handleToggleSidebar = () => {
     setActiveMenu(null);
     toggleSidebar();
@@ -241,12 +481,75 @@ ${html}
     toggleTypewriterMode();
   };
   
+  const handleZoomIn = () => {
+    setActiveMenu(null);
+    const newZoom = Math.min(zoomLevel + 10, 200);
+    setZoomLevel(newZoom);
+    document.documentElement.style.fontSize = `${newZoom}%`;
+  };
+  
+  const handleZoomOut = () => {
+    setActiveMenu(null);
+    const newZoom = Math.max(zoomLevel - 10, 50);
+    setZoomLevel(newZoom);
+    document.documentElement.style.fontSize = `${newZoom}%`;
+  };
+  
+  const handleResetZoom = () => {
+    setActiveMenu(null);
+    setZoomLevel(100);
+    document.documentElement.style.fontSize = '100%';
+  };
+  
+  const handleFullScreen = async () => {
+    setActiveMenu(null);
+    try {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      const win = getCurrentWindow();
+      const isFullscreen = await win.isFullscreen();
+      await win.setFullscreen(!isFullscreen);
+    } catch (err) {
+      console.error('Fullscreen failed:', err);
+    }
+  };
+  
+  const handleOpenDocs = () => {
+    setActiveMenu(null);
+    window.open('https://github.com/jacksoncode/Markhere#readme', '_blank');
+  };
+  
+  const handleMarkdownReference = () => {
+    setActiveMenu(null);
+    window.open('https://www.markdownguide.org/basic-syntax/', '_blank');
+  };
+  
+  const handleCheckUpdates = () => {
+    setActiveMenu(null);
+    window.open('https://github.com/jacksoncode/Markhere/releases', '_blank');
+  };
+  
+  const handleReportIssue = () => {
+    setActiveMenu(null);
+    window.open('https://github.com/jacksoncode/Markhere/issues', '_blank');
+  };
+  
+  const promptForURL = async (): Promise<string | null> => {
+    const url = prompt('Enter URL:');
+    return url || null;
+  };
+  
+  const isHeadingActive = (level: number) => editorInstance?.isActive('heading', { level }) ?? false;
+  const isBoldActive = editorInstance?.isActive('bold') ?? false;
+  const isItalicActive = editorInstance?.isActive('italic') ?? false;
+  const isBulletListActive = editorInstance?.isActive('bulletList') ?? false;
+  const isOrderedListActive = editorInstance?.isActive('orderedList') ?? false;
+  const isCodeBlockActive = editorInstance?.isActive('codeBlock') ?? false;
+  const isQuoteBlockActive = editorInstance?.isActive('blockquote') ?? false;
+  
   return (
     <div className="typora-titlebar" ref={menuRef}>
       <div className="typora-titlebar-controls">
-        {/* File Menu */}
-        <div 
-          className="typora-titlebar-menu-wrapper"
+        <div className="typora-titlebar-menu-wrapper"
           onClick={() => setActiveMenu(activeMenu === 'file' ? null : 'file')}
         >
           <span className={`typora-titlebar-menu ${activeMenu === 'file' ? 'active' : ''}`}>
@@ -254,13 +557,40 @@ ${html}
           </span>
           {activeMenu === 'file' && (
             <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+              <div className="menu-item" onClick={handleNewFile}>
+                <span>{t('file.new')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlN')}</span>
+              </div>
               <div className="menu-item" onClick={handleOpen}>
                 <span>{t('file.open')}</span>
                 <span className="shortcut">{t('shortcuts.ctrlO')}</span>
               </div>
+              
+              {recentFiles.length > 0 && (
+                <div className="menu-item submenu-trigger">
+                  <span>{t('file.openRecent')}</span>
+                  <div className="submenu">
+                    {recentFiles.map((file, idx) => (
+                      <div 
+                        key={idx} 
+                        className="menu-item" 
+                        onClick={() => handleOpenRecent(file)}
+                      >
+                        <span>{file.split('/').pop()}</span>
+                      </div>
+                    ))}
+                    <div className="menu-divider" />
+                    <div className="menu-item" onClick={handleClearRecent}>
+                      <span>{t('file.clearRecent')}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowTemplateSelector(true); }}>
                 <span>{t('file.newFromTemplate')}</span>
               </div>
+              <div className="menu-divider" />
               <div className="menu-item" onClick={handleSave}>
                 <span>{t('file.save')}</span>
                 <span className="shortcut">{t('shortcuts.ctrlS')}</span>
@@ -290,9 +620,7 @@ ${html}
           )}
         </div>
         
-        {/* Edit Menu */}
-        <div 
-          className="typora-titlebar-menu-wrapper"
+        <div className="typora-titlebar-menu-wrapper"
           onClick={() => setActiveMenu(activeMenu === 'edit' ? null : 'edit')}
         >
           <span className={`typora-titlebar-menu ${activeMenu === 'edit' ? 'active' : ''}`}>
@@ -317,17 +645,176 @@ ${html}
                 <span>{t('edit.copy')}</span>
                 <span className="shortcut">{t('shortcuts.ctrlC')}</span>
               </div>
+              <div className="menu-item submenu-trigger">
+                <span>{t('edit.copyAsMarkdown')}</span>
+                <div className="submenu">
+                  <div className="menu-item" onClick={handleCopyAsMarkdown}>
+                    <span>{t('edit.copyAsMarkdown')}</span>
+                  </div>
+                  <div className="menu-item" onClick={handleCopyAsHTML}>
+                    <span>{t('edit.copyAsHtml')}</span>
+                  </div>
+                </div>
+              </div>
               <div className="menu-item" onClick={handlePaste}>
                 <span>{t('edit.paste')}</span>
                 <span className="shortcut">{t('shortcuts.ctrlV')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleSelectAll}>
+                <span>{t('edit.selectAll')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlA')}</span>
+              </div>
+              <div className="menu-item" onClick={handleSelectLine}>
+                <span>{t('edit.selectLine')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlL')}</span>
+              </div>
+              <div className="menu-item" onClick={handleSelectWord}>
+                <span>{t('edit.selectWord')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlD')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleFind}>
+                <span>{t('edit.find')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlF')}</span>
+              </div>
+              <div className="menu-item" onClick={handleReplace}>
+                <span>{t('edit.replace')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlH')}</span>
               </div>
             </div>
           )}
         </div>
         
-        {/* View Menu */}
-        <div 
-          className="typora-titlebar-menu-wrapper"
+        <div className="typora-titlebar-menu-wrapper"
+          onClick={() => setActiveMenu(activeMenu === 'paragraph' ? null : 'paragraph')}
+        >
+          <span className={`typora-titlebar-menu ${activeMenu === 'paragraph' ? 'active' : ''}`}>
+            {t('menu.paragraph')}
+          </span>
+          {activeMenu === 'paragraph' && (
+            <div className="dropdown-menu paragraph-menu" onClick={(e) => e.stopPropagation()}>
+              <div className="menu-item" onClick={() => handleHeading(1)}>
+                <span>{isHeadingActive(1) ? `✓ ${t('paragraph.heading1')}` : t('paragraph.heading1')}</span>
+                <span className="shortcut">{t('shortcuts.ctrl1')}</span>
+              </div>
+              <div className="menu-item" onClick={() => handleHeading(2)}>
+                <span>{isHeadingActive(2) ? `✓ ${t('paragraph.heading2')}` : t('paragraph.heading2')}</span>
+                <span className="shortcut">{t('shortcuts.ctrl2')}</span>
+              </div>
+              <div className="menu-item" onClick={() => handleHeading(3)}>
+                <span>{isHeadingActive(3) ? `✓ ${t('paragraph.heading3')}` : t('paragraph.heading3')}</span>
+                <span className="shortcut">{t('shortcuts.ctrl3')}</span>
+              </div>
+              <div className="menu-item" onClick={() => handleHeading(4)}>
+                <span>{isHeadingActive(4) ? `✓ ${t('paragraph.heading4')}` : t('paragraph.heading4')}</span>
+                <span className="shortcut">{t('shortcuts.ctrl4')}</span>
+              </div>
+              <div className="menu-item" onClick={() => handleHeading(5)}>
+                <span>{isHeadingActive(5) ? `✓ ${t('paragraph.heading5')}` : t('paragraph.heading5')}</span>
+                <span className="shortcut">{t('shortcuts.ctrl5')}</span>
+              </div>
+              <div className="menu-item" onClick={() => handleHeading(6)}>
+                <span>{isHeadingActive(6) ? `✓ ${t('paragraph.heading6')}` : t('paragraph.heading6')}</span>
+                <span className="shortcut">{t('shortcuts.ctrl6')}</span>
+              </div>
+              <div className="menu-item" onClick={handleNormalText}>
+                <span>{t('paragraph.normalText')}</span>
+                <span className="shortcut">{t('shortcuts.ctrl0')}</span>
+              </div>
+              <div className="menu-divider" />
+              
+              <div className="menu-item" onClick={handleBulletList}>
+                <span>{isBulletListActive ? `✓ ${t('paragraph.bulletList')}` : t('paragraph.bulletList')}</span>
+              </div>
+              <div className="menu-item" onClick={handleOrderedList}>
+                <span>{isOrderedListActive ? `✓ ${t('paragraph.orderedList')}` : t('paragraph.orderedList')}</span>
+              </div>
+              <div className="menu-item" onClick={handleTaskList}>
+                <span>{t('paragraph.taskList')}</span>
+              </div>
+              <div className="menu-divider" />
+              
+              <div className="menu-item" onClick={handleCodeBlock}>
+                <span>{isCodeBlockActive ? `✓ ${t('paragraph.codeBlock')}` : t('paragraph.codeBlock')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftM')}</span>
+              </div>
+              <div className="menu-item" onClick={handleQuoteBlock}>
+                <span>{isQuoteBlockActive ? `✓ ${t('paragraph.quoteBlock')}` : t('paragraph.quoteBlock')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlQ')}</span>
+              </div>
+              <div className="menu-item" onClick={handleInsertTable}>
+                <span>{t('paragraph.table')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlT')}</span>
+              </div>
+              <div className="menu-item" onClick={handleMathBlock}>
+                <span>{t('paragraph.mathBlock')}</span>
+              </div>
+              <div className="menu-divider" />
+              
+              <div className="menu-item" onClick={handleIndent}>
+                <span>{t('paragraph.indent')}</span>
+              </div>
+              <div className="menu-item" onClick={handleOutdent}>
+                <span>{t('paragraph.outdent')}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="typora-titlebar-menu-wrapper"
+          onClick={() => setActiveMenu(activeMenu === 'format' ? null : 'format')}
+        >
+          <span className={`typora-titlebar-menu ${activeMenu === 'format' ? 'active' : ''}`}>
+            {t('menu.format')}
+          </span>
+          {activeMenu === 'format' && (
+            <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+              <div className="menu-item" onClick={handleBold}>
+                <span>{isBoldActive ? `✓ ${t('format.bold')}` : t('format.bold')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlB')}</span>
+              </div>
+              <div className="menu-item" onClick={handleItalic}>
+                <span>{isItalicActive ? `✓ ${t('format.italic')}` : t('format.italic')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlI')}</span>
+              </div>
+              <div className="menu-item" onClick={handleUnderline}>
+                <span>{t('format.underline')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlU')}</span>
+              </div>
+              <div className="menu-item" onClick={handleStrikethrough}>
+                <span>{t('format.strikethrough')}</span>
+              </div>
+              <div className="menu-item" onClick={handleHighlight}>
+                <span>{t('format.highlight')}</span>
+                <span className="shortcut">{t('shortcuts.altShiftF')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleInlineCode}>
+                <span>{t('format.inlineCode')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlEqual')}</span>
+              </div>
+              <div className="menu-item" onClick={handleInlineMath}>
+                <span>{t('format.inlineMath')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleInsertLink}>
+                <span>{t('format.link')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlK')}</span>
+              </div>
+              <div className="menu-item" onClick={handleInsertImage}>
+                <span>{t('format.image')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftI')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleClearFormat}>
+                <span>{t('format.clearFormat')}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="typora-titlebar-menu-wrapper"
           onClick={() => setActiveMenu(activeMenu === 'view' ? null : 'view')}
         >
           <span className={`typora-titlebar-menu ${activeMenu === 'view' ? 'active' : ''}`}>
@@ -354,6 +841,40 @@ ${html}
                 <span className="shortcut">{t('shortcuts.ctrlSlash')}</span>
               </div>
               <div className="menu-divider" />
+              
+              <div className="menu-item" onClick={handleZoomIn}>
+                <span>{t('view.zoomIn')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftEqual')}</span>
+              </div>
+              <div className="menu-item" onClick={handleZoomOut}>
+                <span>{t('view.zoomOut')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlMinus')}</span>
+              </div>
+              <div className="menu-item" onClick={handleResetZoom}>
+                <span>{t('view.resetZoom')}</span>
+                <span className="shortcut">{t('shortcuts.ctrl0')}</span>
+              </div>
+              <div className="menu-item" onClick={handleFullScreen}>
+                <span>{t('view.fullScreen')}</span>
+              </div>
+              <div className="menu-divider" />
+              
+              <div className="menu-item submenu-trigger">
+                <span>{t('settings.theme')}</span>
+                <div className="submenu">
+                  <div className="menu-item" onClick={() => { setActiveMenu(null); document.documentElement.setAttribute('data-theme', 'light'); }}>
+                    <span>{t('view.themeLight')}</span>
+                  </div>
+                  <div className="menu-item" onClick={() => { setActiveMenu(null); document.documentElement.setAttribute('data-theme', 'dark'); }}>
+                    <span>{t('view.themeDark')}</span>
+                  </div>
+                  <div className="menu-item" onClick={() => { setActiveMenu(null); document.documentElement.setAttribute('data-theme', 'sepia'); }}>
+                    <span>{t('view.themeSepia')}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="menu-divider" />
+              
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowShortcutSettings(true); }}>
                 <span>{t('view.keyboardShortcuts')}</span>
                 <span className="shortcut">{t('shortcuts.ctrlShiftK')}</span>
@@ -384,6 +905,38 @@ ${html}
             </div>
           )}
         </div>
+        
+        <div className="typora-titlebar-menu-wrapper"
+          onClick={() => setActiveMenu(activeMenu === 'help' ? null : 'help')}
+        >
+          <span className={`typora-titlebar-menu ${activeMenu === 'help' ? 'active' : ''}`}>
+            {t('menu.help')}
+          </span>
+          {activeMenu === 'help' && (
+            <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+              <div className="menu-item" onClick={handleOpenDocs}>
+                <span>{t('help.documentation')}</span>
+              </div>
+              <div className="menu-item" onClick={handleMarkdownReference}>
+                <span>{t('help.markdownReference')}</span>
+              </div>
+              <div className="menu-item" onClick={() => { setActiveMenu(null); setShowShortcutSettings(true); }}>
+                <span>{t('help.keyboardShortcuts')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleCheckUpdates}>
+                <span>{t('help.checkUpdates')}</span>
+              </div>
+              <div className="menu-item" onClick={handleReportIssue}>
+                <span>{t('help.reportIssue')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={() => { setActiveMenu(null); alert(`Markhere v0.2.0\n\nA Modern, Cross-Platform WYSIWYG Markdown Editor\n\nBuilt with Tauri 2.5 & React 19\n\n© 2025 Markhere Team`); }}>
+                <span>{t('help.about')}</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="typora-titlebar-drag-region" />
@@ -397,6 +950,8 @@ ${html}
       <VersionHistory isOpen={showVersionHistory} onClose={() => setShowVersionHistory(false)} />
       <CollaborationPanel isOpen={showCollaboration} onClose={() => setShowCollaboration(false)} />
       <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      
+      {showSearchPanel && <SearchPanel />}
     </div>
   );
 }
