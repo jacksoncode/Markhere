@@ -1,6 +1,6 @@
 [package]
 name = "markhere"
-version = "0.2.0"
+version = "0.3.0"
 description = "A modern WYSIWYG Markdown editor"
 authors = ["markhere-team"]
 edition = "2021"
