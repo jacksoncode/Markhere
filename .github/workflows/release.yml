@@ -13,32 +13,28 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
           name: Markhere ${{ github.ref_name }}
           body: |
-            ## 📦 Markhere ${{ github.ref_name }}
+            ## Downloads
             
-            ### 下载说明
+            | Platform | File |
+            |----------|------|
+            | Linux x86_64 | .deb / .AppImage |
             
-            | 平台 | 文件 | 说明 |
-            |------|------|------|
-            | **Linux** | `*.deb` 或 `*.AppImage` | Ubuntu/Debian (x86_64) |
-            
-            ### 系统要求
+            ## Requirements
             
             - Ubuntu 18.04+ / Debian 10+ (64-bit)
             
-            ### ⚠️ macOS/Windows
+            ## macOS/Windows
             
-            当前仅提供 Linux 版本。如需其他平台：
+            Build locally:
             
-            ```bash
-            # 本地构建
-            git clone https://github.com/jacksoncode/Markhere.git
+            ```
+            git clone https://github.com/jacksoncode/Markhere
             cd Markhere && npm install && npm run tauri:build
             ```
             
-            详见 [CONTRIBUTING.md](../CONTRIBUTING.md)
+            See CONTRIBUTING.md for details.
           draft: false
           prerelease: false
         env:
