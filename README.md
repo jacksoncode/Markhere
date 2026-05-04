@@ -110,7 +110,17 @@ Unlike traditional Markdown editors that require syntax knowledge, Markhere prov
 
 ### Download
 
-Visit our [Releases](https://github.com/jacksoncode/Markhere/releases) page to download the latest version for your platform.
+Visit our [Releases](https://github.com/jacksoncode/Markhere/releases) page to download the latest version.
+
+**Available Platforms:**
+
+| Platform | Format | Status |
+|----------|--------|--------|
+| **Linux (x86_64)** | `.deb`, `.AppImage` | ✅ Available |
+| **macOS** | `.dmg` | ⚠️ Build locally |
+| **Windows** | `.msi`, `.exe` | ⚠️ Build locally |
+
+> **Note**: macOS and Windows builds require local compilation. Follow the [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions.
 
 ### Development Setup
 
