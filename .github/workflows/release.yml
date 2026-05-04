@@ -58,7 +58,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
+          targets: aarch64-apple-darwin
 
       - uses: actions/setup-python@v5
         with:
@@ -75,15 +75,6 @@ jobs:
       - uses: softprops/action-gh-release@v1
         with:
           files: src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
-          fail_on_unmatched_files: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: npx tauri build --target x86_64-apple-darwin
-
-      - uses: softprops/action-gh-release@v1
-        with:
-          files: src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
