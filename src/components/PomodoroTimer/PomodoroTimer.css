@@ -1,0 +1,204 @@
+.pomodoro-container {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 180px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.pomodoro-container.work {
+  border-color: var(--color-work);
+}
+
+.pomodoro-container.shortBreak {
+  border-color: var(--color-shortBreak);
+}
+
+.pomodoro-container.longBreak {
+  border-color: var(--color-longBreak);
+}
+
+.pomodoro-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.phase-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.pomodoro-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-btn,
+.stats-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.settings-btn:hover,
+.stats-btn:hover {
+  background: var(--color-bg-secondary);
+}
+
+.pomodoro-timer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.timer-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transition: background 0.5s ease;
+}
+
+.timer-inner {
+  width: 85px;
+  height: 85px;
+  background: var(--color-bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-display {
+  font-size: 24px;
+  font-weight: 600;
+  font-family: monospace;
+  color: var(--color-text-primary);
+}
+
+.pomodoro-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.start-btn,
+.pause-btn,
+.reset-btn,
+.skip-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.start-btn {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.start-btn:hover {
+  opacity: 0.9;
+}
+
+.pause-btn {
+  background: var(--color-warning);
+  color: white;
+  border-color: var(--color-warning);
+}
+
+.pomodoro-session-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.pomodoro-settings,
+.pomodoro-stats {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.setting-row label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex: 1;
+}
+
+.setting-row input {
+  width: 60px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 13px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.setting-row span {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.stat-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+:root {
+  --color-work: #ff6b6b;
+  --color-shortBreak: #4ecdc4;
+  --color-longBreak: #45b7d1;
+}

@@ -1,0 +1,40 @@
+.typewriter-mode .editor-content {
+  scroll-behavior: smooth;
+}
+
+.typewriter-cursor-line {
+  position: relative;
+}
+
+.typewriter-mode-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-accent);
+  opacity: 0.3;
+  animation: typewriter-pulse 2s ease-in-out infinite;
+}
+
+@keyframes typewriter-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.typewriter-center-indicator {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 33%;
+  width: 60px;
+  height: 2px;
+  background: var(--color-accent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast);
+}
+
+.typewriter-mode .typewriter-center-indicator {
+  opacity: 0.2;
+}

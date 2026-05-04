@@ -1,0 +1,51 @@
+.font-settings {
+  position: relative;
+}
+
+.settings-trigger {
+  padding: 8px 12px;
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.settings-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 8px;
+  width: 300px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.setting-group {
+  margin-bottom: 16px;
+}
+
+.setting-group:last-child {
+  margin-bottom: 0;
+}
+
+.setting-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.setting-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+
+.setting-group input[type="range"] {
+  width: 100%;
+}

@@ -1,0 +1,60 @@
+.focus-mode-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-bg-primary);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.focus-mode-active .focus-mode-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.focus-mode-active .toolbar {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none;
+}
+
+.focus-mode-active .sidebar {
+  opacity: 0;
+  transform: translateX(-240px);
+  pointer-events: none;
+}
+
+.focus-mode-active .editor-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 96px 48px;
+}
+
+.focus-mode-exit-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 24px;
+  background: var(--color-bg-active);
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  z-index: 1000;
+}
+
+.focus-mode-active .focus-mode-exit-btn {
+  opacity: 1;
+}
+
+.focus-mode-exit-btn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-main);
+}

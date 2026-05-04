@@ -1,88 +1,123 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { EditorProvider } from './components/Editor/EditorProvider';
 import { MainEditor } from './components/Editor/MainEditor';
-import { Sidebar } from './components/Sidebar/Sidebar';
+import { SidebarNew } from './components/Sidebar/SidebarNew';
 import { Toolbar } from './components/Toolbar/Toolbar';
-import { MenuBar } from './components/MenuBar/MenuBar';
+import { TitleBar } from './components/TitleBar/TitleBar';
+import { StatusBar } from './components/StatusBar/StatusBar';
+import { SearchPanel } from './components/Search/SearchPanel';
+import { CommandPalette, useCommands } from './components/CommandPalette';
+import { FocusMode } from './components/FocusMode/FocusMode';
+import { TypewriterMode } from './components/TypewriterMode/TypewriterMode';
+import { AutoHideUI } from './components/AutoHideUI/AutoHideUI';
+import { RecoveryDialog } from './components/RecoveryDialog/RecoveryDialog';
+import { AIAssistant } from './components/AIAssistant/AIAssistant';
+import { WordGoalProgress } from './components/WordGoalProgress';
+import { PomodoroTimer } from './components/PomodoroTimer';
+import { LinkValidator } from './components/LinkValidator';
+import { TabBar } from './components/TabBar';
 import { useFileStore } from './store/fileStore';
 import { useEditorState } from './store/editorStore';
+import { useUIState } from './store/uiStore';
+import { useAutoSaveStore } from './store/autoSaveStore';
 import { initTheme } from './store/themeStore';
-import { FileService } from './services/FileService';
-import { saveWorker } from './workers/SaveWorker';
 import './styles/App.css';
 import './styles/theme.css';
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { currentPath, setCurrentPath, setSavedContent } = useFileStore();
+  const { focusMode, pomodoroEnabled, wordGoalEnabled, toggleSidebar, toggleFocusMode, toggleTypewriterMode, toggleSourceMode, togglePomodoro, toggleWordGoal } = useUIState();
+  const { currentPath, setSavedContent, setCurrentPath } = useFileStore();
   const { editorInstance } = useEditorState();
+  const { content, lastSaved, currentPath: savedPath } = useAutoSaveStore();
+  const [showRecovery, setShowRecovery] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
 
   useEffect(() => {
     initTheme();
+    if (content && lastSaved) {
+      setShowRecovery(true);
+    }
   }, []);
-
-  const handleSave = async () => {
-    if (!currentPath) {
-      const path = await FileService.newFile();
-      if (!path) return;
-      setCurrentPath(path);
-    }
-
-    const markdown = (editorInstance?.storage as any)?.markdown?.getMarkdown?.() || '';
-    await saveWorker.immediateSave(async () => {
-      await FileService.saveFile(currentPath!, markdown);
-      setSavedContent(markdown);
-    });
-  };
-
-  const handleNew = async () => {
-    const path = await FileService.newFile();
-    if (path) {
-      setCurrentPath(path);
-      editorInstance?.commands.clearContent();
-      setSavedContent('');
-    }
-  };
-
-  const handleOpen = async () => {
-    const result = await FileService.openFile();
-    if (result) {
-      setCurrentPath(result.path);
-      editorInstance?.commands.setContent(result.content);
-      setSavedContent(result.content);
-    }
-  };
 
   useEffect(() => {
     const handleKeyboard = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey) {
-        if (e.key === 's') {
-          e.preventDefault();
-          handleSave();
-        } else if (e.key === 'n') {
-          e.preventDefault();
-          handleNew();
-        } else if (e.key === 'o') {
-          e.preventDefault();
-          handleOpen();
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowCommandPalette(true);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        if (editorInstance && currentPath) {
+          const markdown = (editorInstance.storage as any)?.markdown?.getMarkdown?.() || '';
+          setSavedContent(markdown);
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyboard);
     return () => window.removeEventListener('keydown', handleKeyboard);
-  }, [currentPath, editorInstance]);
+  }, [currentPath, editorInstance, setSavedContent]);
+
+  const handleRecover = () => {
+    setShowRecovery(false);
+    if (savedPath) {
+      setCurrentPath(savedPath);
+    }
+    if (editorInstance && content) {
+      editorInstance.commands.setContent(content);
+      setSavedContent(content);
+    }
+  };
+
+  const handleDiscard = () => {
+    setShowRecovery(false);
+  };
+
+  const commands = useCommands(
+    () => editorInstance?.commands.clearNodes(),
+    () => {},
+    () => {
+      toggleSidebar();
+      toggleFocusMode();
+      toggleTypewriterMode();
+      toggleSourceMode();
+      togglePomodoro();
+      toggleWordGoal();
+    },
+    () => {
+      editorInstance?.chain().focus().toggleBold().run();
+      editorInstance?.chain().focus().toggleItalic().run();
+    }
+  );
 
   return (
-    <div className="app-container">
-      <Sidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
+    <div className={`app-container app-with-titlebar auto-hide-ui ${focusMode ? 'focus-mode-active' : ''}`}>
+      {showRecovery && (
+        <RecoveryDialog onRecover={handleRecover} onDiscard={handleDiscard} />
+      )}
+      <TitleBar />
+      <AutoHideUI />
+      <SidebarNew />
       <main className="main-content">
-        <MenuBar />
+        <TabBar />
         <Toolbar />
         <EditorProvider>
           <MainEditor />
+          <TypewriterMode />
         </EditorProvider>
       </main>
+      <StatusBar />
+      <SearchPanel />
+      <CommandPalette 
+        isOpen={showCommandPalette} 
+        onClose={() => setShowCommandPalette(false)} 
+        commands={commands}
+      />
+      <FocusMode />
+      <AIAssistant />
+      {wordGoalEnabled && <WordGoalProgress />}
+      {pomodoroEnabled && <PomodoroTimer />}
+      <LinkValidator />
     </div>
   );
 }

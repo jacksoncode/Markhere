@@ -1,0 +1,104 @@
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px !important;
+    padding: 8px !important;
+  }
+
+  .sidebar-title {
+    font-size: 14px !important;
+  }
+
+  .nav-icon {
+    font-size: 18px !important;
+  }
+
+  .editor-wrapper {
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+
+  .toolbar {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .toolbar button {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .search-panel {
+    width: 100% !important;
+    right: 0 !important;
+    top: 40px !important;
+  }
+
+  .command-palette {
+    width: 90% !important;
+    max-width: 400px !important;
+  }
+
+  .theme-selector-popup {
+    width: 280px !important;
+    max-height: 300px !important;
+  }
+
+  .theme-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .split-active {
+    flex-direction: column !important;
+  }
+
+  .menu-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .menu-bar-items {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    position: fixed;
+    left: -60px;
+    transition: left 0.3s;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .editor-wrapper {
+    padding: 8px !important;
+    font-size: 12px !important;
+  }
+
+  .toolbar {
+    padding: 4px !important;
+  }
+
+  .toolbar button {
+    padding: 4px 6px !important;
+  }
+}
+
+@media (hover: none) {
+  .toolbar button:hover,
+  .theme-card:hover,
+  .shortcut-item:hover {
+    background: transparent;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

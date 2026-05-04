@@ -1,0 +1,83 @@
+.resizable-image-wrapper {
+  position: relative;
+  display: inline-block;
+  margin: 8px 0;
+  max-width: 100%;
+}
+
+.resizable-image-wrapper.selected {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.resizable-image-wrapper.resizing {
+  user-select: none;
+}
+
+.resizable-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.image-placeholder {
+  padding: 24px;
+  background: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary);
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.resize-handle:hover {
+  transform: scale(1.2);
+}
+
+.resize-handle.nw {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+
+.resize-handle.ne {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+
+.resize-handle.sw {
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+
+.resize-handle.se {
+  bottom: -6px;
+  right: -6px;
+  cursor: nwse-resize;
+}
+
+.image-size-label {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 11px;
+  border-radius: 4px;
+  font-family: monospace;
+}

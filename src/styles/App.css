@@ -1,8 +1,12 @@
+@import './design-tokens.css';
+
 .app-container {
   display: flex;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
+  background: var(--color-bg-primary);
+  transition: background-color var(--transition-slow);
 }
 
 .main-content {
@@ -11,4 +15,5 @@
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
+  background: transparent;
 }

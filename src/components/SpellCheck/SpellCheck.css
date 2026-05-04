@@ -1,0 +1,161 @@
+.spell-check-panel {
+  background: var(--color-bg-primary);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.spell-check-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.spell-check-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.checking-indicator {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.no-errors {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 6px;
+}
+
+.success-icon {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.no-errors span:last-child {
+  color: var(--color-success);
+  font-size: 14px;
+}
+
+.errors-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.errors-summary {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.error-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--color-bg-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error-item:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.error-item.selected {
+  background: rgba(239, 68, 68, 0.15);
+  border-left: 3px solid var(--color-error);
+}
+
+.error-word {
+  font-size: 14px;
+  color: var(--color-error);
+  font-weight: 500;
+}
+
+.error-type {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.correction-panel {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--color-bg-secondary);
+  border-radius: 6px;
+}
+
+.correction-header {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.suggestions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.suggestion-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.suggestion-btn:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.no-suggestions {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.ignore-btn {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.spell-check-inline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.inline-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 4px;
+}
+
+.error-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-error);
+}
+
+.error-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

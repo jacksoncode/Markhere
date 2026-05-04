@@ -1,0 +1,26 @@
+.auto-hide-ui .toolbar {
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+.auto-hide-active .toolbar {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.auto-hide-ui .sidebar {
+  transition: opacity var(--transition-normal), transform var(--transition-normal);
+}
+
+.auto-hide-active .sidebar {
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+}
+
+.auto-hide-ui:hover .toolbar,
+.auto-hide-ui:hover .sidebar {
+  opacity: 1;
+  transform: translateY(0) translateX(0);
+  pointer-events: auto;
+}

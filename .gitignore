@@ -19,3 +19,13 @@ coverage
 .vscode
 *.swp
 *.swo
+
+*.tar.gz
+*.zip
+BUILD_SUCCESS.md
+FINAL_VERIFICATION.md
+INSTALL_GUIDE.md
+PROJECT_SUMMARY.md
+VERIFICATION_COMPLETE.md
+WEB_DEPLOYMENT.md
+install-new-version.sh

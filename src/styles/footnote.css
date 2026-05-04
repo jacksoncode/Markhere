@@ -1,0 +1,11 @@
+.footnote-ref {
+  color: var(--primary-color);
+  font-size: 0.8em;
+  vertical-align: super;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.footnote-ref:hover {
+  background: var(--hover-bg);
+}

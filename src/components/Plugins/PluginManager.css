@@ -1,0 +1,58 @@
+.plugin-manager {
+  padding: 12px;
+}
+
+.plugin-list {
+  margin-bottom: 12px;
+}
+
+.plugin-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.plugin-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.plugin-name {
+  font-weight: 600;
+}
+
+.plugin-version {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.plugin-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.plugin-controls button {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--hover-bg);
+  cursor: pointer;
+}
+
+.plugin-controls button.enabled {
+  background: var(--primary-color);
+  color: white;
+}
+
+.load-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary-color);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}

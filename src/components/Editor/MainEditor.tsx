@@ -3,7 +3,6 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import Code from '@tiptap/extension-code';
-import { Image } from '@tiptap/extension-image';
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
@@ -14,15 +13,27 @@ import Highlight from '@tiptap/extension-highlight';
 import { TaskList } from '@tiptap/extension-task-list';
 import { TaskItem } from '@tiptap/extension-task-item';
 import { Markdown } from 'tiptap-markdown';
+import { MathExtension, MermaidExtension, CodeBlockHighlight, FootnoteExtension } from '../../extensions';
+import { ResizableImageExtension } from '../../extensions/ResizableImage';
 import { useEditorState } from '../../store/editorStore';
 import { useFileStore } from '../../store/fileStore';
+import { useUIState } from '../../store/uiStore';
+import { useAutoSaveStore } from '../../store/autoSaveStore';
 import { FileService } from '../../services/FileService';
 import { saveWorker } from '../../workers/SaveWorker';
+import { useState, useEffect, useRef } from 'react';
 import './Editor.css';
+import '../../styles/extensions.css';
+
+const AUTO_SAVE_INTERVAL = 30000;
 
 export function MainEditor() {
   const { setContent, setEditorInstance } = useEditorState();
   const { currentPath, setSavedContent } = useFileStore();
+  const { sourceMode } = useUIState();
+  const { saveBackup, markDirty, markSaved } = useAutoSaveStore();
+  const [sourceContent, setSourceContent] = useState<string>('');
+  const autoSaveTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -41,8 +52,8 @@ export function MainEditor() {
         openOnClick: false,
       }),
       Code,
-      Image.configure({
-        inline: true,
+      ResizableImageExtension.configure({
+        inline: false,
         allowBase64: true,
       }),
       Table.configure({
@@ -62,18 +73,24 @@ export function MainEditor() {
       TaskItem.configure({
         nested: true,
       }),
+      MathExtension,
+      MermaidExtension,
+      CodeBlockHighlight,
+      FootnoteExtension,
     ],
     content: '',
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       setContent(html);
+      markDirty();
 
-      // Auto-save with debounce
       if (currentPath) {
         saveWorker.triggerSave(async () => {
           const markdown = (editor.storage as any)?.markdown?.getMarkdown?.() || '';
           await FileService.saveFile(currentPath, markdown);
           setSavedContent(markdown);
+          saveBackup(markdown, currentPath);
+          markSaved();
         });
       }
     },
@@ -83,6 +100,7 @@ export function MainEditor() {
     editorProps: {
       attributes: {
         class: 'editor-content',
+        spellcheck: 'true',
       },
       handlePaste: (_view, event) => {
         const items = event.clipboardData?.items;
@@ -117,6 +135,64 @@ export function MainEditor() {
 
   if (!editor) {
     return <div className="editor-loading">Loading editor...</div>;
+  }
+
+  useEffect(() => {
+    if (!editor) return;
+    
+    if (sourceMode) {
+      const markdown = (editor.storage as any)?.markdown?.getMarkdown?.() || '';
+      setSourceContent(markdown);
+    } else if (sourceContent) {
+      editor.commands.setContent(sourceContent);
+    }
+  }, [sourceMode, editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+    
+    autoSaveTimerRef.current = setInterval(() => {
+      const markdown = (editor.storage as any)?.markdown?.getMarkdown?.() || '';
+      if (markdown) {
+        saveBackup(markdown, currentPath);
+      }
+    }, AUTO_SAVE_INTERVAL);
+    
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearInterval(autoSaveTimerRef.current);
+      }
+    };
+  }, [editor, currentPath, saveBackup]);
+
+  const handleSourceChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = e.target.value;
+    setSourceContent(newContent);
+    setContent(newContent);
+    markDirty();
+    
+    if (currentPath) {
+      saveWorker.triggerSave(async () => {
+        await FileService.saveFile(currentPath, newContent);
+        setSavedContent(newContent);
+        saveBackup(newContent, currentPath);
+        markSaved();
+      });
+    }
+  };
+
+  if (sourceMode) {
+    return (
+      <div className="editor-wrapper source-mode-wrapper">
+        <textarea
+          className="source-editor"
+          value={sourceContent}
+          onChange={handleSourceChange}
+          placeholder="Write in Markdown..."
+          spellCheck="true"
+        />
+      </div>
+    );
   }
 
   return (

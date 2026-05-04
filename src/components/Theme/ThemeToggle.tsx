@@ -1,19 +1,26 @@
-import { useThemeStore } from '../../store/themeStore';
+import { useState } from 'react';
+import { ThemeSelector } from '../Settings/ThemeSelector';
 import './ThemeToggle.css';
 
 export function ThemeToggle() {
-  const { theme, toggleTheme } = useThemeStore();
+  const [showSelector, setShowSelector] = useState(false);
 
   return (
-    <button 
-      className="theme-toggle"
-      onClick={toggleTheme}
-      title={theme === 'light' ? '切换到深色模式' : '切换到浅色模式'}
-      aria-label={theme === 'light' ? '切换到深色模式' : '切换到浅色模式'}
-    >
-      <span className="theme-icon">
-        {theme === 'light' ? '🌙' : '☀️'}
-      </span>
-    </button>
+    <div className="theme-toggle-container">
+      <button 
+        className="theme-toggle"
+        onClick={() => setShowSelector(!showSelector)}
+        title="选择主题"
+        aria-label="选择主题"
+      >
+        <span className="theme-icon">🎨</span>
+      </button>
+      
+      {showSelector && (
+        <div className="theme-selector-popup">
+          <ThemeSelector />
+        </div>
+      )}
+    </div>
   );
 }

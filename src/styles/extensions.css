@@ -1,0 +1,49 @@
+.math-block,
+.mermaid-block {
+  padding: 16px;
+  margin: 12px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--code-bg);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.math-block:hover,
+.mermaid-block:hover {
+  border-color: var(--primary-color);
+}
+
+.math-content,
+.mermaid-preview {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.math-input,
+.mermaid-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.math-error,
+.mermaid-error {
+  color: #d32f2f;
+  font-family: monospace;
+}
+
+.katex-display {
+  margin: 0;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}

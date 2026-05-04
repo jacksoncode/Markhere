@@ -1,0 +1,1 @@
+export { WordGoalProgress } from './WordGoalProgress';

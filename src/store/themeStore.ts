@@ -1,35 +1,47 @@
 import { create } from 'zustand';
-
-export type Theme = 'light' | 'dark';
+import { themes, ThemeName } from './themes';
 
 interface ThemeState {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
+  currentTheme: ThemeName;
+  setTheme: (theme: ThemeName) => void;
+  applyTheme: () => void;
 }
 
-export const useThemeStore = create<ThemeState>((set) => ({
-  theme: 'light',
+export const useThemeStore = create<ThemeState>((set, get) => ({
+  currentTheme: 'github',
+  
   setTheme: (theme) => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-    set({ theme });
+    set({ currentTheme: theme });
+    localStorage.setItem('markhere-theme', theme);
+    get().applyTheme();
   },
-  toggleTheme: () => {
-    set((state) => {
-      const newTheme = state.theme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('theme', newTheme);
-      return { theme: newTheme };
-    });
+  
+  applyTheme: () => {
+    const theme = themes[get().currentTheme];
+    const root = document.documentElement;
+    
+    root.style.setProperty('--bg-color', theme.colors.bg);
+    root.style.setProperty('--text-color', theme.colors.text);
+    root.style.setProperty('--border-color', theme.colors.border);
+    root.style.setProperty('--primary-color', theme.colors.primary);
+    root.style.setProperty('--code-bg', theme.colors.codeBg);
+    root.style.setProperty('--hover-bg', theme.colors.hoverBg);
+    root.style.setProperty('--shadow-color', `${theme.colors.border}40`);
+    
+    const isDark = theme.colors.bg.toLowerCase() < '#888888';
+    document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
   },
 }));
 
+export const initThemeStore = () => {
+  const saved = localStorage.getItem('markhere-theme') as ThemeName | null;
+  if (saved && themes[saved]) {
+    useThemeStore.getState().setTheme(saved);
+  } else {
+    useThemeStore.getState().applyTheme();
+  }
+};
+
 export function initTheme() {
-  const savedTheme = localStorage.getItem('theme') as Theme | null;
-  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  const theme = savedTheme || systemTheme;
-  
-  document.documentElement.setAttribute('data-theme', theme);
-  useThemeStore.getState().setTheme(theme);
+  initThemeStore();
 }

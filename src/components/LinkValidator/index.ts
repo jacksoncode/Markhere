@@ -1,0 +1,1 @@
+export { LinkValidator } from './LinkValidator';

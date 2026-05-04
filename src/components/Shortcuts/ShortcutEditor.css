@@ -1,0 +1,36 @@
+.shortcut-editor {
+  padding: 12px;
+}
+
+.shortcut-list {
+  margin-bottom: 12px;
+}
+
+.shortcut-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.shortcut-item:hover {
+  background: var(--hover-bg);
+}
+
+.shortcut-action {
+  font-weight: 500;
+}
+
+.shortcut-keys {
+  opacity: 0.8;
+  font-family: monospace;
+}
+
+.reset-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+}

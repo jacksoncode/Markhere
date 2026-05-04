@@ -33,11 +33,9 @@
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/128x128@2x.png"
     ],
-    "category": "Editor",
+    "category": "public.app-category.productivity",
     "shortDescription": "WYSIWYG Markdown Editor",
     "longDescription": "A modern, cross-platform Markdown editor with real-time WYSIWYG editing, multiple export formats, and powerful image handling",
     "macOS": {
@@ -49,20 +47,5 @@
       "timestampUrl": ""
     }
   },
-  "plugins": {
-    "shell": {
-      "open": true,
-      "scope": [
-        {
-          "name": "pandoc",
-          "cmd": "pandoc",
-          "args": true
-        }
-      ]
-    },
-    "fs": {
-      "all": true,
-      "scope": ["$HOME/**", "$APP/**", "$DOCUMENT/**"]
-    }
-  }
+  "plugins": {}
 }

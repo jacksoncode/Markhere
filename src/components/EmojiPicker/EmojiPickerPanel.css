@@ -1,0 +1,19 @@
+.emoji-picker-container {
+  position: relative;
+}
+
+.emoji-trigger {
+  padding: 8px;
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.emoji-panel {
+  position: absolute;
+  top: 100%;
+  margin-top: 8px;
+  z-index: 1000;
+}

@@ -1,0 +1,121 @@
+.typora-titlebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 38px;
+  background: var(--color-bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .typora-titlebar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.typora-titlebar-title {
+  font-weight: 500;
+}
+
+.typora-titlebar-drag-region {
+  position: absolute;
+  top: 0;
+  left: 70px;
+  right: 70px;
+  height: 100%;
+  cursor: default;
+  -webkit-app-region: drag;
+}
+
+.typora-titlebar-controls {
+  position: absolute;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.typora-titlebar-menu {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.typora-titlebar-menu:hover,
+.typora-titlebar-menu.active {
+  color: var(--color-text-main);
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] .typora-titlebar-menu:hover,
+[data-theme="dark"] .typora-titlebar-menu.active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.typora-titlebar-menu-wrapper {
+  position: relative;
+  padding: 4px 8px;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 180px;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10000;
+  padding: 4px 0;
+  margin-top: 4px;
+}
+
+[data-theme="dark"] .dropdown-menu {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-text-main);
+  transition: background 0.15s ease;
+}
+
+.menu-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.menu-item .shortcut {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.menu-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 12px;
+}
+
+[data-theme="dark"] .menu-divider {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-with-titlebar {
+  padding-top: 38px;
+}

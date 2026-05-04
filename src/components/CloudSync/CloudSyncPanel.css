@@ -1,0 +1,61 @@
+.cloud-sync-panel {
+  padding: 12px;
+}
+
+.providers-list {
+  margin-bottom: 12px;
+}
+
+.provider-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+}
+
+.provider-item:hover {
+  background: var(--hover-bg);
+}
+
+.provider-icon {
+  font-size: 20px;
+  margin-right: 8px;
+}
+
+.provider-name {
+  flex: 1;
+}
+
+.provider-item button {
+  padding: 4px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--hover-bg);
+  cursor: pointer;
+}
+
+.provider-item button.connected {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.sync-status {
+  padding: 8px;
+  background: var(--code-bg);
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.sync-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary-color);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+}

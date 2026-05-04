@@ -1,0 +1,32 @@
+.split-view-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.split-toggle {
+  padding: 8px 16px;
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 8px;
+}
+
+.split-single {
+  flex: 1;
+  display: flex;
+}
+
+.split-active {
+  flex: 1;
+  display: flex;
+  gap: 1px;
+  background: var(--border-color);
+}
+
+.editor-pane {
+  flex: 1;
+  background: var(--bg-color);
+  overflow: hidden;
+}

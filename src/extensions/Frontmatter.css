@@ -1,0 +1,86 @@
+.frontmatter-display {
+  background: var(--color-bg-secondary);
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 16px 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.frontmatter-display:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-secondary);
+}
+
+.frontmatter-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.frontmatter-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.frontmatter-field {
+  display: flex;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.frontmatter-key {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.frontmatter-value {
+  color: var(--color-text);
+}
+
+.frontmatter-editor {
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-primary);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 16px 0;
+}
+
+.frontmatter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.frontmatter-header span {
+  font-size: 12px;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.frontmatter-save-btn {
+  padding: 4px 12px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.frontmatter-textarea {
+  width: 100%;
+  min-height: 100px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 8px;
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 13px;
+  resize: vertical;
+}

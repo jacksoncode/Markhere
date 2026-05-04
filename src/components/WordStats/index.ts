@@ -1,0 +1,1 @@
+export { WordStats, WordStatsPanel } from './WordStats';

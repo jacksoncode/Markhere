@@ -1,0 +1,55 @@
+.goto-line-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.goto-line-dialog {
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  width: 300px;
+}
+
+.goto-line-dialog h3 {
+  margin: 0 0 16px 0;
+}
+
+.goto-line-dialog input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.dialog-actions button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dialog-actions button[type="button"] {
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+}
+
+.dialog-actions button[type="submit"] {
+  background: var(--primary-color);
+  border: none;
+  color: white;
+}

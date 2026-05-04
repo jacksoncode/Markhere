@@ -1,0 +1,125 @@
+.outline-container {
+  padding: 12px;
+  border-left: 1px solid var(--border-color);
+  background: var(--bg-color);
+}
+
+.outline-header {
+  font-weight: 600;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.outline-header span {
+  color: var(--color-text);
+}
+
+.outline-insert-btn {
+  padding: 4px 8px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.outline-insert-btn:hover {
+  opacity: 0.9;
+}
+
+.outline-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.outline-item {
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.outline-item:hover {
+  background: var(--hover-bg);
+}
+
+.outline-item.level-1 {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.outline-item.level-2 {
+  padding-left: 16px;
+  font-size: 13px;
+}
+
+.outline-item.level-3 {
+  padding-left: 24px;
+  font-size: 12px;
+}
+
+.outline-item.level-4,
+.outline-item.level-5,
+.outline-item.level-6 {
+  padding-left: 32px;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.outline-empty {
+  padding: 12px;
+  text-align: center;
+  color: var(--text-color);
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.outline-item {
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s, opacity 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.outline-item.dragging {
+  opacity: 0.5;
+  background: var(--color-primary-light);
+}
+
+.outline-item.drag-over {
+  border-top: 2px solid var(--color-primary);
+}
+
+.drag-handle {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  cursor: grab;
+  opacity: 0.5;
+  user-select: none;
+}
+
+.outline-item:hover .drag-handle {
+  opacity: 1;
+}
+
+.outline-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
