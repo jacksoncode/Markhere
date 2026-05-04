@@ -1,18 +1,20 @@
 import { useFileStore } from '../../store/fileStore';
 import { useUIState } from '../../store/uiStore';
+import { useTranslation } from '../../i18n';
 import './Sidebar-New.css';
 
 export function SidebarNew() {
+  const { t } = useTranslation();
   const { sidebarOpen, toggleSidebar } = useUIState();
   const { currentPath } = useFileStore();
 
   return (
     <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-      {sidebarOpen && (
+      {sidebarOpen ? (
         <>
           <div className="sidebar-header">
-            <span className="sidebar-title">FILES</span>
-            <button className="sidebar-toggle" onClick={toggleSidebar}>
+            <span className="sidebar-title">{t('sidebar.files')}</span>
+            <button className="sidebar-toggle" onClick={toggleSidebar} title={t('sidebar.closeSidebar')}>
               ×
             </button>
           </div>
@@ -20,7 +22,7 @@ export function SidebarNew() {
           <div className="sidebar-content">
             <div className="file-tree-section">
               <div className="file-tree-header">
-                <span>Recent Files</span>
+                <span>{t('sidebar.recentFiles')}</span>
                 <div className="file-tree-actions">
                   <button className="file-tree-action-btn">+</button>
                 </div>
@@ -46,10 +48,20 @@ export function SidebarNew() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
               </svg>
-              Close Sidebar
+              {t('sidebar.closeSidebar')}
             </button>
           </div>
         </>
+      ) : (
+        <button 
+          className="sidebar-expand-btn" 
+          onClick={toggleSidebar}
+          title={t('sidebar.showSidebar')}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          </svg>
+        </button>
       )}
     </aside>
   );

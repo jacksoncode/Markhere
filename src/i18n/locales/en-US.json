@@ -1,0 +1,70 @@
+{
+  "app": {
+    "title": "Markhere"
+  },
+  "menu": {
+    "file": "File",
+    "edit": "Edit",
+    "view": "View",
+    "help": "Help"
+  },
+  "file": {
+    "open": "Open...",
+    "newFromTemplate": "New from Template...",
+    "save": "Save",
+    "saveAs": "Save As...",
+    "exportPdf": "Export PDF",
+    "exportWord": "Export Word",
+    "exportHtml": "Export HTML",
+    "exportEpub": "Export EPUB"
+  },
+  "edit": {
+    "undo": "Undo",
+    "redo": "Redo",
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste"
+  },
+  "view": {
+    "showSidebar": "Show Sidebar",
+    "hideSidebar": "Hide Sidebar",
+    "focusMode": "Focus Mode",
+    "typewriterMode": "Typewriter Mode",
+    "sourceMode": "Source Mode",
+    "keyboardShortcuts": "Keyboard Shortcuts...",
+    "wordGoal": "Word Goal",
+    "pomodoroTimer": "Pomodoro Timer",
+    "themeEditor": "Theme Editor...",
+    "bookmarks": "Bookmarks...",
+    "versionHistory": "Version History...",
+    "collaboration": "Collaboration..."
+  },
+  "sidebar": {
+    "files": "FILES",
+    "recentFiles": "Recent Files",
+    "closeSidebar": "Close Sidebar",
+    "showSidebar": "Show Sidebar"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "autoSave": "Auto Save",
+    "editor": "Editor Settings"
+  },
+  "shortcuts": {
+    "ctrlO": "Ctrl+O",
+    "ctrlS": "Ctrl+S",
+    "ctrlShiftS": "Ctrl+Shift+S",
+    "ctrlZ": "Ctrl+Z",
+    "ctrlShiftZ": "Ctrl+Shift+Z",
+    "ctrlX": "Ctrl+X",
+    "ctrlC": "Ctrl+C",
+    "ctrlV": "Ctrl+V",
+    "ctrlB": "Ctrl+B",
+    "ctrlShiftF": "Ctrl+Shift+F",
+    "ctrlShiftT": "Ctrl+Shift+T",
+    "ctrlSlash": "Ctrl+/",
+    "ctrlShiftK": "Ctrl+Shift+K"
+  }
+}

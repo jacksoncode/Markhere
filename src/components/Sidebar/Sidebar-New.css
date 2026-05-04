@@ -17,8 +17,27 @@
 }
 
 .sidebar.closed {
-  width: 0;
-  border-right: none;
+  width: 40px;
+  min-width: 40px;
+}
+
+.sidebar-expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 0;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-expand-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-main);
 }
 
 .sidebar-header {

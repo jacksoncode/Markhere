@@ -4,15 +4,18 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { useFileStore } from '../../store/fileStore';
 import { useEditorState } from '../../store/editorStore';
 import { useUIState } from '../../store/uiStore';
+import { useTranslation } from '../../i18n';
 import { ShortcutSettings } from '../ShortcutSettings';
 import { TemplateSelector } from '../TemplateSelector';
 import { BookmarkPanel } from '../BookmarkPanel';
 import { ThemeEditor } from '../ThemeEditor';
 import { VersionHistory } from '../VersionHistory';
 import { CollaborationPanel } from '../Collaboration';
+import { Settings } from '../Settings/Settings';
 import './TitleBar.css';
 
 export function TitleBar() {
+  const { t } = useTranslation();
   const { currentPath, setCurrentPath, setSavedContent } = useFileStore();
   const { editorInstance } = useEditorState();
   const { sidebarOpen, toggleSidebar, focusMode, toggleFocusMode, typewriterMode, toggleTypewriterMode, sourceMode, toggleSourceMode, pomodoroEnabled, togglePomodoro, wordGoalEnabled, toggleWordGoal } = useUIState();
@@ -24,6 +27,7 @@ export function TitleBar() {
   const [showThemeEditor, setShowThemeEditor] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [showCollaboration, setShowCollaboration] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   
   const fileName = currentPath ? currentPath.split('/').pop() : 'Untitled';
@@ -243,41 +247,44 @@ ${html}
         {/* File Menu */}
         <div 
           className="typora-titlebar-menu-wrapper"
-          onMouseEnter={() => setActiveMenu('file')}
-          onMouseLeave={() => setActiveMenu(null)}
+          onClick={() => setActiveMenu(activeMenu === 'file' ? null : 'file')}
         >
           <span className={`typora-titlebar-menu ${activeMenu === 'file' ? 'active' : ''}`}>
-            File
+            {t('menu.file')}
           </span>
           {activeMenu === 'file' && (
-            <div className="dropdown-menu">
+            <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
               <div className="menu-item" onClick={handleOpen}>
-                <span>Open...</span>
-                <span className="shortcut">⌘O</span>
+                <span>{t('file.open')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlO')}</span>
               </div>
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowTemplateSelector(true); }}>
-                <span>New from Template...</span>
+                <span>{t('file.newFromTemplate')}</span>
               </div>
               <div className="menu-item" onClick={handleSave}>
-                <span>Save</span>
-                <span className="shortcut">⌘S</span>
+                <span>{t('file.save')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlS')}</span>
               </div>
               <div className="menu-item" onClick={handleSaveAs}>
-                <span>Save As...</span>
-                <span className="shortcut">⌘⇧S</span>
+                <span>{t('file.saveAs')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftS')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={handleExportPDF}>
-                <span>Export PDF</span>
+                <span>{t('file.exportPdf')}</span>
               </div>
               <div className="menu-item" onClick={handleExportWord}>
-                <span>Export Word</span>
+                <span>{t('file.exportWord')}</span>
               </div>
               <div className="menu-item" onClick={handleExportHTML}>
-                <span>Export HTML</span>
+                <span>{t('file.exportHtml')}</span>
               </div>
               <div className="menu-item" onClick={handleExportEPUB}>
-                <span>Export EPUB</span>
+                <span>{t('file.exportEpub')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={() => { setActiveMenu(null); setShowSettings(true); }}>
+                <span>{t('settings.title')}</span>
               </div>
             </div>
           )}
@@ -286,34 +293,33 @@ ${html}
         {/* Edit Menu */}
         <div 
           className="typora-titlebar-menu-wrapper"
-          onMouseEnter={() => setActiveMenu('edit')}
-          onMouseLeave={() => setActiveMenu(null)}
+          onClick={() => setActiveMenu(activeMenu === 'edit' ? null : 'edit')}
         >
           <span className={`typora-titlebar-menu ${activeMenu === 'edit' ? 'active' : ''}`}>
-            Edit
+            {t('menu.edit')}
           </span>
           {activeMenu === 'edit' && (
-            <div className="dropdown-menu">
+            <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
               <div className="menu-item" onClick={handleUndo}>
-                <span>Undo</span>
-                <span className="shortcut">⌘Z</span>
+                <span>{t('edit.undo')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlZ')}</span>
               </div>
               <div className="menu-item" onClick={handleRedo}>
-                <span>Redo</span>
-                <span className="shortcut">⌘⇧Z</span>
+                <span>{t('edit.redo')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftZ')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={handleCut}>
-                <span>Cut</span>
-                <span className="shortcut">⌘X</span>
+                <span>{t('edit.cut')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlX')}</span>
               </div>
               <div className="menu-item" onClick={handleCopy}>
-                <span>Copy</span>
-                <span className="shortcut">⌘C</span>
+                <span>{t('edit.copy')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlC')}</span>
               </div>
               <div className="menu-item" onClick={handlePaste}>
-                <span>Paste</span>
-                <span className="shortcut">⌘V</span>
+                <span>{t('edit.paste')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlV')}</span>
               </div>
             </div>
           )}
@@ -322,59 +328,58 @@ ${html}
         {/* View Menu */}
         <div 
           className="typora-titlebar-menu-wrapper"
-          onMouseEnter={() => setActiveMenu('view')}
-          onMouseLeave={() => setActiveMenu(null)}
+          onClick={() => setActiveMenu(activeMenu === 'view' ? null : 'view')}
         >
           <span className={`typora-titlebar-menu ${activeMenu === 'view' ? 'active' : ''}`}>
-            View
+            {t('menu.view')}
           </span>
           {activeMenu === 'view' && (
-            <div className="dropdown-menu">
+            <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
               <div className="menu-item" onClick={handleToggleSidebar}>
-                <span>{sidebarOpen ? 'Hide Sidebar' : 'Show Sidebar'}</span>
-                <span className="shortcut">⌘\</span>
+                <span>{sidebarOpen ? t('view.hideSidebar') : t('view.showSidebar')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlB')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={handleFocusMode}>
-                <span>{focusMode ? '✓ Focus Mode' : 'Focus Mode'}</span>
-                <span className="shortcut">⌘⇧F</span>
+                <span>{focusMode ? `✓ ${t('view.focusMode')}` : t('view.focusMode')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftF')}</span>
               </div>
               <div className="menu-item" onClick={handleTypewriterMode}>
-                <span>{typewriterMode ? '✓ Typewriter Mode' : 'Typewriter Mode'}</span>
-                <span className="shortcut">⌘⇧T</span>
+                <span>{typewriterMode ? `✓ ${t('view.typewriterMode')}` : t('view.typewriterMode')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftT')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={() => { setActiveMenu(null); toggleSourceMode(); }}>
-                <span>{sourceMode ? '✓ Source Mode' : 'Source Mode'}</span>
-                <span className="shortcut">⌘/</span>
+                <span>{sourceMode ? `✓ ${t('view.sourceMode')}` : t('view.sourceMode')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlSlash')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowShortcutSettings(true); }}>
-                <span>Keyboard Shortcuts...</span>
-                <span className="shortcut">⌘⇧K</span>
+                <span>{t('view.keyboardShortcuts')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftK')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={() => { setActiveMenu(null); toggleWordGoal(); }}>
-                <span>{wordGoalEnabled ? '✓ Word Goal' : 'Word Goal'}</span>
+                <span>{wordGoalEnabled ? `✓ ${t('view.wordGoal')}` : t('view.wordGoal')}</span>
               </div>
               <div className="menu-item" onClick={() => { setActiveMenu(null); togglePomodoro(); }}>
-                <span>{pomodoroEnabled ? '✓ Pomodoro Timer' : 'Pomodoro Timer'}</span>
+                <span>{pomodoroEnabled ? `✓ ${t('view.pomodoroTimer')}` : t('view.pomodoroTimer')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowThemeEditor(true); }}>
-                <span>Theme Editor...</span>
+                <span>{t('view.themeEditor')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowBookmarkPanel(true); }}>
-                <span>Bookmarks...</span>
+                <span>{t('view.bookmarks')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowVersionHistory(true); }}>
-                <span>Version History...</span>
+                <span>{t('view.versionHistory')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowCollaboration(true); }}>
-                <span>Collaboration...</span>
+                <span>{t('view.collaboration')}</span>
               </div>
             </div>
           )}
@@ -391,6 +396,7 @@ ${html}
       <ThemeEditor isOpen={showThemeEditor} onClose={() => setShowThemeEditor(false)} />
       <VersionHistory isOpen={showVersionHistory} onClose={() => setShowVersionHistory(false)} />
       <CollaborationPanel isOpen={showCollaboration} onClose={() => setShowCollaboration(false)} />
+      <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   );
 }

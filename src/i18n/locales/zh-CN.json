@@ -1,0 +1,70 @@
+{
+  "app": {
+    "title": "Markhere"
+  },
+  "menu": {
+    "file": "文件",
+    "edit": "编辑",
+    "view": "视图",
+    "help": "帮助"
+  },
+  "file": {
+    "open": "打开...",
+    "newFromTemplate": "从模板新建...",
+    "save": "保存",
+    "saveAs": "另存为...",
+    "exportPdf": "导出 PDF",
+    "exportWord": "导出 Word",
+    "exportHtml": "导出 HTML",
+    "exportEpub": "导出 EPUB"
+  },
+  "edit": {
+    "undo": "撤销",
+    "redo": "重做",
+    "cut": "剪切",
+    "copy": "复制",
+    "paste": "粘贴"
+  },
+  "view": {
+    "showSidebar": "显示侧边栏",
+    "hideSidebar": "隐藏侧边栏",
+    "focusMode": "专注模式",
+    "typewriterMode": "打字机模式",
+    "sourceMode": "源码模式",
+    "keyboardShortcuts": "键盘快捷键...",
+    "wordGoal": "字数目标",
+    "pomodoroTimer": "番茄时钟",
+    "themeEditor": "主题编辑器...",
+    "bookmarks": "书签...",
+    "versionHistory": "版本历史...",
+    "collaboration": "协作..."
+  },
+  "sidebar": {
+    "files": "文件",
+    "recentFiles": "最近文件",
+    "closeSidebar": "关闭侧边栏",
+    "showSidebar": "显示侧边栏"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言",
+    "theme": "主题",
+    "autoSave": "自动保存",
+    "editor": "编辑器设置"
+  },
+  "shortcuts": {
+    "ctrlO": "Ctrl+O",
+    "ctrlS": "Ctrl+S",
+    "ctrlShiftS": "Ctrl+Shift+S",
+    "ctrlZ": "Ctrl+Z",
+    "ctrlShiftZ": "Ctrl+Shift+Z",
+    "ctrlX": "Ctrl+X",
+    "ctrlC": "Ctrl+C",
+    "ctrlV": "Ctrl+V",
+    "ctrlB": "Ctrl+B",
+    "ctrlShiftF": "Ctrl+Shift+F",
+    "ctrlShiftT": "Ctrl+Shift+T",
+    "ctrlSlash": "Ctrl+/",
+    "ctrlShiftK": "Ctrl+Shift+K"
+  }
+}
