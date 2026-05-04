@@ -7,72 +7,45 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-mac:
-    runs-on: macos-latest
+  create-release:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          node-version: 20
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build macOS Universal
-        run: |
-          # Build for both architectures
-          npx tauri build --target universal-apple-darwin
+          tag_name: ${{ github.ref_name }}
+          name: Markhere ${{ github.ref_name }}
+          body: |
+            ## 📦 Markhere ${{ github.ref_name }}
+            
+            ### 下载说明
+            
+            | 平台 | 文件 | 说明 |
+            |------|------|------|
+            | **Linux** | `*.deb` 或 `*.AppImage` | Ubuntu/Debian (x86_64) |
+            
+            ### 系统要求
+            
+            - Ubuntu 18.04+ / Debian 10+ (64-bit)
+            
+            ### ⚠️ macOS/Windows
+            
+            当前仅提供 Linux 版本。如需其他平台：
+            
+            ```bash
+            # 本地构建
+            git clone https://github.com/jacksoncode/Markhere.git
+            cd Markhere && npm install && npm run tauri:build
+            ```
+            
+            详见 [CONTRIBUTING.md](../CONTRIBUTING.md)
+          draft: false
+          prerelease: false
         env:
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-
-      - name: Upload macOS Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-builds
-          path: |
-            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
-
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-pc-windows-msvc
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build Windows
-        run: npx tauri build
-        env:
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-
-      - name: Upload Windows Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-builds
-          path: |
-            src-tauri/target/release/bundle/msi/*.msi
-            src-tauri/target/release/bundle/nsis/*.exe
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-linux:
+    needs: create-release
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
@@ -96,72 +69,12 @@ jobs:
 
       - name: Build Linux
         run: npx tauri build
-        env:
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
 
-      - name: Upload Linux Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-builds
-          path: |
-            src-tauri/target/release/bundle/deb/*.deb
-            src-tauri/target/release/bundle/appimage/*.AppImage
-
-  release:
-    needs: [build-mac, build-windows, build-linux]
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: Download macOS Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-builds
-          path: macos
-
-      - name: Download Windows Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-builds
-          path: windows
-
-      - name: Download Linux Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-builds
-          path: linux
-
-      - name: Create Release
+      - name: Upload Linux Release Assets
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            macos/*.dmg
-            windows/*.msi
-            windows/*.exe
-            linux/*.deb
-            linux/*.AppImage
-          generate_release_notes: true
-          body: |
-            ## 📦 Markhere v${{ github.ref_name }}
-            
-            ### 下载说明
-            
-            | 平台 | 文件 | 说明 |
-            |------|------|------|
-            | **macOS (Universal)** | `*.dmg` | 支持 Apple Silicon + Intel |
-            | **Windows** | `*.msi` 或 `*.exe` | 64位系统 |
-            | **Linux** | `*.deb` 或 `*.AppImage` | Ubuntu/Debian |
-            
-            ### 系统要求
-            
-            - macOS 10.15+ (Catalina)
-            - Windows 10/11 (64-bit)
-            - Ubuntu 18.04+ / Debian 10+
-            
-            ### ⚠️ 注意
-            
-            此版本未进行代码签名。
-            
-            **macOS 用户**: 右键点击 → 打开 → 确认
-            **Windows 用户**: 点击 "更多信息" → "仍要运行"
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/appimage/*.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
