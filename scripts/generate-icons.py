@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import subprocess
 from pathlib import Path
 
 try:
@@ -34,13 +35,114 @@ def create_icon(size: int, output_path: str):
     img.save(output_path, 'PNG')
     print(f"Created: {output_path} ({size}x{size})")
 
+def create_ico(output_path: str):
+    """Create Windows .ico file with multiple sizes"""
+    sizes = [16, 32, 48, 64, 128, 256]
+    images = []
+    
+    for size in sizes:
+        img = Image.new('RGBA', (size, size), (99, 102, 241, 255))
+        draw = ImageDraw.Draw(img)
+        
+        margin = size // 8
+        points = [
+            (margin, size - margin),
+            (margin, margin),
+            (size // 2, size // 2 - margin // 4),
+            (size - margin, margin),
+            (size - margin, size - margin),
+        ]
+        
+        draw.polygon(points, fill=(255, 255, 255, 255))
+        
+        if size >= 16:
+            draw.rectangle([2, 2, size-3, size-3], outline=(255, 255, 255, 50), width=1 if size < 32 else 2)
+        
+        images.append(img)
+    
+    # Save as .ico
+    images[0].save(output_path, format='ICO', sizes=[(img.width, img.height) for img in images])
+    print(f"Created: {output_path} (Windows ICO)")
+
+def create_icns_macos(output_path: str):
+    """Create macOS .icns using sips (macOS only)"""
+    icons_dir = Path(output_path).parent
+    
+    # Create iconset directory
+    iconset_dir = icons_dir / "icon.iconset"
+    iconset_dir.mkdir(exist_ok=True)
+    
+    sizes = [16, 32, 128, 256, 512]
+    
+    for size in sizes:
+        img = Image.new('RGBA', (size, size), (99, 102, 241, 255))
+        draw = ImageDraw.Draw(img)
+        
+        margin = size // 8
+        points = [
+            (margin, size - margin),
+            (margin, margin),
+            (size // 2, size // 2 - margin // 4),
+            (size - margin, margin),
+            (size - margin, size - margin),
+        ]
+        
+        draw.polygon(points, fill=(255, 255, 255, 255))
+        
+        if size >= 16:
+            draw.rectangle([2, 2, size-3, size-3], outline=(255, 255, 255, 50), width=1 if size < 32 else 2)
+        
+        # Normal size
+        img.save(str(iconset_dir / f"icon_{size}x{size}.png"))
+        
+        # @2x version (retina)
+        if size <= 256:
+            img_2x = img.resize((size * 2, size * 2), Image.Resampling.LANCZOS)
+            img_2x.save(str(iconset_dir / f"icon_{size}x{size}@2x.png"))
+    
+    # Use sips to create .icns (macOS built-in tool)
+    subprocess.run(["sips", "-s", "format", "icns", str(iconset_dir), "--out", output_path], check=True)
+    print(f"Created: {output_path} (macOS ICNS)")
+
+def create_icns_linux(output_path: str):
+    """Create placeholder .icns for Linux CI (won't be used)"""
+    # Just create a simple PNG renamed as .icns placeholder
+    # Linux builds don't use .icns anyway
+    img = Image.new('RGBA', (128, 128), (99, 102, 241, 255))
+    draw = ImageDraw.Draw(img)
+    
+    margin = 16
+    points = [
+        (margin, 112),
+        (margin, 16),
+        (64, 60),
+        (112, 16),
+        (112, 112),
+    ]
+    
+    draw.polygon(points, fill=(255, 255, 255, 255))
+    
+    # Linux doesn't actually need .icns, so just save as PNG
+    img.save(output_path.replace('.icns', '_placeholder.png'))
+    print(f"Created placeholder for Linux (ICNS not needed)")
+
 def main():
     icons_dir = Path("src-tauri/icons")
     icons_dir.mkdir(parents=True, exist_ok=True)
     
+    # Generate PNG icons
     for size in [32, 128, 256, 512]:
         filename = "128x128@2x.png" if size == 256 else f"{size}x{size}.png"
         create_icon(size, str(icons_dir / filename))
+    
+    # Generate platform-specific icons based on OS
+    if os.name == 'nt':  # Windows
+        create_ico(str(icons_dir / "icon.ico"))
+    elif os.uname().sysname == 'Darwin':  # macOS
+        create_icns_macos(str(icons_dir / "icon.icns"))
+    else:  # Linux
+        create_ico(str(icons_dir / "icon.ico"))  # Still generate for cross-build
+        # .icns not needed for Linux builds
     
     print("Icons generated!")
 
