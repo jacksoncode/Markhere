@@ -65,10 +65,9 @@ def create_ico(output_path: str):
     print(f"Created: {output_path} (Windows ICO)")
 
 def create_icns_macos(output_path: str):
-    """Create macOS .icns using sips (macOS only)"""
+    """Create macOS .icns using iconutil (macOS only)"""
     icons_dir = Path(output_path).parent
     
-    # Create iconset directory
     iconset_dir = icons_dir / "icon.iconset"
     iconset_dir.mkdir(exist_ok=True)
     
@@ -92,16 +91,13 @@ def create_icns_macos(output_path: str):
         if size >= 16:
             draw.rectangle([2, 2, size-3, size-3], outline=(255, 255, 255, 50), width=1 if size < 32 else 2)
         
-        # Normal size
         img.save(str(iconset_dir / f"icon_{size}x{size}.png"))
         
-        # @2x version (retina)
         if size <= 256:
             img_2x = img.resize((size * 2, size * 2), Image.Resampling.LANCZOS)
             img_2x.save(str(iconset_dir / f"icon_{size}x{size}@2x.png"))
     
-    # Use sips to create .icns (macOS built-in tool)
-    subprocess.run(["sips", "-s", "format", "icns", str(iconset_dir), "--out", output_path], check=True)
+    subprocess.run(["iconutil", "-c", "icns", str(iconset_dir), "-o", output_path], check=True)
     print(f"Created: {output_path} (macOS ICNS)")
 
 def create_icns_linux(output_path: str):
