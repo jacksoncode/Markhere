@@ -68,6 +68,9 @@ jobs:
 
       - run: python scripts/generate-icons.py
 
+      - name: Generate macOS Icons
+        run: npx tauri icon src-tauri/icons/128x128.png
+
       - run: npm ci
 
       - run: npx tauri build --target aarch64-apple-darwin
@@ -108,6 +111,9 @@ jobs:
       - run: pip install Pillow
 
       - run: python scripts/generate-icons.py
+
+      - name: Generate Windows Icons
+        run: npx tauri icon src-tauri/icons/128x128.png
 
       - run: npm ci
 
