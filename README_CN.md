@@ -4,14 +4,15 @@
 
 **一款现代化的跨平台所见即所得 Markdown 编辑器**
 
-[![许可证](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![官方网站](https://img.shields.io/badge/Website-访问-green.svg)](https://jacksoncode.github.io/Markhere)
+[![许可证](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jacksoncode/Markhere/blob/main/LICENSE)
 [![Tauri](https://img.shields.io/badge/Tauri-2.5-orange.svg)](https://tauri.app)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-严格模式-blue.svg)](https://www.typescriptlang.org)
 
 *优雅写作 · 随处导出 · 无缝协作*
 
-[英文文档](README.md) | [中文文档](README_CN.md)
+**🏠 [官方网站](https://jacksoncode.github.io/Markhere) | [英文文档](https://github.com/jacksoncode/Markhere/blob/main/README.md) | [中文文档](https://github.com/jacksoncode/Markhere/blob/main/README_CN.md)**
 
 </div>
 
@@ -242,7 +243,7 @@ Markhere/
 
 ## 📄 许可证
 
-本项目基于 **MIT 许可证** 开源 - 详情请见 [LICENSE](LICENSE) 文件。
+本项目基于 **MIT 许可证** 开源 - 详情请见 [LICENSE](https://github.com/jacksoncode/Markhere/blob/main/LICENSE) 文件。
 
 ---
 
