@@ -3,6 +3,8 @@ use std::io::Write;
 use std::process::Command;
 use base64::{Engine as _, engine::general_purpose};
 use tauri::Manager;
+use tauri::menu::Menu;
+use tauri::{TitleBarStyle, WebviewWindowBuilder, WebviewUrl};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -254,6 +256,38 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
+.setup(|app| {
+            let menu = Menu::default(&app.handle()).expect("Failed to create default menu");
+            menu.set_as_app_menu().expect("Failed to set app menu");
+
+            #[cfg(target_os = "macos")]
+            {
+                let _window = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
+                    .title("Markhere - Markdown Editor")
+                    .inner_size(1200.0, 800.0)
+                    .min_inner_size(800.0, 600.0)
+                    .resizable(true)
+                    .center()
+                    .title_bar_style(TitleBarStyle::Transparent)
+                    .build()
+                    .expect("Failed to create window");
+            }
+
+            #[cfg(not(target_os = "macos"))]
+            {
+                let _window = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
+                    .title("Markhere - Markdown Editor")
+                    .inner_size(1200.0, 800.0)
+                    .min_inner_size(800.0, 600.0)
+                    .resizable(true)
+                    .center()
+                    .decorations(true)
+                    .build()
+                    .expect("Failed to create window");
+            }
+
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             save_file,
             read_file,
