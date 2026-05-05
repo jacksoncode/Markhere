@@ -9,6 +9,7 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "title": "Markhere - Markdown Editor",
@@ -19,6 +20,7 @@
         "resizable": true,
         "fullscreen": false,
         "decorations": true,
+        "transparent": true,
         "center": true
       }
     ],
