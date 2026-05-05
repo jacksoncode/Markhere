@@ -1,0 +1,136 @@
+.knowledge-graph-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.knowledge-graph-panel {
+  background: var(--color-bg-primary);
+  border-radius: 16px;
+  width: 850px;
+  max-height: 80vh;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  animation: graph-appear 0.2s ease-out;
+}
+
+@keyframes graph-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.graph-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.graph-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.graph-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.graph-filter {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  width: 200px;
+}
+
+.graph-filter:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.graph-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.graph-close:hover {
+  background: var(--color-bg-secondary);
+}
+
+.graph-content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.graph-empty {
+  text-align: center;
+  padding: 60px;
+}
+
+.graph-empty p {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.graph-hint {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+}
+
+.graph-canvas {
+  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  cursor: pointer;
+}
+
+.graph-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  border-radius: 0 0 16px 16px;
+}
+
+.graph-stats {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.graph-selected {
+  font-size: 14px;
+  color: var(--color-primary);
+  font-weight: 500;
+}

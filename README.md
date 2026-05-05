@@ -4,6 +4,7 @@
 
 **A Modern, Cross-Platform WYSIWYG Markdown Editor**
 
+[![Website](https://img.shields.io/badge/Website-Visit-green.svg)](https://jacksoncode.github.io/Markhere)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Tauri](https://img.shields.io/badge/Tauri-2.5-orange.svg)](https://tauri.app)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev)
@@ -11,7 +12,7 @@
 
 *Write beautifully. Export anywhere. Collaborate seamlessly.*
 
-[English](README.md) | [中文文档](README_CN.md)
+**🏠 [Official Website](https://jacksoncode.github.io/Markhere) | [English](README.md) | [中文文档](README_CN.md)**
 
 </div>
 

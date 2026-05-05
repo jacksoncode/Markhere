@@ -4,6 +4,7 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { useFileStore } from '../../store/fileStore';
 import { useEditorState } from '../../store/editorStore';
 import { useUIState } from '../../store/uiStore';
+import { useTabsStore } from '../../store/tabsStore';
 import { useTranslation } from '../../i18n';
 import { ShortcutSettings } from '../ShortcutSettings';
 import { TemplateSelector } from '../TemplateSelector';
@@ -20,7 +21,7 @@ export function TitleBar() {
   const { currentPath, setCurrentPath, setSavedContent } = useFileStore();
   const { editorInstance } = useEditorState();
   const { 
-    sidebarOpen, toggleSidebar, 
+    sidebarOpen, sidebarMode, toggleSidebar, setSidebarMode,
     focusMode, toggleFocusMode, 
     typewriterMode, toggleTypewriterMode, 
     sourceMode, toggleSourceMode, 
@@ -71,6 +72,12 @@ export function TitleBar() {
     editorInstance?.commands.clearContent();
     setCurrentPath(null);
     setSavedContent('');
+  };
+  
+  const handleReopenClosedTab = () => {
+    setActiveMenu(null);
+    const { reopenClosedTab } = useTabsStore.getState();
+    reopenClosedTab();
   };
   
   const handleOpen = async () => {
@@ -466,6 +473,167 @@ ${html}
       .run();
   };
 
+  const handlePasteAsPlainText = async () => {
+    setActiveMenu(null);
+    try {
+      const text = await navigator.clipboard.readText();
+      editorInstance?.chain().focus().insertContent(text).run();
+    } catch (err) {
+      console.error('Paste as plain text failed:', err);
+    }
+  };
+
+  const handleCloseWindow = async () => {
+    setActiveMenu(null);
+    try {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      const win = getCurrentWindow();
+      await win.close();
+    } catch (err) {
+      console.error('Close window failed:', err);
+    }
+  };
+
+  const handleIncreaseHeading = () => {
+    setActiveMenu(null);
+    let currentLevel = 0;
+    for (let i = 1; i <= 6; i++) {
+      if (editorInstance?.isActive('heading', { level: i })) {
+        currentLevel = i;
+        break;
+      }
+    }
+    const newLevel = currentLevel === 0 ? 6 : currentLevel === 1 ? 1 : currentLevel - 1;
+    editorInstance?.chain().focus().toggleHeading({ level: newLevel as 1|2|3|4|5|6 }).run();
+  };
+
+  const handleDecreaseHeading = () => {
+    setActiveMenu(null);
+    let currentLevel = 0;
+    for (let i = 1; i <= 6; i++) {
+      if (editorInstance?.isActive('heading', { level: i })) {
+        currentLevel = i;
+        break;
+      }
+    }
+    if (currentLevel === 0 || currentLevel === 6) {
+      editorInstance?.chain().focus().setParagraph().run();
+    } else {
+      editorInstance?.chain().focus().toggleHeading({ level: (currentLevel + 1) as 1|2|3|4|5|6 }).run();
+    }
+  };
+
+  const handleJumpToTop = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().setTextSelection({ from: 0, to: 0 }).run();
+  };
+
+  const handleJumpToSelection = () => {
+    setActiveMenu(null);
+    const { from, to } = editorInstance?.state.selection || { from: 0, to: 0 };
+    if (from !== to) {
+      editorInstance?.commands.scrollIntoView();
+    } else {
+      handleSelectLine();
+    }
+  };
+
+  const handleJumpToBottom = () => {
+    setActiveMenu(null);
+    const docSize = editorInstance?.state.doc.content.size || 0;
+    editorInstance?.chain().focus().setTextSelection({ from: docSize, to: docSize }).run();
+  };
+
+  const handleHorizontalRule = () => {
+    setActiveMenu(null);
+    editorInstance?.chain().focus().insertContent('\n---\n').run();
+  };
+
+  const handleYamlFrontMatter = () => {
+    setActiveMenu(null);
+    const yamlTemplate = `---
+title: 
+author: 
+date: ${new Date().toISOString().split('T')[0]}
+tags: []
+---
+
+`;
+    editorInstance?.chain().focus().insertContentAt(0, yamlTemplate).run();
+  };
+
+  const handleFootnote = () => {
+    setActiveMenu(null);
+    const footnoteId = `fn-${Date.now()}`;
+    editorInstance?.chain().focus().insertContent(`[^${footnoteId}]`).run();
+  };
+
+  const handleDeleteWord = () => {
+    setActiveMenu(null);
+    const { from } = editorInstance?.state.selection || { from: 0 };
+    const doc = editorInstance?.state.doc;
+    if (!doc) return;
+    
+    const $pos = doc.resolve(from);
+    const textNode = $pos.nodeBefore || $pos.nodeAfter;
+    if (textNode && textNode.isText) {
+      const start = from - (textNode.text?.length || 0);
+      editorInstance?.chain().focus().deleteRange({ from: start, to: from }).run();
+    }
+  };
+
+  const handleDeleteLine = () => {
+    setActiveMenu(null);
+    const { from } = editorInstance?.state.selection || { from: 0 };
+    const doc = editorInstance?.state.doc;
+    if (!doc) return;
+    
+    const $pos = doc.resolve(from);
+    const depth = $pos.depth;
+    const start = $pos.before(depth);
+    const end = $pos.after(depth);
+    editorInstance?.chain().focus().deleteRange({ from: start, to: end }).run();
+  };
+
+  const handleSelectStyleScope = () => {
+    setActiveMenu(null);
+    const { from } = editorInstance?.state.selection || { from: 0 };
+    const doc = editorInstance?.state.doc;
+    if (!doc) return;
+    
+    const $pos = doc.resolve(from);
+    const marks = $pos.marks();
+    
+    if (marks.length > 0) {
+      let startPos = from;
+      let endPos = from;
+      
+      for (let i = from - 1; i >= 0; i--) {
+        const $posBack = doc.resolve(i);
+        const backMarks = $posBack.marks();
+        if (backMarks.some(m => marks.some(m2 => m2.eq(m)))) {
+          startPos = i;
+        } else {
+          break;
+        }
+      }
+      
+      for (let i = from + 1; i <= doc.content.size; i++) {
+        const $posForward = doc.resolve(i);
+        const forwardMarks = $posForward.marks();
+        if (forwardMarks.some(m => marks.some(m2 => m2.eq(m)))) {
+          endPos = i;
+        } else {
+          break;
+        }
+      }
+      
+      editorInstance?.chain().focus().setTextSelection({ from: startPos, to: endPos }).run();
+    } else {
+      handleSelectLine();
+    }
+  };
+
   const handleToggleSidebar = () => {
     setActiveMenu(null);
     toggleSidebar();
@@ -587,6 +755,11 @@ ${html}
                 </div>
               )}
               
+              <div className="menu-item" onClick={handleReopenClosedTab}>
+                <span>{t('file.reopenClosed')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftT')}</span>
+              </div>
+              
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowTemplateSelector(true); }}>
                 <span>{t('file.newFromTemplate')}</span>
               </div>
@@ -615,6 +788,11 @@ ${html}
               <div className="menu-divider" />
               <div className="menu-item" onClick={() => { setActiveMenu(null); setShowSettings(true); }}>
                 <span>{t('settings.title')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleCloseWindow}>
+                <span>{t('file.closeWindow')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlW')}</span>
               </div>
             </div>
           )}
@@ -660,6 +838,10 @@ ${html}
                 <span>{t('edit.paste')}</span>
                 <span className="shortcut">{t('shortcuts.ctrlV')}</span>
               </div>
+              <div className="menu-item" onClick={handlePasteAsPlainText}>
+                <span>{t('edit.pasteAsPlainText')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftV')}</span>
+              </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={handleSelectAll}>
                 <span>{t('edit.selectAll')}</span>
@@ -672,6 +854,31 @@ ${html}
               <div className="menu-item" onClick={handleSelectWord}>
                 <span>{t('edit.selectWord')}</span>
                 <span className="shortcut">{t('shortcuts.ctrlD')}</span>
+              </div>
+              <div className="menu-item" onClick={handleSelectStyleScope}>
+                <span>{t('edit.selectStyleScope')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlE')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleDeleteWord}>
+                <span>{t('edit.deleteWord')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftD')}</span>
+              </div>
+              <div className="menu-item" onClick={handleDeleteLine}>
+                <span>{t('edit.deleteLine')}</span>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleJumpToTop}>
+                <span>{t('edit.jumpToTop')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlHome')}</span>
+              </div>
+              <div className="menu-item" onClick={handleJumpToSelection}>
+                <span>{t('edit.jumpToSelection')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlJ')}</span>
+              </div>
+              <div className="menu-item" onClick={handleJumpToBottom}>
+                <span>{t('edit.jumpToBottom')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlEnd')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={handleFind}>
@@ -723,6 +930,15 @@ ${html}
                 <span className="shortcut">{t('shortcuts.ctrl0')}</span>
               </div>
               <div className="menu-divider" />
+              <div className="menu-item" onClick={handleIncreaseHeading}>
+                <span>{t('paragraph.increaseHeading')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftUp')}</span>
+              </div>
+              <div className="menu-item" onClick={handleDecreaseHeading}>
+                <span>{t('paragraph.decreaseHeading')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftDown')}</span>
+              </div>
+              <div className="menu-divider" />
               
               <div className="menu-item" onClick={handleBulletList}>
                 <span>{isBulletListActive ? `✓ ${t('paragraph.bulletList')}` : t('paragraph.bulletList')}</span>
@@ -749,6 +965,16 @@ ${html}
               </div>
               <div className="menu-item" onClick={handleMathBlock}>
                 <span>{t('paragraph.mathBlock')}</span>
+              </div>
+              <div className="menu-item" onClick={handleHorizontalRule}>
+                <span>{t('paragraph.horizontalRule')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlShiftH')}</span>
+              </div>
+              <div className="menu-item" onClick={handleYamlFrontMatter}>
+                <span>{t('paragraph.yamlFrontMatter')}</span>
+              </div>
+              <div className="menu-item" onClick={handleFootnote}>
+                <span>{t('paragraph.footnote')}</span>
               </div>
               <div className="menu-divider" />
               
@@ -825,6 +1051,33 @@ ${html}
               <div className="menu-item" onClick={handleToggleSidebar}>
                 <span>{sidebarOpen ? t('view.hideSidebar') : t('view.showSidebar')}</span>
                 <span className="shortcut">{t('shortcuts.ctrlB')}</span>
+              </div>
+              <div className="menu-item submenu-trigger">
+                <span>{t('view.sidebarMode')}</span>
+                <div className="submenu">
+                  <div className="menu-item" onClick={() => { setActiveMenu(null); setSidebarMode('outline'); }}>
+                    <span>{sidebarMode === 'outline' ? `✓ ${t('view.sidebarOutline')}` : t('view.sidebarOutline')}</span>
+                  </div>
+                  <div className="menu-item" onClick={() => { setActiveMenu(null); setSidebarMode('fileTree'); }}>
+                    <span>{sidebarMode === 'fileTree' ? `✓ ${t('view.sidebarFileTree')}` : t('view.sidebarFileTree')}</span>
+                  </div>
+                  <div className="menu-item" onClick={() => { setActiveMenu(null); setSidebarMode('fileList'); }}>
+                    <span>{sidebarMode === 'fileList' ? `✓ ${t('view.sidebarFileList')}` : t('view.sidebarFileList')}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="menu-divider" />
+              <div className="menu-item" onClick={handleJumpToTop}>
+                <span>{t('view.jumpToTop')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlHome')}</span>
+              </div>
+              <div className="menu-item" onClick={handleJumpToSelection}>
+                <span>{t('view.jumpToSelection')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlJ')}</span>
+              </div>
+              <div className="menu-item" onClick={handleJumpToBottom}>
+                <span>{t('view.jumpToBottom')}</span>
+                <span className="shortcut">{t('shortcuts.ctrlEnd')}</span>
               </div>
               <div className="menu-divider" />
               <div className="menu-item" onClick={handleFocusMode}>

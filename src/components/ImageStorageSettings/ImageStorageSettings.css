@@ -1,0 +1,177 @@
+.image-storage-settings {
+  padding: 24px;
+}
+
+.settings-section {
+  margin-bottom: 32px;
+}
+
+.settings-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.section-desc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.mode-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.mode-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-card:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.mode-card.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.mode-icon {
+  font-size: 28px;
+}
+
+.mode-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mode-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.mode-desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.path-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.path-input {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.path-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.browse-btn {
+  padding: 10px 16px;
+  font-size: 14px;
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.browse-btn:hover {
+  background: var(--color-bg-hover);
+}
+
+.hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.provider-card {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.provider-card:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.provider-card.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.provider-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.provider-desc {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.cloud-config {
+  background: var(--color-bg-secondary);
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.config-field {
+  margin-bottom: 16px;
+}
+
+.config-field label {
+  display: block;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.config-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.config-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}

@@ -10,9 +10,17 @@ export interface TabInfo {
   lastAccessed: number;
 }
 
+export interface ClosedTabInfo {
+  path: string;
+  name: string;
+  content: string;
+  closedAt: number;
+}
+
 interface TabsState {
   tabs: TabInfo[];
   activeTabId: string | null;
+  closedTabs: ClosedTabInfo[];
   
   openTab: (path: string, name: string, content: string) => void;
   closeTab: (id: string) => void;
@@ -22,13 +30,18 @@ interface TabsState {
   getActiveTab: () => TabInfo | null;
   getTabById: (id: string) => TabInfo | undefined;
   reorderTabs: (fromIndex: number, toIndex: number) => void;
+  reopenClosedTab: () => void;
+  hasClosedTabs: () => boolean;
 }
+
+const MAX_CLOSED_TABS = 20;
 
 export const useTabsStore = create<TabsState>()(
   persist(
     (set, get) => ({
       tabs: [],
       activeTabId: null,
+      closedTabs: [],
       
       openTab: (path, name, content) => {
         const existingTab = get().tabs.find((t) => t.path === path);
@@ -59,8 +72,21 @@ export const useTabsStore = create<TabsState>()(
       },
       
       closeTab: (id) => {
+        const tab = get().tabs.find((t) => t.id === id);
         const tabs = get().tabs.filter((t) => t.id !== id);
         const activeTabId = get().activeTabId;
+        
+        if (tab) {
+          const closedTab: ClosedTabInfo = {
+            path: tab.path,
+            name: tab.name,
+            content: tab.content,
+            closedAt: Date.now(),
+          };
+          set((state) => ({
+            closedTabs: [closedTab, ...state.closedTabs].slice(0, MAX_CLOSED_TABS),
+          }));
+        }
         
         let newActiveId = activeTabId;
         if (activeTabId === id) {
@@ -108,6 +134,17 @@ export const useTabsStore = create<TabsState>()(
         tabs.splice(toIndex, 0, moved);
         set({ tabs });
       },
+      
+      reopenClosedTab: () => {
+        const closedTabs = get().closedTabs;
+        if (closedTabs.length === 0) return;
+        
+        const [lastClosed, ...remaining] = closedTabs;
+        get().openTab(lastClosed.path, lastClosed.name, lastClosed.content);
+        set({ closedTabs: remaining });
+      },
+      
+      hasClosedTabs: () => get().closedTabs.length > 0,
     }),
     {
       name: 'tabs-storage',
@@ -119,6 +156,7 @@ export const useTabsStore = create<TabsState>()(
           lastAccessed: t.lastAccessed,
         })),
         activeTabId: state.activeTabId,
+        closedTabs: state.closedTabs.slice(0, 10),
       }),
     }
   )

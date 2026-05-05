@@ -1,0 +1,197 @@
+.plugin-manager {
+  padding: 24px;
+}
+
+.plugin-header {
+  margin-bottom: 24px;
+}
+
+.plugin-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.plugin-desc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.plugin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plugin-empty {
+  padding: 48px;
+  text-align: center;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+}
+
+.plugin-empty p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.install-plugin-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.install-plugin-btn:hover {
+  background: var(--color-primary-dark);
+}
+
+.plugin-card {
+  padding: 20px;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.plugin-card.enabled {
+  border: 2px solid var(--color-primary);
+}
+
+.plugin-card.disabled {
+  opacity: 0.7;
+}
+
+.plugin-info {
+  margin-bottom: 16px;
+}
+
+.plugin-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.plugin-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.plugin-version {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.plugin-description {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.plugin-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.plugin-link {
+  font-size: 13px;
+  color: var(--color-primary);
+  text-decoration: none;
+  margin-top: 8px;
+}
+
+.plugin-link:hover {
+  text-decoration: underline;
+}
+
+.plugin-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.enable-btn,
+.disable-btn,
+.remove-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.enable-btn {
+  background: var(--color-success);
+  color: white;
+  border: none;
+}
+
+.enable-btn:hover {
+  background: var(--color-success-dark);
+}
+
+.disable-btn {
+  background: var(--color-warning);
+  color: white;
+  border: none;
+}
+
+.disable-btn:hover {
+  background: var(--color-warning-dark);
+}
+
+.remove-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.remove-btn:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.plugin-footer {
+  margin-top: 32px;
+  padding: 16px;
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plugin-stats {
+  display: flex;
+  gap: 24px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.plugin-actions-footer {
+  display: flex;
+  gap: 12px;
+}
+
+.reload-plugins-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reload-plugins-btn:hover {
+  background: var(--color-bg-tertiary);
+}

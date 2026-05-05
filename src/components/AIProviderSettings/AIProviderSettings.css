@@ -1,0 +1,285 @@
+.ai-provider-settings {
+  padding: 24px;
+}
+
+.settings-section {
+  margin-bottom: 32px;
+}
+
+.settings-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.section-desc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.provider-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.provider-card:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.provider-card.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.provider-icon {
+  font-size: 24px;
+}
+
+.provider-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.provider-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.provider-models {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.provider-status {
+  font-size: 16px;
+}
+
+.provider-status.configured {
+  color: var(--color-success);
+}
+
+.api-key-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.api-key-info {
+  padding: 16px;
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+}
+
+.api-key-info p {
+  margin-bottom: 12px;
+  color: var(--color-text-secondary);
+}
+
+.api-key-info a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.api-key-configured {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+}
+
+.api-key-hidden {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.clear-key-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.clear-key-btn:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.api-key-input-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.api-key-input {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.api-key-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.save-key-btn,
+.cancel-btn,
+.configure-btn {
+  padding: 10px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.configure-btn {
+  border: none;
+  background: var(--color-primary);
+  color: white;
+}
+
+.configure-btn:hover {
+  background: var(--color-primary-dark);
+}
+
+.save-key-btn {
+  border: none;
+  background: var(--color-success);
+  color: white;
+}
+
+.cancel-btn {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.provider-features {
+  display: flex;
+  gap: 8px;
+}
+
+.feature-tag {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: 4px;
+}
+
+.model-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.model-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.model-card:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.model-card.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.model-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.model-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.model-id {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.model-details {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.model-tokens {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.model-pricing {
+  font-size: 12px;
+  color: var(--color-warning);
+}
+
+.model-free {
+  font-size: 12px;
+  color: var(--color-success);
+}
+
+.model-capabilities {
+  display: flex;
+  gap: 6px;
+}
+
+.capability-tag {
+  font-size: 11px;
+  padding: 2px 6px;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+  border-radius: 4px;
+}
+
+.loading-models,
+.no-models {
+  padding: 40px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.no-models button {
+  margin-top: 16px;
+  padding: 8px 16px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

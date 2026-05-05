@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Markhere - 现代化跨平台所见即所得Markdown编辑器">
+    <meta name="keywords" content="Markdown, 编辑器, WYSIWYG, Tauri, React, 写作工具">
+    <title>Markhere - 现代化Markdown编辑器</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/jacksoncode/Markhere/main/src-tauri/icons/icon.png">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <img src="https://raw.githubusercontent.com/jacksoncode/Markhere/main/src-tauri/icons/icon.png" alt="Markhere Logo" class="logo-img">
+                <span class="logo-text">Markhere</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">功能</a></li>
+                <li><a href="#guide">使用指南</a></li>
+                <li><a href="#feedback">反馈</a></li>
+                <li><a href="#download">下载</a></li>
+                <li><a href="https://github.com/jacksoncode/Markhere" target="_blank">GitHub</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="gradient-text">优雅写作</span>
+                <br>
+                <span class="gradient-text">无缝导出</span>
+            </h1>
+            <p class="hero-desc">
+                Markhere 是下一代所见即所得 Markdown 编辑器<br>
+                为现代作家、开发者和团队而生
+            </p>
+            <div class="hero-buttons">
+                <a href="#download" class="btn btn-primary">立即下载</a>
+                <a href="https://github.com/jacksoncode/Markhere" target="_blank" class="btn btn-secondary">查看源码</a>
+            </div>
+            <div class="hero-badges">
+                <span class="badge">🚀 Tauri 2.5</span>
+                <span class="badge">⚡ React 19</span>
+                <span class="badge">✨ TypeScript Strict</span>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="editor-preview">
+                <div class="editor-toolbar">
+                    <span class="toolbar-btn">B</span>
+                    <span class="toolbar-btn">I</span>
+                    <span class="toolbar-btn">U</span>
+                    <span class="toolbar-btn">🔗</span>
+                    <span class="toolbar-btn">📊</span>
+                </div>
+                <div class="editor-content">
+                    <h2 style="color: #2563eb;">欢迎使用 Markhere</h2>
+                    <p>这是一款<strong>现代化</strong>的 Markdown 编辑器</p>
+                    <ul>
+                        <li>✅ 实时所见即所得</li>
+                        <li>✅ 双向链接支持</li>
+                        <li>✅ AI写作助手</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="features">
+        <div class="section-header">
+            <h2 class="section-title">核心功能</h2>
+            <p class="section-desc">一切为优雅写作而生</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3 class="feature-title">实时所见即所得</h3>
+                <p class="feature-desc">
+                    自然写作，即时格式化预览<br>
+                    无需记忆复杂语法
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔗</div>
+                <h3 class="feature-title">双向链接</h3>
+                <p class="feature-desc">
+                    WikiLink语法 [[文件名]]<br>
+                    知识图谱可视化关系
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">AI助手</h3>
+                <p class="feature-desc">
+                    支持12家国内AI供应商<br>
+                    智能补全、润色、翻译
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🧩</div>
+                <h3 class="feature-title">插件系统</h3>
+                <p class="feature-desc">
+                    完整PluginAPI接口<br>
+                    命令、扩展、面板注册
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">表格编辑</h3>
+                <p class="feature-desc">
+                    拖拽调整列宽<br>
+                    添加/删除行列、排序
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🧮</div>
+                <h3 class="feature-title">数学公式</h3>
+                <p class="feature-desc">
+                    KaTeX/LaTeX渲染<br>
+                    行内与块级公式
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3 class="feature-title">Mermaid图表</h3>
+                <p class="feature-desc">
+                    流程图、时序图、甘特图<br>
+                    一键可视化
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📤</div>
+                <h3 class="feature-title">多格式导出</h3>
+                <p class="feature-desc">
+                    PDF、Word、HTML、EPUB<br>
+                    格式完整保留
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">☁️</div>
+                <h3 class="feature-title">云端图床</h3>
+                <p class="feature-desc">
+                    OSS、COS、S3、R2<br>
+                    自动上传配置
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🚄</div>
+                <h3 class="feature-title">性能优化</h3>
+                <p class="feature-desc">
+                    大文件分块加载<br>
+                    虚拟滚动渲染
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3 class="feature-title">主题定制</h3>
+                <p class="feature-desc">
+                    深色/浅色主题切换<br>
+                    自定义CSS编辑器
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⌨️</div>
+                <h3 class="feature-title">快捷键</h3>
+                <p class="feature-desc">
+                    40+可搜索命令<br>
+                    命令面板 Ctrl+K
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="guide" class="guide">
+        <div class="section-header">
+            <h2 class="section-title">使用指南</h2>
+            <p class="section-desc">快速上手，高效写作</p>
+        </div>
+        
+        <div class="guide-tabs">
+            <div class="guide-tab active">基本编辑</div>
+            <div class="guide-tab">AI助手</div>
+            <div class="guide-tab">双向链接</div>
+            <div class="guide-tab">导出</div>
+        </div>
+        
+        <div class="guide-content">
+            <div class="guide-section">
+                <h3>📝 文本格式化</h3>
+                <table class="guide-table">
+                    <tr>
+                        <th>操作</th>
+                        <th>快捷键</th>
+                        <th>效果</th>
+                    </tr>
+                    <tr>
+                        <td>加粗</td>
+                        <td><code>Ctrl/Cmd + B</code></td>
+                        <td><strong>粗体文本</strong></td>
+                    </tr>
+                    <tr>
+                        <td>斜体</td>
+                        <td><code>Ctrl/Cmd + I</code></td>
+                        <td><em>斜体文本</em></td>
+                    </tr>
+                    <tr>
+                        <td>下划线</td>
+                        <td><code>Ctrl/Cmd + U</code></td>
+                        <td><u>下划线文本</u></td>
+                    </tr>
+                    <tr>
+                        <td>代码</td>
+                        <td><code>Ctrl/Cmd + E</code></td>
+                        <td><code>inline code</code></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="guide-section">
+                <h3>🤖 AI助手使用</h3>
+                <div class="guide-steps">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <p>打开设置 > AI助手</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <p>选择供应商（DeepSeek、GLM、Kimi等）</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <p>输入API Key，自动获取可用模型</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <p>选中文本，使用快捷键触发功能</p>
+                    </div>
+                </div>
+                <table class="guide-table">
+                    <tr>
+                        <th>功能</th>
+                        <th>快捷键</th>
+                    </tr>
+                    <tr>
+                        <td>智能补全</td>
+                        <td><code>Alt + Space</code></td>
+                    </tr>
+                    <tr>
+                        <td>润色优化</td>
+                        <td><code>Ctrl/Cmd + Alt + R</code></td>
+                    </tr>
+                    <tr>
+                        <td>翻译</td>
+                        <td><code>Ctrl/Cmd + Alt + T</code></td>
+                    </tr>
+                    <tr>
+                        <td>摘要总结</td>
+                        <td><code>Ctrl/Cmd + Alt + S</code></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="guide-section">
+                <h3>🔗 双向链接与知识图谱</h3>
+                <div class="code-example">
+                    <code>
+                        [[项目计划]] - 链接到"项目计划"文档<br>
+                        [[会议纪要|上周会议]] - 自定义显示文本
+                    </code>
+                </div>
+                <p class="guide-note">
+                    使用 <code>Ctrl/Cmd + Shift + G</code> 打开知识图谱，可视化所有链接关系
+                </p>
+            </div>
+            
+            <div class="guide-section">
+                <h3>📤 导出文档</h3>
+                <ul class="guide-list">
+                    <li><strong>PDF</strong> - 打印、分享，支持自定义页面大小</li>
+                    <li><strong>Word (DOCX)</strong> - Office协作，格式完整保留</li>
+                    <li><strong>HTML</strong> - 网页发布，响应式输出</li>
+                    <li><strong>EPUB</strong> - 电子书格式，适合出版</li>
+                    <li><strong>Markdown</strong> - 源码导出，版本控制</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="guide-links">
+            <a href="https://github.com/jacksoncode/Markhere/blob/main/docs/USER_GUIDE.md" target="_blank" class="btn btn-outline">
+                📖 完整用户手册
+            </a>
+            <a href="https://github.com/jacksoncode/Markhere/blob/main/RELEASE_NOTES.md" target="_blank" class="btn btn-outline">
+                📋 更新日志
+            </a>
+        </div>
+    </section>
+
+    <section id="feedback" class="feedback">
+        <div class="section-header">
+            <h2 class="section-title">意见与反馈</h2>
+            <p class="section-desc">您的声音，我们倾听</p>
+        </div>
+        
+        <div class="feedback-grid">
+            <div class="feedback-card">
+                <div class="feedback-icon">🐛</div>
+                <h3>问题反馈</h3>
+                <p>发现Bug或有技术问题？</p>
+                <a href="https://github.com/jacksoncode/Markhere/issues/new?template=bug_report.md" target="_blank" class="btn btn-small">
+                    提交Bug报告
+                </a>
+            </div>
+            
+            <div class="feedback-card">
+                <div class="feedback-icon">💡</div>
+                <h3>功能需求</h3>
+                <p>希望添加新功能？</p>
+                <a href="https://github.com/jacksoncode/Markhere/issues/new?template=feature_request.md" target="_blank" class="btn btn-small">
+                    提交功能请求
+                </a>
+            </div>
+            
+            <div class="feedback-card">
+                <div class="feedback-icon">💬</div>
+                <h3>社区讨论</h3>
+                <p>交流使用经验、分享技巧</p>
+                <a href="https://github.com/jacksoncode/Markhere/discussions" target="_blank" class="btn btn-small">
+                    加入讨论
+                </a>
+            </div>
+            
+            <div class="feedback-card">
+                <div class="feedback-icon">📧</div>
+                <h3>邮件联系</h3>
+                <p>隐私问题或商务合作</p>
+                <a href="mailto:support@markhere.app" class="btn btn-small">
+                    发送邮件
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="download" class="download">
+        <div class="section-header">
+            <h2 class="section-title">立即下载</h2>
+            <p class="section-desc">选择适合您的平台</p>
+        </div>
+        
+        <div class="download-version">
+            <span class="version-badge">v0.4.0</span>
+            <span class="version-date">2026年5月5日</span>
+        </div>
+        
+        <div class="download-grid">
+            <div class="download-card">
+                <div class="download-platform">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="macOS" class="platform-icon">
+                    <h3>macOS</h3>
+                </div>
+                <div class="download-info">
+                    <p class="download-req">macOS 10.15+ (Catalina)</p>
+                    <a href="https://github.com/jacksoncode/Markhere/releases/download/v0.4.0/Markhere_0.4.0_darwin.dmg" class="btn btn-download">
+                        下载 .dmg
+                    </a>
+                </div>
+            </div>
+            
+            <div class="download-card">
+                <div class="download-platform">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0a/Unofficial_Windows_logo_variant_-_2002%E2%80%932012_(Multicolored).svg" alt="Windows" class="platform-icon">
+                    <h3>Windows</h3>
+                </div>
+                <div class="download-info">
+                    <p class="download-req">Windows 10/11 (64位)</p>
+                    <a href="https://github.com/jacksoncode/Markhere/releases/download/v0.4.0/Markhere_0.4.0_x64.msi" class="btn btn-download">
+                        下载 .msi
+                    </a>
+                    <a href="https://github.com/jacksoncode/Markhere/releases/download/v0.4.0/Markhere_0.4.0_x64.exe" class="btn btn-download-alt">
+                        下载 .exe
+                    </a>
+                </div>
+            </div>
+            
+            <div class="download-card">
+                <div class="download-platform">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Tux.svg" alt="Linux" class="platform-icon">
+                    <h3>Linux</h3>
+                </div>
+                <div class="download-info">
+                    <p class="download-req">Ubuntu 18.04+, Debian 10+</p>
+                    <a href="https://github.com/jacksoncode/Markhere/releases/download/v0.4.0/markhere_0.4.0_amd64.deb" class="btn btn-download">
+                        下载 .deb
+                    </a>
+                    <a href="https://github.com/jacksoncode/Markhere/releases/download/v0.4.0/Markhere_0.4.0_x86_64.AppImage" class="btn btn-download-alt">
+                        下载 .AppImage
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="download-note">
+            <p>
+                ⚠️ macOS和Windows构建需本地编译，请参考
+                <a href="https://github.com/jacksoncode/Markhere/blob/main/CONTRIBUTING.md" target="_blank">贡献指南</a>
+            </p>
+        </div>
+        
+        <div class="download-all">
+            <a href="https://github.com/jacksoncode/Markhere/releases/tag/v0.4.0" target="_blank" class="btn btn-outline">
+                📦 查看所有下载
+            </a>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="stat-card">
+            <div class="stat-number">12+</div>
+            <div class="stat-label">AI供应商</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">代码语言</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">40+</div>
+            <div class="stat-label">快捷命令</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">4</div>
+            <div class="stat-label">导出格式</div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Markhere</h4>
+                <p>现代化Markdown编辑器<br>为优雅写作而生</p>
+            </div>
+            
+            <div class="footer-section">
+                <h4>资源</h4>
+                <ul>
+                    <li><a href="https://github.com/jacksoncode/Markhere/blob/main/docs/USER_GUIDE.md" target="_blank">用户手册</a></li>
+                    <li><a href="https://github.com/jacksoncode/Markhere/blob/main/RELEASE_NOTES.md" target="_blank">更新日志</a></li>
+                    <li><a href="https://github.com/jacksoncode/Markhere/blob/main/CONTRIBUTING.md" target="_blank">贡献指南</a></li>
+                    <li><a href="https://github.com/jacksoncode/Markhere/blob/main/LICENSE" target="_blank">开源许可</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>社区</h4>
+                <ul>
+                    <li><a href="https://github.com/jacksoncode/Markhere/issues" target="_blank">问题反馈</a></li>
+                    <li><a href="https://github.com/jacksoncode/Markhere/discussions" target="_blank">社区讨论</a></li>
+                    <li><a href="https://github.com/jacksoncode/Markhere/releases" target="_blank">版本发布</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h4>技术栈</h4>
+                <div class="tech-badges">
+                    <span class="tech-badge">Tauri 2.5</span>
+                    <span class="tech-badge">React 19</span>
+                    <span class="tech-badge">TypeScript</span>
+                    <span class="tech-badge">Tiptap</span>
+                    <span class="tech-badge">Zustand</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>
+                Made with ❤️ by the Markhere Team<br>
+                <a href="https://github.com/jacksoncode/Markhere" target="_blank">GitHub</a> •
+                MIT License •
+                2026
+            </p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
