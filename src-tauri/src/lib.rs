@@ -3,7 +3,7 @@ use std::io::Write;
 use std::process::Command;
 use base64::{Engine as _, engine::general_purpose};
 use tauri::Manager;
-use tauri::menu::Menu;
+use tauri::menu::{MenuBuilder, SubmenuBuilder, MenuItem, PredefinedMenuItem};
 use tauri::{TitleBarStyle, WebviewWindowBuilder, WebviewUrl};
 use serde::{Deserialize, Serialize};
 
@@ -257,11 +257,59 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
 .setup(|app| {
-            let menu = Menu::default(&app.handle()).expect("Failed to create default menu");
-            menu.set_as_app_menu().expect("Failed to set app menu");
-
             #[cfg(target_os = "macos")]
             {
+                let file_submenu = SubmenuBuilder::new(app, "File")
+                    .item(&MenuItem::with_id(app, "new", "New", true, Some("CmdOrControl+N"))?)
+                    .item(&MenuItem::with_id(app, "open", "Open...", true, Some("CmdOrControl+O"))?)
+                    .separator()
+                    .item(&MenuItem::with_id(app, "save", "Save", true, Some("CmdOrControl+S"))?)
+                    .item(&MenuItem::with_id(app, "save_as", "Save As...", true, Some("CmdOrControl+Shift+S"))?)
+                    .separator()
+                    .item(&PredefinedMenuItem::close_window(app, None)?)
+                    .build()?;
+                
+                let edit_submenu = SubmenuBuilder::new(app, "Edit")
+                    .item(&PredefinedMenuItem::undo(app, None)?)
+                    .item(&PredefinedMenuItem::redo(app, None)?)
+                    .separator()
+                    .item(&PredefinedMenuItem::cut(app, None)?)
+                    .item(&PredefinedMenuItem::copy(app, None)?)
+                    .item(&PredefinedMenuItem::paste(app, None)?)
+                    .separator()
+                    .item(&PredefinedMenuItem::select_all(app, None)?)
+                    .build()?;
+                
+                let view_submenu = SubmenuBuilder::new(app, "View")
+                    .item(&MenuItem::with_id(app, "toggle_sidebar", "Toggle Sidebar", true, Some("CmdOrControl+B"))?)
+                    .item(&MenuItem::with_id(app, "focus_mode", "Focus Mode", true, Some("CmdOrControl+Shift+F"))?)
+                    .separator()
+                    .item(&PredefinedMenuItem::fullscreen(app, None)?)
+                    .build()?;
+                
+                let window_submenu = SubmenuBuilder::new(app, "Window")
+                    .item(&PredefinedMenuItem::minimize(app, None)?)
+                    .separator()
+                    .item(&PredefinedMenuItem::close_window(app, None)?)
+                    .build()?;
+                
+                let help_submenu = SubmenuBuilder::new(app, "Help")
+                    .item(&MenuItem::with_id(app, "docs", "Documentation", true, None::<&str>)?)
+                    .item(&MenuItem::with_id(app, "updates", "Check for Updates", true, None::<&str>)?)
+                    .separator()
+                    .item(&MenuItem::with_id(app, "about", "About Markhere", true, None::<&str>)?)
+                    .build()?;
+                
+                let menu = MenuBuilder::new(app)
+                    .item(&file_submenu)
+                    .item(&edit_submenu)
+                    .item(&view_submenu)
+                    .item(&window_submenu)
+                    .item(&help_submenu)
+                    .build()?;
+                
+                menu.set_as_app_menu()?;
+                
                 let _window = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                     .title("Markhere - Markdown Editor")
                     .inner_size(1200.0, 800.0)
