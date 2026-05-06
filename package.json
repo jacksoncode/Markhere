@@ -1,6 +1,6 @@
 {
   "name": "markhere",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "A modern WYSIWYG Markdown editor with cross-platform support",
   "type": "module",
   "scripts": {
