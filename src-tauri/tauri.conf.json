@@ -1,6 +1,6 @@
 {
   "productName": "Markhere",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "identifier": "com.markhere.app",
   "build": {
     "beforeDevCommand": "npm run dev",
