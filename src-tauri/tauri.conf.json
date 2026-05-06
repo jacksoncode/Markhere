@@ -1,6 +1,6 @@
 {
   "productName": "Markhere",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "identifier": "com.markhere.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -9,7 +9,6 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "macOSPrivateApi": true,
     "security": {
       "csp": "default-src 'self'; img-src 'self' data: blob: https:; script-src 'self'; style-src 'self' 'unsafe-inline'",
       "dangerousDisableAssetCspModification": false
