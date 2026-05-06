@@ -126,19 +126,14 @@ def main():
     icons_dir = Path("src-tauri/icons")
     icons_dir.mkdir(parents=True, exist_ok=True)
     
-    # Generate PNG icons
     for size in [32, 128, 256, 512]:
         filename = "128x128@2x.png" if size == 256 else f"{size}x{size}.png"
         create_icon(size, str(icons_dir / filename))
     
-    # Generate platform-specific icons based on OS
-    if os.name == 'nt':  # Windows
-        create_ico(str(icons_dir / "icon.ico"))
-    elif os.uname().sysname == 'Darwin':  # macOS
+    create_ico(str(icons_dir / "icon.ico"))
+    
+    if os.uname().sysname == 'Darwin':
         create_icns_macos(str(icons_dir / "icon.icns"))
-    else:  # Linux
-        create_ico(str(icons_dir / "icon.ico"))  # Still generate for cross-build
-        # .icns not needed for Linux builds
     
     print("Icons generated!")
 

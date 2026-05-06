@@ -324,6 +324,48 @@ pub fn run() {
 
             #[cfg(not(target_os = "macos"))]
             {
+                let file_submenu = SubmenuBuilder::new(app, "File")
+                    .item(&MenuItem::with_id(app, "new", "New", true, Some("Ctrl+N"))?)
+                    .item(&MenuItem::with_id(app, "open", "Open...", true, Some("Ctrl+O"))?)
+                    .separator()
+                    .item(&MenuItem::with_id(app, "save", "Save", true, Some("Ctrl+S"))?)
+                    .item(&MenuItem::with_id(app, "save_as", "Save As...", true, Some("Ctrl+Shift+S"))?)
+                    .separator()
+                    .item(&PredefinedMenuItem::close_window(app, None)?)
+                    .build()?;
+                
+                let edit_submenu = SubmenuBuilder::new(app, "Edit")
+                    .item(&PredefinedMenuItem::undo(app, None)?)
+                    .item(&PredefinedMenuItem::redo(app, None)?)
+                    .separator()
+                    .item(&PredefinedMenuItem::cut(app, None)?)
+                    .item(&PredefinedMenuItem::copy(app, None)?)
+                    .item(&PredefinedMenuItem::paste(app, None)?)
+                    .separator()
+                    .item(&PredefinedMenuItem::select_all(app, None)?)
+                    .build()?;
+                
+                let view_submenu = SubmenuBuilder::new(app, "View")
+                    .item(&MenuItem::with_id(app, "toggle_sidebar", "Toggle Sidebar", true, Some("Ctrl+B"))?)
+                    .item(&MenuItem::with_id(app, "focus_mode", "Focus Mode", true, Some("Ctrl+Shift+F"))?)
+                    .separator()
+                    .item(&PredefinedMenuItem::fullscreen(app, None)?)
+                    .build()?;
+                
+                let help_submenu = SubmenuBuilder::new(app, "Help")
+                    .item(&MenuItem::with_id(app, "docs", "Documentation", true, None::<&str>)?)
+                    .item(&MenuItem::with_id(app, "updates", "Check for Updates", true, None::<&str>)?)
+                    .separator()
+                    .item(&MenuItem::with_id(app, "about", "About Markhere", true, None::<&str>)?)
+                    .build()?;
+                
+                let menu = MenuBuilder::new(app)
+                    .item(&file_submenu)
+                    .item(&edit_submenu)
+                    .item(&view_submenu)
+                    .item(&help_submenu)
+                    .build()?;
+                
                 let _window = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                     .title("Markhere - Markdown Editor")
                     .inner_size(1200.0, 800.0)
@@ -331,6 +373,7 @@ pub fn run() {
                     .resizable(true)
                     .center()
                     .decorations(true)
+                    .menu(&menu)
                     .build()
                     .expect("Failed to create window");
             }
