@@ -47,11 +47,29 @@ function App() {
   };
 
   const handleSaveBeforeClose = async () => {
-    if (editorInstance && currentPath) {
+    if (editorInstance) {
       const markdown = (editorInstance.storage as any)?.markdown?.getMarkdown?.() || '';
-      const { invoke } = await import('@tauri-apps/api/core');
-      await invoke('save_file', { path: currentPath, content: markdown });
-      setSavedContent(markdown);
+      if (currentPath) {
+        const { invoke } = await import('@tauri-apps/api/core');
+        await invoke('save_file', { path: currentPath, content: markdown });
+        setSavedContent(markdown);
+        useAutoSaveStore.getState().markSaved();
+      } else {
+        const { save } = await import('@tauri-apps/plugin-dialog');
+        const { invoke } = await import('@tauri-apps/api/core');
+        const filePath = await save({
+          filters: [{ name: 'Markdown', extensions: ['md'] }],
+          defaultPath: 'Untitled.md'
+        });
+        if (filePath) {
+          await invoke('save_file', { path: filePath, content: markdown });
+          setCurrentPath(filePath);
+          setSavedContent(markdown);
+          useAutoSaveStore.getState().markSaved();
+        } else {
+          return;
+        }
+      }
     }
     setShowUnsavedDialog(false);
     if (pendingClose) {
@@ -62,6 +80,7 @@ function App() {
   };
 
   const handleDiscardChanges = () => {
+    useAutoSaveStore.getState().clearBackup();
     setShowUnsavedDialog(false);
     if (pendingClose) {
       import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
