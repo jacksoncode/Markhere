@@ -101,9 +101,7 @@ def create_icns_macos(output_path: str):
     print(f"Created: {output_path} (macOS ICNS)")
 
 def create_icns_linux(output_path: str):
-    """Create placeholder .icns for Linux CI (won't be used)"""
-    # Just create a simple PNG renamed as .icns placeholder
-    # Linux builds don't use .icns anyway
+    """Create placeholder .icns for Linux CI"""
     img = Image.new('RGBA', (128, 128), (99, 102, 241, 255))
     draw = ImageDraw.Draw(img)
     
@@ -118,9 +116,8 @@ def create_icns_linux(output_path: str):
     
     draw.polygon(points, fill=(255, 255, 255, 255))
     
-    # Linux doesn't actually need .icns, so just save as PNG
-    img.save(output_path.replace('.icns', '_placeholder.png'))
-    print(f"Created placeholder for Linux (ICNS not needed)")
+    img.save(output_path, format='PNG')
+    print(f"Created placeholder: {output_path} (Linux ICNS)")
 
 def main():
     icons_dir = Path("src-tauri/icons")
@@ -134,6 +131,8 @@ def main():
     
     if os.uname().sysname == 'Darwin':
         create_icns_macos(str(icons_dir / "icon.icns"))
+    else:
+        create_icns_linux(str(icons_dir / "icon.icns"))
     
     print("Icons generated!")
 
