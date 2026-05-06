@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
+import { listen } from '@tauri-apps/api/event';
 import { useFileStore } from '../../store/fileStore';
 import { useEditorState } from '../../store/editorStore';
 import { useUIState } from '../../store/uiStore';
@@ -59,7 +60,44 @@ export function TitleBar() {
     if (saved) {
       setRecentFiles(JSON.parse(saved));
     }
-  }, []);
+    
+    const unlisten = listen<string>('menu-event', (event) => {
+      const menuId = event.payload;
+      switch (menuId) {
+        case 'new':
+          handleNewFile();
+          break;
+        case 'open':
+          handleOpen();
+          break;
+        case 'save':
+          handleSave();
+          break;
+        case 'save_as':
+          handleSaveAs();
+          break;
+        case 'toggle_sidebar':
+          toggleSidebar();
+          break;
+        case 'focus_mode':
+          toggleFocusMode();
+          break;
+        case 'docs':
+          window.open('https://github.com/jacksoncode/Markhere#readme', '_blank');
+          break;
+        case 'updates':
+          window.open('https://github.com/jacksoncode/Markhere/releases', '_blank');
+          break;
+        case 'about':
+          alert(`Markhere v0.3.0\n\nA Modern, Cross-Platform WYSIWYG Markdown Editor\n\nBuilt with Tauri 2 & React 19\n\n© 2025 Markhere Team`);
+          break;
+      }
+    });
+    
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, [toggleSidebar, toggleFocusMode]);
   
   const addToRecentFiles = (path: string) => {
     const updated = [path, ...recentFiles.filter(f => f !== path)].slice(0, 10);
@@ -716,6 +754,7 @@ tags: []
   
   return (
     <div className="typora-titlebar" ref={menuRef}>
+      <div className="typora-titlebar-drag-region" data-tauri-drag-region />
       <div className="typora-titlebar-controls">
         <div className="typora-titlebar-menu-wrapper"
           onClick={() => setActiveMenu(activeMenu === 'file' ? null : 'file')}
@@ -1191,8 +1230,6 @@ tags: []
           )}
         </div>
       </div>
-      
-      <div className="typora-titlebar-drag-region" />
       
       <span className="typora-titlebar-title">{fileName} - Markhere</span>
       

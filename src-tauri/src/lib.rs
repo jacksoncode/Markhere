@@ -3,6 +3,7 @@ use std::io::Write;
 use std::process::Command;
 use base64::{Engine as _, engine::general_purpose};
 use tauri::Manager;
+use tauri::Emitter;
 use tauri::menu::{MenuBuilder, SubmenuBuilder, MenuItem, PredefinedMenuItem};
 use tauri::{TitleBarStyle, WebviewWindowBuilder, WebviewUrl};
 use serde::{Deserialize, Serialize};
@@ -335,6 +336,10 @@ pub fn run() {
             }
 
             Ok(())
+        })
+        .on_menu_event(|app, event| {
+            let id = event.id().as_ref();
+            app.emit("menu-event", id).expect("Failed to emit menu event");
         })
         .invoke_handler(tauri::generate_handler![
             save_file,

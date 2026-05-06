@@ -25,11 +25,11 @@
 .typora-titlebar-drag-region {
   position: absolute;
   top: 0;
-  left: 70px;
-  right: 70px;
+  left: 350px;
+  right: 100px;
   height: 100%;
   cursor: default;
-  -webkit-app-region: drag;
+  z-index: 0;
 }
 
 .typora-titlebar-controls {
@@ -37,23 +37,18 @@
   left: 78px;
   display: flex;
   gap: 8px;
-  -webkit-app-region: no-drag;
+  z-index: 10;
 }
 
 .typora-titlebar-menu-wrapper {
   position: relative;
   padding: 4px 8px;
-  -webkit-app-region: no-drag;
 }
 
 .typora-titlebar-menu {
   font-size: 13px;
   color: var(--color-text-secondary);
   cursor: pointer;
-}
-
-.dropdown-menu {
-  -webkit-app-region: no-drag;
 }
 
 .typora-titlebar-menu:hover,
