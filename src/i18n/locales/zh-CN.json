@@ -136,7 +136,15 @@
     "files": "文件",
     "recentFiles": "最近文件",
     "closeSidebar": "关闭侧边栏",
-    "showSidebar": "显示侧边栏"
+    "showSidebar": "显示侧边栏",
+    "newFile": "新建文件"
+  },
+  "unsaved": {
+    "title": "未保存的更改",
+    "message": "当前文件有未保存的更改，是否保存？",
+    "save": "保存",
+    "discard": "放弃更改",
+    "cancel": "取消"
   },
   "settings": {
     "title": "设置",

@@ -136,7 +136,15 @@
     "files": "FILES",
     "recentFiles": "Recent Files",
     "closeSidebar": "Close Sidebar",
-    "showSidebar": "Show Sidebar"
+    "showSidebar": "Show Sidebar",
+    "newFile": "New File"
+  },
+  "unsaved": {
+    "title": "Unsaved Changes",
+    "message": "The current file has unsaved changes. Do you want to save?",
+    "save": "Save",
+    "discard": "Discard Changes",
+    "cancel": "Cancel"
   },
   "settings": {
     "title": "Settings",

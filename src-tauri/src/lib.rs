@@ -380,7 +380,7 @@ pub fn run() {
 
             Ok(())
         })
-        .on_menu_event(|app, event| {
+.on_menu_event(|app, event| {
             let id = event.id().as_ref();
             app.emit("menu-event", id).expect("Failed to emit menu event");
         })

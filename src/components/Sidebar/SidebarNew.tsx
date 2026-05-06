@@ -1,12 +1,23 @@
 import { useFileStore } from '../../store/fileStore';
+import { useEditorState } from '../../store/editorStore';
 import { useUIState } from '../../store/uiStore';
+import { useAutoSaveStore } from '../../store/autoSaveStore';
 import { useTranslation } from '../../i18n';
 import './Sidebar-New.css';
 
 export function SidebarNew() {
   const { t } = useTranslation();
   const { sidebarOpen, toggleSidebar } = useUIState();
-  const { currentPath } = useFileStore();
+  const { currentPath, setCurrentPath, setSavedContent } = useFileStore();
+  const { editorInstance } = useEditorState();
+  const { clearBackup } = useAutoSaveStore();
+
+  const handleNewFile = () => {
+    editorInstance?.commands.clearContent();
+    setCurrentPath(null);
+    setSavedContent('');
+    clearBackup();
+  };
 
   return (
     <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
@@ -24,7 +35,7 @@ export function SidebarNew() {
               <div className="file-tree-header">
                 <span>{t('sidebar.recentFiles')}</span>
                 <div className="file-tree-actions">
-                  <button className="file-tree-action-btn">+</button>
+                  <button className="file-tree-action-btn" onClick={handleNewFile} title={t('sidebar.newFile')}>+</button>
                 </div>
               </div>
               

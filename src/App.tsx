@@ -19,6 +19,7 @@ import { TabBar } from './components/TabBar';
 import { WordCountDialog } from './components/WordCountDialog/WordCountDialog';
 import { QuickOpenPanel } from './components/QuickOpen/QuickOpenPanel';
 import { TocPanel } from './components/TocPanel/TocPanel';
+import { UnsavedChangesDialog } from './components/UnsavedChangesDialog';
 import { useFileStore } from './store/fileStore';
 import { useEditorState } from './store/editorStore';
 import { useUIState } from './store/uiStore';
@@ -37,12 +38,77 @@ function App() {
   const [showWordCount, setShowWordCount] = useState(false);
   const [showQuickOpen, setShowQuickOpen] = useState(false);
   const [showTocPanel, setShowTocPanel] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
+
+  const checkUnsavedChanges = () => {
+    const { hasUnsavedChanges } = useAutoSaveStore.getState();
+    return hasUnsavedChanges;
+  };
+
+  const handleSaveBeforeClose = async () => {
+    if (editorInstance && currentPath) {
+      const markdown = (editorInstance.storage as any)?.markdown?.getMarkdown?.() || '';
+      const { invoke } = await import('@tauri-apps/api/core');
+      await invoke('save_file', { path: currentPath, content: markdown });
+      setSavedContent(markdown);
+    }
+    setShowUnsavedDialog(false);
+    if (pendingClose) {
+      import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+        getCurrentWindow().close();
+      });
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    if (pendingClose) {
+      import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+        getCurrentWindow().close();
+      });
+    }
+  };
+
+  const handleCancelClose = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+  };
 
   useEffect(() => {
     initTheme();
     if (content && lastSaved) {
       setShowRecovery(true);
     }
+    
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (checkUnsavedChanges()) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    
+    import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+      getCurrentWindow().onCloseRequested((event) => {
+        if (checkUnsavedChanges()) {
+          event.preventDefault();
+          setPendingClose(true);
+          setShowUnsavedDialog(true);
+        }
+      }).then((fn) => { unlisten = fn; });
+    });
+    
+    return () => { unlisten?.(); };
   }, []);
 
   useEffect(() => {
@@ -72,9 +138,14 @@ function App() {
       }
       if (isMod && e.key === 'w') {
         e.preventDefault();
-        import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
-          getCurrentWindow().close();
-        });
+        if (checkUnsavedChanges()) {
+          setPendingClose(true);
+          setShowUnsavedDialog(true);
+        } else {
+          import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+            getCurrentWindow().close();
+          });
+        }
       }
       if (isMod && e.shiftKey && e.key === 'ArrowUp') {
         e.preventDefault();
@@ -246,6 +317,13 @@ function App() {
         isOpen={showTocPanel} 
         onClose={() => setShowTocPanel(false)} 
       />
+      {showUnsavedDialog && (
+        <UnsavedChangesDialog
+          onSave={handleSaveBeforeClose}
+          onDiscard={handleDiscardChanges}
+          onCancel={handleCancelClose}
+        />
+      )}
     </div>
   );
 }
