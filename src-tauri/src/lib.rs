@@ -385,7 +385,9 @@ pub fn run() {
         })
 .on_menu_event(|app, event| {
             let id = event.id().as_ref();
-            app.emit("menu-event", id).expect("Failed to emit menu event");
+            if let Err(e) = app.emit("menu-event", id) {
+                eprintln!("Failed to emit menu event: {}", e);
+            }
         })
         .invoke_handler(tauri::generate_handler![
             save_file,

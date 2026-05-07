@@ -61,41 +61,47 @@ export function TitleBar() {
       setRecentFiles(JSON.parse(saved));
     }
     
-    const unlisten = listen<string>('menu-event', (event) => {
-      const menuId = event.payload;
-      switch (menuId) {
-        case 'new':
-          handleNewFile();
-          break;
-        case 'open':
-          handleOpen();
-          break;
-        case 'save':
-          handleSave();
-          break;
-        case 'save_as':
-          handleSaveAs();
-          break;
-        case 'toggle_sidebar':
-          toggleSidebar();
-          break;
-        case 'focus_mode':
-          toggleFocusMode();
-          break;
-        case 'docs':
-          window.open('https://github.com/jacksoncode/Markhere#readme', '_blank');
-          break;
-        case 'updates':
-          window.open('https://github.com/jacksoncode/Markhere/releases', '_blank');
-          break;
-        case 'about':
-          alert(`Markhere v0.3.0\n\nA Modern, Cross-Platform WYSIWYG Markdown Editor\n\nBuilt with Tauri 2 & React 19\n\n© 2025 Markhere Team`);
-          break;
+    listen<string>('menu-event', (event) => {
+      try {
+        const menuId = event.payload;
+        switch (menuId) {
+          case 'new':
+            handleNewFile();
+            break;
+          case 'open':
+            handleOpen();
+            break;
+          case 'save':
+            handleSave();
+            break;
+          case 'save_as':
+            handleSaveAs();
+            break;
+          case 'toggle_sidebar':
+            toggleSidebar();
+            break;
+          case 'focus_mode':
+            toggleFocusMode();
+            break;
+          case 'docs':
+            window.open('https://github.com/jacksoncode/Markhere#readme', '_blank');
+            break;
+          case 'updates':
+            window.open('https://github.com/jacksoncode/Markhere/releases', '_blank');
+            break;
+          case 'about':
+            alert(`Markhere v0.3.0\n\nA Modern, Cross-Platform WYSIWYG Markdown Editor\n\nBuilt with Tauri 2 & React 19\n\n© 2025 Markhere Team`);
+            break;
+        }
+      } catch (error) {
+        console.error('Menu event handling failed:', error);
       }
+    }).catch((error) => {
+      console.error('Failed to listen to menu events:', error);
     });
     
     return () => {
-      unlisten.then((fn) => fn());
+      // Cleanup will be handled by the promise chain
     };
   }, [toggleSidebar, toggleFocusMode]);
   
