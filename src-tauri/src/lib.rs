@@ -376,7 +376,7 @@ pub fn run() {
                     .resizable(true)
                     .center()
                     .decorations(true)
-                    .menu(&menu)
+                    .menu(menu)
                     .build()
                     .expect("Failed to create window");
             }
