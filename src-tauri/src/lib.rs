@@ -5,8 +5,11 @@ use base64::{Engine as _, engine::general_purpose};
 use tauri::Manager;
 use tauri::Emitter;
 use tauri::menu::{MenuBuilder, SubmenuBuilder, MenuItem, PredefinedMenuItem};
-use tauri::{TitleBarStyle, WebviewWindowBuilder, WebviewUrl};
+use tauri::{WebviewWindowBuilder, WebviewUrl};
 use serde::{Deserialize, Serialize};
+
+#[cfg(target_os = "macos")]
+use tauri::TitleBarStyle;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GitCommit {
