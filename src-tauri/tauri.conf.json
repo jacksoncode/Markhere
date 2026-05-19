@@ -49,5 +49,15 @@
       "timestampUrl": ""
     }
   },
-  "plugins": {}
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/jacksoncode/Markhere/releases/latest/download/latest.json"
+      ],
+      "pubkey": "PLACEHOLDER - generate with `npx tauri signer generate`",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
 }

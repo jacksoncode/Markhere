@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { documentTemplates, DocumentTemplate, getTemplatesByCategory } from '../../data/templates';
 import { useEditorState } from '../../store/editorStore';
+import { useTranslation } from '../../i18n';
 import './TemplateSelector.css';
 
 interface TemplateSelectorProps {
@@ -8,18 +9,19 @@ interface TemplateSelectorProps {
   onClose: () => void;
 }
 
-const categoryLabels: Record<DocumentTemplate['category'], string> = {
-  academic: '学术',
-  personal: '个人',
-  business: '商业',
-  creative: '创作',
-};
-
 export function TemplateSelector({ isOpen, onClose }: TemplateSelectorProps) {
+  const { t } = useTranslation();
   const [selectedCategory, setSelectedCategory] = useState<DocumentTemplate['category'] | 'all'>('all');
   const { editorInstance } = useEditorState();
 
   const categories: DocumentTemplate['category'][] = ['academic', 'personal', 'business', 'creative'];
+
+  const categoryLabels: Record<DocumentTemplate['category'], string> = {
+    academic: t('template.academic'),
+    personal: t('template.personal'),
+    business: t('template.business'),
+    creative: t('template.creative'),
+  };
 
   const filteredTemplates = selectedCategory === 'all'
     ? documentTemplates
@@ -38,7 +40,7 @@ export function TemplateSelector({ isOpen, onClose }: TemplateSelectorProps) {
     <div className="template-selector-overlay" onClick={onClose}>
       <div className="template-selector-modal" onClick={(e) => e.stopPropagation()}>
         <div className="template-selector-header">
-          <h2>选择文档模板</h2>
+          <h2>{t('template.selectTemplate')}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
 
@@ -47,7 +49,7 @@ export function TemplateSelector({ isOpen, onClose }: TemplateSelectorProps) {
             className={`category-btn ${selectedCategory === 'all' ? 'active' : ''}`}
             onClick={() => setSelectedCategory('all')}
           >
-            全部
+            {t('template.all')}
           </button>
           {categories.map((cat) => (
             <button

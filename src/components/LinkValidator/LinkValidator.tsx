@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useEditorState } from '../../store/editorStore';
+import { useTranslation } from '../../i18n';
 import './LinkValidator.css';
 
 interface LinkInfo {
@@ -10,6 +11,7 @@ interface LinkInfo {
 }
 
 export function LinkValidator() {
+  const { t } = useTranslation();
   const { content } = useEditorState();
   const [links, setLinks] = useState<LinkInfo[]>([]);
   const [isValidating, setIsValidating] = useState(false);
@@ -63,7 +65,7 @@ export function LinkValidator() {
       <button
         className="link-validator-toggle"
         onClick={() => setIsOpen(true)}
-        title="Link Validator"
+        title={t('linkValidator.title')}
       >
         🔗
         {brokenCount > 0 && <span className="broken-indicator">{brokenCount}</span>}
@@ -74,14 +76,14 @@ export function LinkValidator() {
   return (
     <div className="link-validator-panel">
       <div className="link-validator-header">
-        <h3>Link Validator</h3>
+        <h3>{t('linkValidator.title')}</h3>
         <button className="close-btn" onClick={() => setIsOpen(false)}>×</button>
       </div>
 
       <div className="link-validator-stats">
-        <span className="stat valid">✓ {validCount} valid</span>
-        <span className="stat broken">✗ {brokenCount} broken</span>
-        <span className="stat pending">○ {pendingCount} pending</span>
+        <span className="stat valid">✓ {t('linkValidator.valid', undefined, { count: validCount })}</span>
+        <span className="stat broken">✗ {t('linkValidator.broken', undefined, { count: brokenCount })}</span>
+        <span className="stat pending">○ {t('linkValidator.pending', undefined, { count: pendingCount })}</span>
       </div>
 
       <div className="link-validator-actions">
@@ -90,13 +92,13 @@ export function LinkValidator() {
           onClick={validateAllLinks}
           disabled={isValidating || links.length === 0}
         >
-          {isValidating ? 'Validating...' : 'Validate All'}
+          {isValidating ? t('linkValidator.validating') : t('linkValidator.validateAll')}
         </button>
       </div>
 
       <div className="link-validator-list">
         {links.length === 0 ? (
-          <p className="no-links">No external links found in document.</p>
+          <p className="no-links">{t('linkValidator.noLinks')}</p>
         ) : (
           links.map((link, index) => (
             <div key={index} className={`link-item ${link.status}`}>

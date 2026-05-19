@@ -17,3 +17,95 @@
   overflow: hidden;
   background: transparent;
 }
+
+/* ── Skip-to-content link ── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 10000;
+  padding: 8px 16px;
+  background: var(--color-accent, #4a90d9);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid var(--color-accent, #4a90d9);
+  outline-offset: 2px;
+}
+
+/* ── Screen-reader only utility ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Reduced motion support ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable auto-hide UI transitions */
+  .auto-hide-ui {
+    transition: none !important;
+  }
+
+  /* Disable sidebar transitions */
+  .sidebar {
+    transition: none !important;
+  }
+
+  /* Disable command palette animations */
+  .command-palette-overlay {
+    animation: none !important;
+  }
+
+  .command-palette-modal {
+    animation: none !important;
+  }
+
+  /* Disable notification animations */
+  .notification-enter,
+  .notification-exit {
+    animation: none !important;
+  }
+
+  /* Disable focus mode transitions */
+  .focus-mode-active .main-content {
+    transition: none !important;
+  }
+
+  /* Disable drop zone animation */
+  .drop-zone-overlay {
+    animation: none !important;
+  }
+
+  /* Disable tab bar smooth scroll */
+  .tabs-container {
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable typewriter mode smooth scroll */
+  .ProseMirror {
+    scroll-behavior: auto !important;
+  }
+}

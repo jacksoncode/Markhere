@@ -1,40 +1,42 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+/**
+ * @deprecated Use `useAIStore` from `@/store/aiStore` instead.
+ *
+ * This store has been superseded by the unified `aiStore` (P1-3 architecture).
+ * It is kept for backward compatibility only — all new code should import from `aiStore`.
+ *
+ * Migration guide:
+ *   `selectedProvider`       -> `config.providerId`
+ *   `selectedModel`          -> `config.model`
+ *   `setSelectedProvider(p)` -> `setConfig({ providerId: p })`
+ *   `setSelectedModel(m)`    -> `setConfig({ model: m })`
+ *   `setApiKey` / `clearApiKey` / `apiKeys` — unchanged, same signatures in both stores.
+ */
 
-interface AIProviderState {
-  selectedProvider: string;
-  selectedModel: string;
-  apiKeys: Record<string, string>;
-  
-  setSelectedProvider: (provider: string) => void;
-  setSelectedModel: (model: string) => void;
-  setApiKey: (provider: string, key: string) => void;
-  clearApiKey: (provider: string) => void;
+import { useAIStore } from './aiStore';
+
+// Re-export types for any code still importing them from this file.
+export type { AIConfig, AIModel } from './aiStore';
+export { AI_PROVIDERS } from './aiStore';
+
+/**
+ * @deprecated Use `useAIStore` instead. See migration guide above.
+ */
+export function useAIProviderStore() {
+  const state = useAIStore();
+
+  return {
+    selectedProvider: state.config.providerId,
+    selectedModel: state.config.model,
+    apiKeys: state.apiKeys,
+
+    setSelectedProvider: (provider: string) =>
+      state.setConfig({ providerId: provider }),
+
+    setSelectedModel: (model: string) =>
+      state.setConfig({ model }),
+
+    setApiKey: state.setApiKey,
+
+    clearApiKey: state.clearApiKey,
+  };
 }
-
-export const useAIProviderStore = create<AIProviderState>()(
-  persist(
-    (set) => ({
-      selectedProvider: 'deepseek',
-      selectedModel: 'deepseek-chat',
-      apiKeys: {},
-      
-      setSelectedProvider: (provider) => set({ selectedProvider: provider }),
-      setSelectedModel: (model) => set({ selectedModel: model }),
-      setApiKey: (provider, key) => set((state) => ({
-        apiKeys: { ...state.apiKeys, [provider]: key },
-      })),
-      clearApiKey: (provider) => set((state) => ({
-        apiKeys: { ...state.apiKeys, [provider]: '' },
-      })),
-    }),
-    {
-      name: 'ai-provider-storage',
-      partialize: (state) => ({
-        selectedProvider: state.selectedProvider,
-        selectedModel: state.selectedModel,
-        apiKeys: state.apiKeys,
-      }),
-    }
-  )
-);

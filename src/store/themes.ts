@@ -340,6 +340,39 @@ export const themes = {
       hoverBg: '#EEEEEE',
     },
   },
+  sepia: {
+    name: 'Sepia',
+    colors: {
+      bg: '#F4ECD8',
+      text: '#5B4636',
+      border: '#DCCCA8',
+      primary: '#8B5E3C',
+      codeBg: '#E8DCC0',
+      hoverBg: '#EBDFC5',
+    },
+  },
+  githubDark: {
+    name: 'GitHub Dark',
+    colors: {
+      bg: '#0D1117',
+      text: '#C9D1D9',
+      border: '#30363D',
+      primary: '#58A6FF',
+      codeBg: '#161B22',
+      hoverBg: '#1C2128',
+    },
+  },
+  githubLight: {
+    name: 'GitHub Light',
+    colors: {
+      bg: '#FFFFFF',
+      text: '#24292E',
+      border: '#E1E4E8',
+      primary: '#0366D6',
+      codeBg: '#F6F8FA',
+      hoverBg: '#F3F4F6',
+    },
+  },
 };
 
 export type ThemeName = keyof typeof themes;

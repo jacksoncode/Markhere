@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCollaborationStore, Collaborator } from '../../store/collaborationStore';
+import { useTranslation } from '../../i18n';
 import './CollaborationPanel.css';
 
 interface CollaborationPanelProps {
@@ -8,6 +9,7 @@ interface CollaborationPanelProps {
 }
 
 export function CollaborationPanel({ isOpen, onClose }: CollaborationPanelProps) {
+  const { t } = useTranslation();
   const {
     isConnected,
     roomId,
@@ -22,11 +24,11 @@ export function CollaborationPanel({ isOpen, onClose }: CollaborationPanelProps)
 
   const handleConnect = () => {
     if (!userName.trim()) {
-      setError('Please enter your name');
+      setError(t('collaboration.enterName'));
       return;
     }
     if (!newRoomId.trim()) {
-      setError('Please enter a room ID');
+      setError(t('collaboration.enterRoomId'));
       return;
     }
 
@@ -55,7 +57,7 @@ export function CollaborationPanel({ isOpen, onClose }: CollaborationPanelProps)
     <div className="collaboration-panel-overlay" onClick={onClose}>
       <div className="collaboration-panel-modal" onClick={(e) => e.stopPropagation()}>
         <div className="collaboration-panel-header">
-          <h2>Real-time Collaboration</h2>
+          <h2>{t('collaboration.title')}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
 
@@ -63,28 +65,28 @@ export function CollaborationPanel({ isOpen, onClose }: CollaborationPanelProps)
           {!isConnected ? (
             <div className="connect-section">
               <div className="input-group">
-                <label>Your Name</label>
+                <label>{t('collaboration.yourName')}</label>
                 <input
                   type="text"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  placeholder="Enter your name"
+                  placeholder={t('collaboration.enterName')}
                   className="name-input"
                 />
               </div>
 
               <div className="input-group">
-                <label>Room ID</label>
+                <label>{t('collaboration.roomId')}</label>
                 <div className="room-input-wrapper">
                   <input
                     type="text"
                     value={newRoomId}
                     onChange={(e) => setNewRoomId(e.target.value)}
-                    placeholder="Enter room ID or generate"
+                    placeholder={t('collaboration.enterNameOrGenerate')}
                     className="room-input"
                   />
                   <button className="generate-btn" onClick={generateRoomId}>
-                    Generate
+                    {t('collaboration.generate')}
                   </button>
                 </div>
               </div>
@@ -92,32 +94,31 @@ export function CollaborationPanel({ isOpen, onClose }: CollaborationPanelProps)
               {error && <div className="error-message">{error}</div>}
 
               <button className="connect-btn" onClick={handleConnect}>
-                Connect
+                {t('collaboration.connect')}
               </button>
 
               <div className="help-text">
-                Share the room ID with collaborators to join the same document.
-                All changes will be synchronized in real-time.
+                {t('collaboration.shareRoomInfo')}
               </div>
             </div>
           ) : (
             <div className="connected-section">
               <div className="room-info">
                 <div className="room-id-display">
-                  <span className="room-label">Room:</span>
+                  <span className="room-label">{t('collaboration.room')}:</span>
                   <span className="room-value">{roomId}</span>
                   <button className="copy-btn" onClick={copyRoomId}>
-                    Copy
+                    {t('collaboration.copy')}
                   </button>
                 </div>
                 <div className="connection-status">
                   <span className="status-indicator connected">●</span>
-                  Connected
+                  {t('collaboration.connected')}
                 </div>
               </div>
 
               <div className="collaborators-section">
-                <h3>Collaborators ({collaborators.length})</h3>
+                <h3>{t('collaboration.collaborators')} ({collaborators.length})</h3>
                 <div className="collaborators-list">
                   {collaborators.map((collab: Collaborator) => (
                     <div key={collab.id} className="collaborator-item">
@@ -130,7 +131,7 @@ export function CollaborationPanel({ isOpen, onClose }: CollaborationPanelProps)
                       <span className="collaborator-name">{collab.name}</span>
                       {collab.cursor && (
                         <span className="cursor-indicator">
-                          editing at position {collab.cursor.from}
+                          {t('collaboration.editingAt', undefined, { pos: collab.cursor.from })}
                         </span>
                       )}
                     </div>
@@ -139,15 +140,14 @@ export function CollaborationPanel({ isOpen, onClose }: CollaborationPanelProps)
               </div>
 
               <div className="sync-info">
-                <h3>Sync Status</h3>
+                <h3>{t('collaboration.syncStatus')}</h3>
                 <div className="sync-status">
-                  Document is synchronized across all collaborators.
-                  All edits are merged automatically using Y.js CRDT technology.
+                  {t('collaboration.synced')}
                 </div>
               </div>
 
               <button className="disconnect-btn" onClick={handleDisconnect}>
-                Disconnect
+                {t('collaboration.disconnect')}
               </button>
             </div>
           )}

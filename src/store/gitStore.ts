@@ -1,66 +1,73 @@
 import { create } from 'zustand';
-
-export interface GitStatus {
-  branch: string;
-  modified: number;
-  staged: number;
-  untracked: number;
-}
+import { invoke } from '@tauri-apps/api/core';
 
 export interface GitCommit {
   hash: string;
-  message: string;
+  short_hash: string;
   author: string;
   date: string;
+  message: string;
+}
+
+export interface GitDiff {
+  old_content: string;
+  new_content: string;
+  additions: number;
+  deletions: number;
 }
 
 interface GitState {
   isEnabled: boolean;
-  status: GitStatus | null;
+  loading: boolean;
+  error: string | null;
   commits: GitCommit[];
-  checkStatus: (path: string) => Promise<void>;
-  commit: (path: string, message: string) => Promise<void>;
-  push: (path: string) => Promise<void>;
-  pull: (path: string) => Promise<void>;
+  currentDiff: GitDiff | null;
+  selectedHash: string | null;
+
+  loadHistory: (path: string) => Promise<void>;
+  loadDiff: (path: string, oldHash: string, newHash: string) => Promise<void>;
+  selectCommit: (hash: string | null) => void;
+  clearDiff: () => void;
 }
 
 export const useGitStore = create<GitState>((set) => ({
   isEnabled: false,
-  status: null,
+  loading: false,
+  error: null,
   commits: [],
-  
-  checkStatus: async (path: string) => {
+  currentDiff: null,
+  selectedHash: null,
+
+  loadHistory: async (path: string) => {
+    if (!path) return;
+    set({ loading: true, error: null });
     try {
-      const invoke = (window as any).__TAURI__?.invoke;
-      if (!invoke) {
-        set({ isEnabled: false, status: null });
-        return;
-      }
-      const status = await invoke('git_status', { path }) as GitStatus;
-      set({ status, isEnabled: true });
+      const commits = await invoke<GitCommit[]>('get_git_history', { filePath: path });
+      set({ commits, isEnabled: true, loading: false });
+    } catch {
+      set({ commits: [], isEnabled: false, loading: false });
+    }
+  },
+
+  loadDiff: async (path: string, oldHash: string, newHash: string) => {
+    set({ loading: true, error: null, currentDiff: null });
+    try {
+      const diff = await invoke<GitDiff>('get_git_diff', {
+        filePath: path,
+        oldHash,
+        newHash,
+      });
+      set({ currentDiff: diff, loading: false });
     } catch (e) {
-      set({ isEnabled: false, status: null });
+      set({ currentDiff: null, loading: false, error: String(e) });
     }
   },
-  
-  commit: async (path: string, message: string) => {
-    const invoke = (window as any).__TAURI__?.invoke;
-    if (invoke) {
-      await invoke('git_commit', { path, message });
-    }
+
+  selectCommit: (hash: string | null) => {
+    set({ selectedHash: hash });
   },
-  
-  push: async (path: string) => {
-    const invoke = (window as any).__TAURI__?.invoke;
-    if (invoke) {
-      await invoke('git_push', { path });
-    }
-  },
-  
-  pull: async (path: string) => {
-    const invoke = (window as any).__TAURI__?.invoke;
-    if (invoke) {
-      await invoke('git_pull', { path });
-    }
+
+  clearDiff: () => {
+    set({ currentDiff: null, selectedHash: null });
   },
 }));

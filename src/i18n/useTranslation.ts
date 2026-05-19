@@ -8,26 +8,51 @@ const translations = {
   'en-US': enUS,
 };
 
-type TranslationKey = string;
+type TranslationParams = Record<string, string | number>;
 
-function getNestedValue(obj: any, path: string): string {
+function getNestedValue(obj: any, path: string): string | undefined {
   const keys = path.split('.');
-  let result = obj;
+  let result: any = obj;
   for (const key of keys) {
     if (result && typeof result === 'object' && key in result) {
       result = result[key];
     } else {
-      return path;
+      return undefined;
     }
   }
-  return typeof result === 'string' ? result : path;
+  return typeof result === 'string' ? result : undefined;
+}
+
+/**
+ * Replace {{variable}} placeholders in a string with values from a params object.
+ */
+function interpolate(text: string, params?: TranslationParams): string {
+  if (!params) return text;
+  return text.replace(/\{\{(\w+)\}\}/g, (_match, key: string) =>
+    String(params[key] ?? `{{${key}}}`)
+  );
 }
 
 export function useTranslation() {
   const { language } = useLanguageStore();
-  const t = (key: TranslationKey): string => {
+
+  /**
+   * Look up a translation key in the current locale.
+   *
+   * @param key       Dot-separated path to the translation (e.g. "statusBar.words").
+   * @param fallback  String to return when the key is not found in the current locale.
+   * @param params    Optional object for interpolating {{placeholder}} tokens.
+   */
+  const t = (
+    key: string,
+    fallback?: string,
+    params?: TranslationParams
+  ): string => {
     const locale = translations[language] || translations['zh-CN'];
-    return getNestedValue(locale, key);
+    const raw = getNestedValue(locale, key);
+    const value = raw ?? fallback ?? key;
+    return interpolate(value, params);
   };
+
   return { t, language };
 }

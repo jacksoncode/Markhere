@@ -151,3 +151,95 @@
 .app-with-titlebar {
   padding-top: 38px;
 }
+
+/* About Dialog */
+.about-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+.about-dialog {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 32px 40px;
+  min-width: 360px;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .about-dialog {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.about-dialog-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--color-text-main);
+}
+
+.about-dialog-version {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.about-dialog-desc {
+  font-size: 14px;
+  color: var(--color-text-main);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.about-dialog-tech {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.about-dialog-sep {
+  margin: 0 8px;
+  opacity: 0.4;
+}
+
+.about-dialog-license {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.about-dialog-copyright {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.about-dialog-close-btn {
+  padding: 8px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-main);
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s ease;
+}
+
+.about-dialog-close-btn:hover {
+  background: var(--color-bg-secondary, rgba(0, 0, 0, 0.05));
+}
+
+[data-theme="dark"] .about-dialog-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}

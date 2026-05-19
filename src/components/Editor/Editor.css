@@ -1,6 +1,7 @@
 .editor-wrapper {
   flex: 1;
   display: flex;
+  position: relative;
   overflow: auto;
   padding: 0;
   background: var(--color-bg);
@@ -49,6 +50,19 @@
     padding: 32px 24px;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Virtual scrolling via CSS containment                               */
+/* ------------------------------------------------------------------ */
+
+.editor-wrapper[data-virtual-scroll="true"] .editor-content > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Loading state                                                       */
+/* ------------------------------------------------------------------ */
 
 .editor-loading {
   display: flex;
@@ -170,4 +184,62 @@
     padding: 32px 24px;
     font-size: 13px;
   }
+}
+
+/* ---- Drag-and-drop overlay ---- */
+
+.editor-wrapper.drag-over {
+  position: relative;
+}
+
+.editor-wrapper.drag-over::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 2px dashed var(--color-accent, #4a9eff);
+  border-radius: 12px;
+  background: rgba(74, 158, 255, 0.04);
+  z-index: 100;
+  pointer-events: none;
+  animation: drop-zone-pulse 2s ease-in-out infinite;
+}
+
+@keyframes drop-zone-pulse {
+  0%, 100% { border-color: var(--color-accent, #4a9eff); }
+  50% { border-color: rgba(74, 158, 255, 0.4); }
+}
+
+.drop-zone-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(128, 128, 128, 0.06);
+  z-index: 101;
+  pointer-events: none;
+  backdrop-filter: blur(2px);
+}
+
+[data-theme="dark"] .drop-zone-overlay {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.drop-zone-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 64px;
+  border: 2px dashed var(--color-accent, #4a9eff);
+  border-radius: 16px;
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .drop-zone-overlay-content {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }

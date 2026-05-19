@@ -20,6 +20,8 @@ import { WordCountDialog } from './components/WordCountDialog/WordCountDialog';
 import { QuickOpenPanel } from './components/QuickOpen/QuickOpenPanel';
 import { TocPanel } from './components/TocPanel/TocPanel';
 import { UnsavedChangesDialog } from './components/UnsavedChangesDialog';
+import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
+import { NotificationContainer } from './components/Notification/Notification';
 import { useFileStore } from './store/fileStore';
 import { useEditorState } from './store/editorStore';
 import { useUIState } from './store/uiStore';
@@ -297,53 +299,57 @@ function App() {
   );
 
   return (
-    <div className={`app-container app-with-titlebar auto-hide-ui ${focusMode ? 'focus-mode-active' : ''}`}>
-      {showRecovery && (
-        <RecoveryDialog onRecover={handleRecover} onDiscard={handleDiscard} />
-      )}
-      <TitleBar />
-      <AutoHideUI />
-      <SidebarNew />
-      <main className="main-content">
-        <TabBar />
-        <Toolbar />
-        <EditorProvider>
-          <MainEditor />
-          <TypewriterMode />
-        </EditorProvider>
-      </main>
-      <StatusBar />
-      <SearchPanel />
-      <CommandPalette 
-        isOpen={showCommandPalette} 
-        onClose={() => setShowCommandPalette(false)} 
-        commands={commands}
-      />
-      <FocusMode />
-      <AIAssistant />
-      {wordGoalEnabled && <WordGoalProgress />}
-      {pomodoroEnabled && <PomodoroTimer />}
-      <LinkValidator />
-      <WordCountDialog 
-        isOpen={showWordCount} 
-        onClose={() => setShowWordCount(false)} 
-      />
-      <QuickOpenPanel 
-        isOpen={showQuickOpen} 
-        onClose={() => setShowQuickOpen(false)} 
-      />
-      <TocPanel 
-        isOpen={showTocPanel} 
-        onClose={() => setShowTocPanel(false)} 
-      />
-      {showUnsavedDialog && (
-        <UnsavedChangesDialog
-          onSave={handleSaveBeforeClose}
-          onDiscard={handleDiscardChanges}
-          onCancel={handleCancelClose}
+    <ErrorBoundary>
+      <a href="#main-content" className="skip-link">Skip to content</a>
+      <div className={`app-container app-with-titlebar auto-hide-ui ${focusMode ? 'focus-mode-active' : ''}`}>
+        {showRecovery && (
+          <RecoveryDialog onRecover={handleRecover} onDiscard={handleDiscard} />
+        )}
+        <TitleBar />
+        <AutoHideUI />
+        <SidebarNew />
+        <main id="main-content" className="main-content">
+          <TabBar />
+          <Toolbar />
+          <EditorProvider>
+            <MainEditor />
+            <TypewriterMode />
+          </EditorProvider>
+        </main>
+        <StatusBar />
+        <SearchPanel />
+        <CommandPalette
+          isOpen={showCommandPalette}
+          onClose={() => setShowCommandPalette(false)}
+          commands={commands}
         />
-      )}
-    </div>
+        <FocusMode />
+        <AIAssistant />
+        {wordGoalEnabled && <WordGoalProgress />}
+        {pomodoroEnabled && <PomodoroTimer />}
+        <LinkValidator />
+        <WordCountDialog
+          isOpen={showWordCount}
+          onClose={() => setShowWordCount(false)}
+        />
+        <QuickOpenPanel
+          isOpen={showQuickOpen}
+          onClose={() => setShowQuickOpen(false)}
+        />
+        <TocPanel
+          isOpen={showTocPanel}
+          onClose={() => setShowTocPanel(false)}
+        />
+        {showUnsavedDialog && (
+          <UnsavedChangesDialog
+            onSave={handleSaveBeforeClose}
+            onDiscard={handleDiscardChanges}
+            onCancel={handleCancelClose}
+          />
+        )}
+        <NotificationContainer />
+      </div>
+    </ErrorBoundary>
   );
 }
 

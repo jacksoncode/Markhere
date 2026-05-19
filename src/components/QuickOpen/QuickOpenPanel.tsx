@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from '../../i18n';
 import { useTabsStore, TabInfo } from '../../store/tabsStore';
 import { useFileStore } from '../../store/fileStore';
+import { useNotificationStore } from '../Notification/Notification';
 import './QuickOpenPanel.css';
 
 interface QuickOpenPanelProps {
@@ -21,6 +22,7 @@ export function QuickOpenPanel({ isOpen, onClose }: QuickOpenPanelProps) {
   const { t } = useTranslation();
   const { tabs, switchTab } = useTabsStore();
   const { setCurrentPath, setSavedContent } = useFileStore();
+  const notify = useNotificationStore((s) => s.notify);
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [files, setFiles] = useState<string[]>([]);
@@ -43,9 +45,10 @@ export function QuickOpenPanel({ isOpen, onClose }: QuickOpenPanelProps) {
       }
     } catch (err) {
       console.error('Load files failed:', err);
+      notify('error', `Failed to load recent files: ${(err as Error).message || String(err)}`);
     }
   };
-  
+
   const results = useMemo(() => {
     const searchResults: SearchResult[] = [];
     const lowerQuery = query.toLowerCase();
@@ -114,6 +117,7 @@ export function QuickOpenPanel({ isOpen, onClose }: QuickOpenPanelProps) {
         setSavedContent(content);
       } catch (err) {
         console.error('Open file failed:', err);
+        notify('error', `Failed to open file: ${(err as Error).message || String(err)}`);
       }
     }
     onClose();

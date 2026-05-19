@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::Write;
+use std::io::{Write, BufWriter};
 use std::process::Command;
 use base64::{Engine as _, engine::general_purpose};
 use tauri::Manager;
@@ -7,25 +7,27 @@ use tauri::Emitter;
 use tauri::menu::{MenuBuilder, SubmenuBuilder, MenuItem, PredefinedMenuItem};
 use tauri::{WebviewWindowBuilder, WebviewUrl};
 use serde::{Deserialize, Serialize};
+use printpdf::*;
+use docx_rs::*;
 
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GitCommit {
-    hash: String,
-    short_hash: String,
-    author: String,
-    date: String,
-    message: String,
+    pub hash: String,
+    pub short_hash: String,
+    pub author: String,
+    pub date: String,
+    pub message: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GitDiff {
-    old_content: String,
-    new_content: String,
-    additions: usize,
-    deletions: usize,
+    pub old_content: String,
+    pub new_content: String,
+    pub additions: usize,
+    pub deletions: usize,
 }
 
 #[tauri::command]
@@ -57,63 +59,636 @@ async fn file_exists(path: String) -> Result<bool, String> {
 }
 
 #[tauri::command]
-async fn export_to_pdf(html: String, output_path: String) -> Result<String, String> {
-    let wrapped_html = format!(
-        "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><style>body{{font-family:sans-serif;max-width:800px;margin:40px auto;}}pre{{background:#f4f4f4;padding:16px;}}code{{background:#f4f4f4;padding:2px 6px;}}img{{max-width:100%;}}</style></head><body>{}</body></html>",
-        html
+async fn export_to_pdf(markdown: String, output_path: String) -> Result<String, String> {
+    let (doc, mut current_page, mut current_layer) = PdfDocument::new(
+        "Markhere Export",
+        Mm(210.0),
+        Mm(297.0),
+        "Layer 1",
     );
-    
-    let mut file = fs::File::create(&output_path).map_err(|e: std::io::Error| e.to_string())?;
-    file.write_all(wrapped_html.as_bytes()).map_err(|e: std::io::Error| e.to_string())?;
-    
+
+    let font = doc.add_builtin_font(BuiltinFont::Helvetica).map_err(|e| e.to_string())?;
+    let font_bold = doc.add_builtin_font(BuiltinFont::HelveticaBold).map_err(|e| e.to_string())?;
+
+    let margin_left = 20.0;
+    let margin_top = 20.0;
+    let margin_bottom = 25.0;
+    let page_text_width = 170.0; // 210 - 2*20
+    let mut y: f64 = 297.0 - margin_top;
+
+    for line in markdown.lines() {
+        let (text, font_size, is_bold) = pdf_line_style(line);
+
+        if text.is_empty() {
+            y -= 6.0;
+            continue;
+        }
+
+        let current_font = if is_bold { &font_bold } else { &font };
+        let line_spacing = font_size * 1.5;
+        let chars_per_line = ((page_text_width / (font_size * 0.175)) as usize).max(10);
+
+        let wrapped = wrap_pdf_text(&text, chars_per_line);
+
+        for wline in &wrapped {
+            if y < margin_bottom {
+                let (np, nl) = doc.add_page(Mm(210.0), Mm(297.0), "Layer");
+                current_page = np;
+                current_layer = nl;
+                y = 297.0 - margin_top;
+            }
+
+            let layer = doc.get_page(current_page).get_layer(current_layer);
+            layer.use_text(wline, font_size as f32, Mm(margin_left as f32), Mm(y as f32), current_font);
+            y -= line_spacing;
+        }
+    }
+
+    let file = std::fs::File::create(&output_path).map_err(|e: std::io::Error| e.to_string())?;
+    let mut writer = BufWriter::new(file);
+    doc.save(&mut writer).map_err(|e| format!("{:?}", e))?;
+
     Ok(output_path)
 }
 
 #[tauri::command]
 async fn export_to_word(markdown: String, output_path: String) -> Result<String, String> {
-    let mut file = fs::File::create(&output_path).map_err(|e: std::io::Error| e.to_string())?;
-    file.write_all(markdown.as_bytes()).map_err(|e: std::io::Error| e.to_string())?;
-    
+    let mut doc = Docx::new();
+
+    for line in markdown.lines() {
+        if line.starts_with("```") {
+            continue;
+        }
+
+        if let Some(text) = line.strip_prefix("# ") {
+            doc = doc.add_paragraph(make_docx_paragraph(text.trim(), 48, true, false));
+        } else if let Some(text) = line.strip_prefix("## ") {
+            doc = doc.add_paragraph(make_docx_paragraph(text.trim(), 40, true, false));
+        } else if let Some(text) = line.strip_prefix("### ") {
+            doc = doc.add_paragraph(make_docx_paragraph(text.trim(), 32, true, false));
+        } else if let Some(text) = line.strip_prefix("#### ") {
+            doc = doc.add_paragraph(make_docx_paragraph(text.trim(), 28, true, false));
+        } else if let Some(text) = line.strip_prefix("##### ") {
+            doc = doc.add_paragraph(make_docx_paragraph(text.trim(), 26, true, false));
+        } else if let Some(text) = line.strip_prefix("###### ") {
+            doc = doc.add_paragraph(make_docx_paragraph(text.trim(), 24, true, false));
+        } else if line.starts_with("- ") || line.starts_with("* ") {
+            let text = format!("  •  {}", &line[2..]);
+            doc = doc.add_paragraph(make_docx_paragraph(&text, 24, false, false));
+        } else if line.is_empty() {
+            doc = doc.add_paragraph(Paragraph::new());
+        } else if !line.trim().is_empty() {
+            doc = doc.add_paragraph(make_docx_paragraph(line.trim(), 24, false, false));
+        }
+    }
+
+    let output_file = std::fs::File::create(&output_path).map_err(|e: std::io::Error| e.to_string())?;
+    doc.build().pack(output_file).map_err(|e| format!("{:?}", e))?;
+
     Ok(output_path)
 }
 
 #[tauri::command]
 async fn export_to_epub(markdown: String, output_path: String, title: String) -> Result<String, String> {
+    let html_body = markdown_to_html(&markdown);
+    let date = chrono::Local::now().format("%Y-%m-%d").to_string();
+
     let epub_content = format!(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">
-<html xmlns=\"http://www.w3.org/1999/xhtml\">
-<head><title>{}</title></head>
+        r#"<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>{title}</title>
+    <meta name="author" content="Markhere"/>
+    <meta name="date" content="{date}"/>
+    <style type="text/css">
+        body {{ font-family: Georgia, serif; max-width: 800px; margin: 40px auto; line-height: 1.6; color: #333; }}
+        h1, h2, h3, h4 {{ font-family: Helvetica, sans-serif; margin-top: 1.5em; }}
+        h1 {{ font-size: 2em; border-bottom: 2px solid #eee; padding-bottom: 0.3em; }}
+        h2 {{ font-size: 1.5em; }}
+        h3 {{ font-size: 1.25em; }}
+        pre {{ background: #f5f5f5; padding: 1em; overflow-x: auto; font-size: 0.9em; }}
+        code {{ background: #f5f5f5; padding: 0.2em 0.4em; font-size: 0.9em; }}
+        blockquote {{ border-left: 4px solid #ccc; margin: 1em 0; padding-left: 1em; color: #555; }}
+        img {{ max-width: 100%; height: auto; }}
+        a {{ color: #0366d6; }}
+    </style>
+</head>
 <body>
-{}
+{html_body}
 </body>
-</html>",
-        title,
-        markdown_to_html(&markdown)
+</html>"#,
+        title = title,
+        date = date,
+        html_body = html_body,
     );
-    
-    let mut file = fs::File::create(&output_path).map_err(|e: std::io::Error| e.to_string())?;
+
+    let mut file = std::fs::File::create(&output_path).map_err(|e: std::io::Error| e.to_string())?;
     file.write_all(epub_content.as_bytes()).map_err(|e: std::io::Error| e.to_string())?;
-    
+
     Ok(output_path)
 }
 
 fn markdown_to_html(markdown: &str) -> String {
     let mut html = String::new();
+    let mut in_code_block = false;
+    let mut code_lang = String::new();
+
     for line in markdown.lines() {
-        if line.starts_with('#') {
-            let level = line.chars().take_while(|c| *c == '#').count();
-            let text = line.trim_start_matches('#').trim();
-            html.push_str(&format!("<h{}>{}</h{}>\n", level, text, level));
+        if line.starts_with("```") {
+            if in_code_block {
+                html.push_str("</code></pre>\n");
+                in_code_block = false;
+                code_lang.clear();
+            } else {
+                code_lang = line[3..].trim().to_string();
+                if code_lang.is_empty() {
+                    html.push_str("<pre><code>\n");
+                } else {
+                    html.push_str(&format!("<pre><code class=\"language-{}\">\n", code_lang));
+                }
+                in_code_block = true;
+            }
+            continue;
+        }
+
+        if in_code_block {
+            html.push_str(&escape_html(line));
+            html.push('\n');
+            continue;
+        }
+
+        if line.starts_with("# ") {
+            let text = parse_inline_html(&line[2..]);
+            html.push_str(&format!("<h1>{}</h1>\n", text));
+        } else if line.starts_with("## ") {
+            let text = parse_inline_html(&line[3..]);
+            html.push_str(&format!("<h2>{}</h2>\n", text));
+        } else if line.starts_with("### ") {
+            let text = parse_inline_html(&line[4..]);
+            html.push_str(&format!("<h3>{}</h3>\n", text));
+        } else if line.starts_with("#### ") {
+            let text = parse_inline_html(&line[5..]);
+            html.push_str(&format!("<h4>{}</h4>\n", text));
+        } else if line.starts_with("##### ") {
+            let text = parse_inline_html(&line[6..]);
+            html.push_str(&format!("<h5>{}</h5>\n", text));
+        } else if line.starts_with("###### ") {
+            let text = parse_inline_html(&line[7..]);
+            html.push_str(&format!("<h6>{}</h6>\n", text));
+        } else if line.starts_with("> ") {
+            let text = parse_inline_html(&line[2..]);
+            html.push_str(&format!("<blockquote><p>{}</p></blockquote>\n", text));
         } else if line.starts_with("- ") || line.starts_with("* ") {
-            html.push_str(&format!("<li>{}</li>\n", line[2..].trim()));
+            let text = parse_inline_html(&line[2..]);
+            html.push_str(&format!("<li>{}</li>\n", text));
+        } else if line.starts_with("---") || line.starts_with("***") || line.starts_with("___") {
+            html.push_str("<hr/>\n");
         } else if line.is_empty() {
             html.push_str("<br/>\n");
         } else {
-            html.push_str(&format!("<p>{}</p>\n", line));
+            let text = parse_inline_html(line);
+            html.push_str(&format!("<p>{}</p>\n", text));
         }
     }
+
+    if in_code_block {
+        html.push_str("</code></pre>\n");
+    }
+
     html
+}
+
+fn escape_html(text: &str) -> String {
+    text.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+}
+
+fn parse_inline_html(text: &str) -> String {
+    let mut result = String::new();
+    let chars: Vec<char> = text.chars().collect();
+    let len = chars.len();
+    let mut i = 0;
+
+    while i < len {
+        if chars[i] == '\\' && i + 1 < len {
+            result.push(chars[i + 1]);
+            i += 2;
+        } else if chars[i] == '!' && i + 1 < len && chars[i + 1] == '[' {
+            // Image: ![alt](url)
+            i += 2;
+            let mut alt = String::new();
+            while i < len && chars[i] != ']' {
+                alt.push(chars[i]);
+                i += 1;
+            }
+            if i < len {
+                i += 1;
+            } // skip ]
+            let mut url = String::new();
+            if i < len && chars[i] == '(' {
+                i += 1;
+                while i < len && chars[i] != ')' {
+                    url.push(chars[i]);
+                    i += 1;
+                }
+                if i < len {
+                    i += 1;
+                } // skip )
+            }
+            result.push_str(&format!(
+                "<img src=\"{}\" alt=\"{}\"/>",
+                url,
+                escape_html(&alt)
+            ));
+        } else if chars[i] == '[' {
+            // Link: [text](url)
+            i += 1;
+            let mut link_text = String::new();
+            while i < len && chars[i] != ']' {
+                link_text.push(chars[i]);
+                i += 1;
+            }
+            if i < len {
+                i += 1;
+            } // skip ]
+            let mut url = String::new();
+            if i < len && chars[i] == '(' {
+                i += 1;
+                while i < len && chars[i] != ')' {
+                    url.push(chars[i]);
+                    i += 1;
+                }
+                if i < len {
+                    i += 1;
+                } // skip )
+            }
+            if url.is_empty() {
+                result.push('[');
+                result.push_str(&link_text);
+                result.push(']');
+            } else {
+                result.push_str(&format!(
+                    "<a href=\"{}\">{}</a>",
+                    url,
+                    parse_inline_html(&link_text)
+                ));
+            }
+        } else if chars[i] == '`' {
+            i += 1;
+            let mut code = String::new();
+            while i < len && chars[i] != '`' {
+                code.push(chars[i]);
+                i += 1;
+            }
+            if i < len {
+                i += 1;
+            } // skip closing `
+            result.push_str(&format!("<code>{}</code>", escape_html(&code)));
+        } else if chars[i] == '*' && i + 1 < len && chars[i + 1] == '*' {
+            i += 2;
+            let mut bold_text = String::new();
+            while i + 1 < len && !(chars[i] == '*' && chars[i + 1] == '*') {
+                bold_text.push(chars[i]);
+                i += 1;
+            }
+            if i + 1 < len {
+                i += 2;
+            } // skip closing **
+            result.push_str(&format!("<strong>{}</strong>", parse_inline_html(&bold_text)));
+        } else if chars[i] == '*' {
+            i += 1;
+            let mut italic_text = String::new();
+            while i < len && chars[i] != '*' {
+                italic_text.push(chars[i]);
+                i += 1;
+            }
+            if i < len {
+                i += 1;
+            } // skip closing *
+            result.push_str(&format!("<em>{}</em>", parse_inline_html(&italic_text)));
+        } else if chars[i] == '_' && i + 1 < len && chars[i + 1] == '_' {
+            i += 2;
+            let mut bold_text = String::new();
+            while i + 1 < len && !(chars[i] == '_' && chars[i + 1] == '_') {
+                bold_text.push(chars[i]);
+                i += 1;
+            }
+            if i + 1 < len {
+                i += 2;
+            }
+            result.push_str(&format!("<strong>{}</strong>", parse_inline_html(&bold_text)));
+        } else if chars[i] == '_' {
+            i += 1;
+            let mut italic_text = String::new();
+            while i < len && chars[i] != '_' {
+                italic_text.push(chars[i]);
+                i += 1;
+            }
+            if i < len {
+                i += 1;
+            }
+            result.push_str(&format!("<em>{}</em>", parse_inline_html(&italic_text)));
+        } else if chars[i] == '~' && i + 1 < len && chars[i + 1] == '~' {
+            i += 2;
+            let mut strike_text = String::new();
+            while i + 1 < len && !(chars[i] == '~' && chars[i + 1] == '~') {
+                strike_text.push(chars[i]);
+                i += 1;
+            }
+            if i + 1 < len {
+                i += 2;
+            }
+            result.push_str(&format!("<del>{}</del>", parse_inline_html(&strike_text)));
+        } else {
+            result.push(chars[i]);
+            i += 1;
+        }
+    }
+
+    result
+}
+
+// ---- PDF helper functions ----
+
+fn pdf_line_style(line: &str) -> (String, f64, bool) {
+    if let Some(text) = line.strip_prefix("# ") {
+        (strip_inline_markers(text.trim()), 24.0, true)
+    } else if let Some(text) = line.strip_prefix("## ") {
+        (strip_inline_markers(text.trim()), 20.0, true)
+    } else if let Some(text) = line.strip_prefix("### ") {
+        (strip_inline_markers(text.trim()), 16.0, true)
+    } else if let Some(text) = line.strip_prefix("#### ") {
+        (strip_inline_markers(text.trim()), 14.0, true)
+    } else if let Some(text) = line.strip_prefix("##### ") {
+        (strip_inline_markers(text.trim()), 13.0, true)
+    } else if let Some(text) = line.strip_prefix("###### ") {
+        (strip_inline_markers(text.trim()), 12.0, true)
+    } else if line.starts_with("- ") || line.starts_with("* ") {
+        let text = format!("  •  {}", strip_inline_markers(&line[2..].trim()));
+        (text, 12.0, false)
+    } else if line.starts_with("```") {
+        (String::new(), 12.0, false)
+    } else {
+        (strip_inline_markers(line.trim()), 12.0, false)
+    }
+}
+
+fn strip_inline_markers(text: &str) -> String {
+    let mut result = String::new();
+    let chars: Vec<char> = text.chars().collect();
+    let len = chars.len();
+    let mut i = 0;
+
+    while i < len {
+        match chars[i] {
+            '\\' if i + 1 < len => {
+                result.push(chars[i + 1]);
+                i += 2;
+            }
+            '!' if i + 1 < len && chars[i + 1] == '[' => {
+                // Image: ![alt](url) -> alt
+                i += 2;
+                while i < len && chars[i] != ']' {
+                    result.push(chars[i]);
+                    i += 1;
+                }
+                if i < len { i += 1; }
+                if i < len && chars[i] == '(' {
+                    i += 1;
+                    while i < len && chars[i] != ')' { i += 1; }
+                    if i < len { i += 1; }
+                }
+            }
+            '[' => {
+                // Link: [text](url) -> text
+                i += 1;
+                while i < len && chars[i] != ']' {
+                    result.push(chars[i]);
+                    i += 1;
+                }
+                if i < len { i += 1; }
+                if i < len && chars[i] == '(' {
+                    i += 1;
+                    while i < len && chars[i] != ')' { i += 1; }
+                    if i < len { i += 1; }
+                }
+            }
+            marker @ ('*' | '_' | '~') => {
+                if i + 1 < len && chars[i + 1] == marker {
+                    i += 2;
+                    while i + 1 < len && !(chars[i] == marker && chars[i + 1] == marker) {
+                        result.push(chars[i]);
+                        i += 1;
+                    }
+                    if i + 1 < len { i += 2; }
+                } else {
+                    i += 1;
+                    while i < len && chars[i] != marker {
+                        result.push(chars[i]);
+                        i += 1;
+                    }
+                    if i < len { i += 1; }
+                }
+            }
+            '`' => {
+                i += 1;
+                while i < len && chars[i] != '`' {
+                    result.push(chars[i]);
+                    i += 1;
+                }
+                if i < len { i += 1; }
+            }
+            _ => {
+                result.push(chars[i]);
+                i += 1;
+            }
+        }
+    }
+
+    result
+}
+
+fn wrap_pdf_text(text: &str, max_chars: usize) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut current = String::new();
+
+    if text.len() <= max_chars {
+        return vec![text.to_string()];
+    }
+
+    for word in text.split_whitespace() {
+        if current.is_empty() {
+            current = word.to_string();
+        } else if current.len() + 1 + word.len() <= max_chars {
+            current.push(' ');
+            current.push_str(word);
+        } else {
+            lines.push(current);
+            current = word.to_string();
+        }
+    }
+
+    if !current.is_empty() {
+        lines.push(current);
+    }
+
+    if lines.is_empty() {
+        lines.push(text.to_string());
+    }
+
+    lines
+}
+
+// ---- Word (DOCX) helper functions ----
+
+struct InlineSegment {
+    text: String,
+    bold: bool,
+    italic: bool,
+}
+
+fn parse_inline_segments(text: &str) -> Vec<InlineSegment> {
+    let mut segments: Vec<InlineSegment> = Vec::new();
+    let chars: Vec<char> = text.chars().collect();
+    let len = chars.len();
+    let mut i = 0;
+    let mut current = String::new();
+    let mut bold = false;
+    let mut italic = false;
+
+    while i < len {
+        if chars[i] == '*' && i + 1 < len && chars[i + 1] == '*' {
+            if !current.is_empty() {
+                segments.push(InlineSegment {
+                    text: std::mem::take(&mut current),
+                    bold,
+                    italic,
+                });
+            }
+            bold = !bold;
+            i += 2;
+        } else if chars[i] == '*' {
+            if !current.is_empty() {
+                segments.push(InlineSegment {
+                    text: std::mem::take(&mut current),
+                    bold,
+                    italic,
+                });
+            }
+            italic = !italic;
+            i += 1;
+        } else if chars[i] == '`' {
+            if !current.is_empty() {
+                segments.push(InlineSegment {
+                    text: std::mem::take(&mut current),
+                    bold,
+                    italic,
+                });
+            }
+            i += 1;
+            while i < len && chars[i] != '`' {
+                current.push(chars[i]);
+                i += 1;
+            }
+            if i < len {
+                i += 1;
+            }
+        } else if chars[i] == '[' {
+            if !current.is_empty() {
+                segments.push(InlineSegment {
+                    text: std::mem::take(&mut current),
+                    bold,
+                    italic,
+                });
+            }
+            i += 1;
+            while i < len && chars[i] != ']' {
+                current.push(chars[i]);
+                i += 1;
+            }
+            if i < len {
+                i += 1;
+            }
+            if i < len && chars[i] == '(' {
+                i += 1;
+                while i < len && chars[i] != ')' {
+                    i += 1;
+                }
+                if i < len {
+                    i += 1;
+                }
+            }
+        } else if chars[i] == '!' && i + 1 < len && chars[i + 1] == '[' {
+            if !current.is_empty() {
+                segments.push(InlineSegment {
+                    text: std::mem::take(&mut current),
+                    bold,
+                    italic,
+                });
+            }
+            i += 2;
+            while i < len && chars[i] != ']' {
+                current.push(chars[i]);
+                i += 1;
+            }
+            if i < len {
+                i += 1;
+            }
+            if i < len && chars[i] == '(' {
+                i += 1;
+                while i < len && chars[i] != ')' {
+                    i += 1;
+                }
+                if i < len {
+                    i += 1;
+                }
+            }
+        } else {
+            current.push(chars[i]);
+            i += 1;
+        }
+    }
+
+    if !current.is_empty() {
+        segments.push(InlineSegment {
+            text: current,
+            bold,
+            italic,
+        });
+    }
+
+    segments
+}
+
+fn make_docx_paragraph(text: &str, size: usize, heading_bold: bool, _heading_italic: bool) -> Paragraph {
+    let segments = parse_inline_segments(text);
+    let mut para = Paragraph::new();
+
+    if segments.is_empty() {
+        // If there are no parsed segments (e.g., plain text without markers),
+        // just add the text directly.
+        para = para.add_run(Run::new().add_text(text).size(size));
+        if heading_bold {
+            para = para.bold();
+        }
+        return para;
+    }
+
+    for seg in segments {
+        let mut run = Run::new().add_text(seg.text).size(size);
+        if heading_bold || seg.bold {
+            run = run.bold();
+        }
+        if seg.italic {
+            run = run.italic();
+        }
+        para = para.add_run(run);
+    }
+
+    para
 }
 
 #[tauri::command]
@@ -255,11 +830,21 @@ async fn get_file_at_commit(file_path: String, hash: String) -> Result<String, S
     Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+fn register_updater(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
+    builder.plugin(tauri_plugin_updater::Builder::new().build())
+}
+
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_fs::init());
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    let builder = register_updater(builder);
+
+    builder
 .setup(|app| {
             #[cfg(target_os = "macos")]
             {
@@ -404,4 +989,69 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_markdown_to_html_headings() {
+        let input = "# Title\n\n## Subtitle";
+        let output = markdown_to_html(input);
+        assert!(output.contains("<h1>Title</h1>"));
+        assert!(output.contains("<h2>Subtitle</h2>"));
+    }
+
+    #[test]
+    fn test_markdown_to_html_lists() {
+        let input = "- Item 1\n- Item 2";
+        let output = markdown_to_html(input);
+        assert!(output.contains("<li>Item 1</li>"));
+        assert!(output.contains("<li>Item 2</li>"));
+    }
+
+    #[test]
+    fn test_markdown_to_html_paragraphs() {
+        let input = "Hello\n\nWorld";
+        let output = markdown_to_html(input);
+        assert!(output.contains("<p>Hello</p>"));
+        assert!(output.contains("<p>World</p>"));
+    }
+
+    #[test]
+    fn test_markdown_to_html_empty() {
+        let output = markdown_to_html("");
+        assert!(output.is_empty());
+    }
+
+    #[test]
+    fn test_parse_inline_html_bold() {
+        let input = "Hello **bold** world";
+        let output = parse_inline_html(input);
+        assert!(output.contains("<strong>bold</strong>"));
+    }
+
+    #[test]
+    fn test_parse_inline_html_italic() {
+        let input = "Hello *italic* world";
+        let output = parse_inline_html(input);
+        assert!(output.contains("<em>italic</em>"));
+    }
+
+    #[test]
+    fn test_parse_inline_html_code() {
+        let input = "Use `code` here";
+        let output = parse_inline_html(input);
+        assert!(output.contains("<code>code</code>"));
+    }
+
+    #[test]
+    fn test_escape_html_basic() {
+        let input = "<div class=\"test\">&amp;";
+        let output = escape_html(input);
+        assert!(output.contains("&lt;"));
+        assert!(output.contains("&gt;"));
+        assert!(output.contains("&amp;"));
+    }
 }

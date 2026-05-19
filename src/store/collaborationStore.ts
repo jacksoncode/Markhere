@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Editor } from '@tiptap/react';
 import * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 
@@ -10,6 +11,13 @@ export interface Collaborator {
   selection?: { from: number; to: number };
 }
 
+interface EditorBinding {
+  editor: Editor;
+  updateHandler: () => void;
+  ytextObserver: () => void;
+  selectionHandler: () => void;
+}
+
 interface CollaborationState {
   isConnected: boolean;
   roomId: string | null;
@@ -17,13 +25,16 @@ interface CollaborationState {
   ydoc: Y.Doc | null;
   provider: WebrtcProvider | null;
   ytext: Y.Text | null;
-  
+  binding: EditorBinding | null;
+
   connect: (roomId: string, userName: string) => void;
   disconnect: () => void;
   updateAwareness: (field: string, value: any) => void;
   syncContent: (content: string) => void;
   getContent: () => string;
   observeUpdates: (callback: (content: string) => void) => () => void;
+  bindEditor: (editor: Editor) => void;
+  unbindEditor: () => void;
 }
 
 const colors = [
@@ -38,6 +49,7 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
   ydoc: null,
   provider: null,
   ytext: null,
+  binding: null,
   
   connect: (roomId: string, userName: string) => {
     const ydoc = new Y.Doc();
@@ -81,6 +93,9 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
   },
   
   disconnect: () => {
+    // Unbind editor before tearing down Yjs objects
+    get().unbindEditor();
+
     const { provider, ydoc } = get();
     if (provider) {
       provider.disconnect();
@@ -96,6 +111,7 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
       ydoc: null,
       provider: null,
       ytext: null,
+      binding: null,
     });
   },
   
@@ -122,12 +138,101 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
   observeUpdates: (callback: (content: string) => void) => {
     const { ytext } = get();
     if (!ytext) return () => {};
-    
+
     const observer = () => {
       callback(ytext.toString());
     };
-    
+
     ytext.observe(observer);
     return () => ytext.unobserve(observer);
+  },
+
+  bindEditor: (editor: Editor) => {
+    const { ytext, provider, binding: existingBinding } = get();
+    if (!ytext) return;
+
+    // Clean up any previous binding
+    if (existingBinding) {
+      get().unbindEditor();
+    }
+
+    // Guard against infinite loops: track whether the current change
+    // originated locally (editor → Y.Text) or remotely (Y.Text → editor).
+    let isLocalUpdate = false;
+
+    // ---- Editor → Y.Text ----
+    // When the user types, push HTML content into the shared Y.Text.
+    const updateHandler = () => {
+      if (!isLocalUpdate) {
+        isLocalUpdate = true;
+        const html = editor.getHTML();
+        ytext.delete(0, ytext.length);
+        ytext.insert(0, html);
+        isLocalUpdate = false;
+      }
+    };
+
+    // ---- Y.Text → Editor ----
+    // When a remote peer changes the Y.Text, load it into the editor.
+    const ytextObserver = () => {
+      if (!isLocalUpdate) {
+        isLocalUpdate = true;
+        const content = ytext.toString();
+        editor.commands.setContent(content);
+        isLocalUpdate = false;
+      }
+    };
+
+    // ---- Cursor / selection → Awareness ----
+    // Broadcast the local cursor position so remote peers can see it.
+    const selectionHandler = () => {
+      const { from, to } = editor.state.selection;
+      if (provider) {
+        provider.awareness.setLocalStateField('cursor', { from, to });
+      }
+    };
+
+    // Wire up listeners
+    editor.on('update', updateHandler);
+    editor.on('selectionUpdate', selectionHandler);
+    ytext.observe(ytextObserver);
+
+    // ---- Initial sync ----
+    // If the shared document already has content (a peer was here first),
+    // load it. Otherwise push the local editor content to the shared doc.
+    if (ytext.length > 0) {
+      const content = ytext.toString();
+      editor.commands.setContent(content);
+    } else {
+      const html = editor.getHTML();
+      if (html) {
+        ytext.insert(0, html);
+      }
+    }
+
+    set({
+      binding: {
+        editor,
+        updateHandler,
+        ytextObserver,
+        selectionHandler,
+      },
+    });
+  },
+
+  unbindEditor: () => {
+    const { binding, ytext } = get();
+    if (binding && ytext) {
+      binding.editor.off('update', binding.updateHandler);
+      binding.editor.off('selectionUpdate', binding.selectionHandler);
+      ytext.unobserve(binding.ytextObserver);
+
+      // Clear cursor from awareness
+      const { provider } = get();
+      if (provider) {
+        provider.awareness.setLocalStateField('cursor', null);
+      }
+    }
+    set({ binding: null });
   },
 }));

@@ -1,0 +1,111 @@
+.notification-container {
+  position: fixed;
+  top: 48px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.notification-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: notification-slide-in 0.3s ease-out forwards;
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.notification-toast__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-toast__title {
+  font-weight: 600;
+  margin-bottom: 2px;
+  font-size: 14px;
+}
+
+.notification-toast__message {
+  color: inherit;
+  opacity: 0.9;
+}
+
+.notification-toast__dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 2px;
+  opacity: 0.6;
+  color: inherit;
+  transition: opacity 0.15s;
+}
+
+.notification-toast__dismiss:hover {
+  opacity: 1;
+}
+
+/* Color variants */
+.notification-toast--info {
+  background-color: #2196f3;
+  color: #ffffff;
+}
+
+.notification-toast--success {
+  background-color: #4caf50;
+  color: #ffffff;
+}
+
+.notification-toast--warning {
+  background-color: #ff9800;
+  color: #ffffff;
+}
+
+.notification-toast--error {
+  background-color: #f44336;
+  color: #ffffff;
+}
+
+@keyframes notification-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Dark theme support */
+[data-theme='dark'] .notification-toast {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .notification-toast--info {
+  background-color: #1565c0;
+}
+
+[data-theme='dark'] .notification-toast--success {
+  background-color: #2e7d32;
+}
+
+[data-theme='dark'] .notification-toast--warning {
+  background-color: #e65100;
+}
+
+[data-theme='dark'] .notification-toast--error {
+  background-color: #c62828;
+}

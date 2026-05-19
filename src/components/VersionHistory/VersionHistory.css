@@ -208,3 +208,31 @@
   line-height: 1.4;
   white-space: pre-wrap;
 }
+
+/* Empty / loading / error states (full-width) */
+.vh-empty-state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.vh-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.vh-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}

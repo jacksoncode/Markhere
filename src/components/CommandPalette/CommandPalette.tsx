@@ -21,14 +21,20 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const resultCountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
       setSearch('');
       setSelectedIndex(0);
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
+    } else if (previousFocusRef.current) {
+      previousFocusRef.current.focus();
+      previousFocusRef.current = null;
     }
   }, [isOpen]);
 
@@ -99,10 +105,16 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
   let currentIndex = 0;
 
   return (
-    <div className="command-palette-overlay" onClick={onClose}>
-      <div className="command-palette-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="command-palette-overlay" onClick={onClose} aria-label="Close command palette">
+      <div
+        className="command-palette-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+      >
         <div className="command-palette-input-wrapper">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon" aria-hidden="true">🔍</span>
           <input
             ref={inputRef}
             type="text"
@@ -111,16 +123,28 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
             onKeyDown={handleKeyDown}
             placeholder="Search commands..."
             className="command-palette-input"
+            aria-label="Search commands"
+            role="combobox"
+            aria-expanded={filteredCommands.length > 0}
+            aria-controls="command-palette-listbox"
+            aria-activedescendant={filteredCommands[selectedIndex] ? `command-option-${filteredCommands[selectedIndex].id}` : undefined}
+            aria-autocomplete="list"
           />
           <span className="shortcut-hint">ESC to close</span>
         </div>
 
-        <div className="command-palette-list" ref={listRef}>
+        <div
+          id="command-palette-listbox"
+          className="command-palette-list"
+          ref={listRef}
+          role="listbox"
+          aria-label="Command results"
+        >
           {filteredCommands.length === 0 ? (
-            <div className="no-results">No commands found</div>
+            <div className="no-results" role="option" aria-selected="false">No commands found</div>
           ) : (
             Object.entries(groupedCommands).map(([category, cmds]) => (
-              <div key={category} className="command-group">
+              <div key={category} className="command-group" role="group" aria-label={category}>
                 <div className="command-group-header">{category}</div>
                 {cmds.map((cmd) => {
                   const isSelected = flatIndexToCommand[selectedIndex]?.id === cmd.id;
@@ -128,15 +152,18 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
                   return (
                     <div
                       key={cmd.id}
+                      id={`command-option-${cmd.id}`}
                       className={`command-item ${isSelected ? 'selected' : ''}`}
                       onClick={() => handleCommandClick(cmd)}
                       onMouseEnter={() => setSelectedIndex(flatIndexToCommand.findIndex(c => c.id === cmd.id))}
+                      role="option"
+                      aria-selected={isSelected}
                     >
                       <div className="command-content">
-                        {cmd.icon && <span className="command-icon">{cmd.icon}</span>}
+                        {cmd.icon && <span className="command-icon" aria-hidden="true">{cmd.icon}</span>}
                         <span className="command-name">{cmd.name}</span>
                         {cmd.shortcut && (
-                          <span className="command-shortcut">{cmd.shortcut}</span>
+                          <span className="command-shortcut" aria-label={`Shortcut: ${cmd.shortcut}`}>{cmd.shortcut}</span>
                         )}
                       </div>
                     </div>
@@ -147,12 +174,20 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
           )}
         </div>
 
-        <div className="command-palette-footer">
+        <div
+          ref={resultCountRef}
+          className="command-palette-footer"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           <div className="footer-hint">
             <span>↑↓ Navigate</span>
             <span>↵ Execute</span>
             <span>ESC Close</span>
           </div>
+          <span className="sr-only">
+            {filteredCommands.length} command{filteredCommands.length !== 1 ? 's' : ''} found
+          </span>
         </div>
       </div>
     </div>

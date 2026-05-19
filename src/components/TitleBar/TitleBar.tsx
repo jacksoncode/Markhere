@@ -7,6 +7,7 @@ import { useEditorState } from '../../store/editorStore';
 import { useUIState } from '../../store/uiStore';
 import { useTabsStore } from '../../store/tabsStore';
 import { useTranslation } from '../../i18n';
+import { useNotificationStore } from '../Notification/Notification';
 import { ShortcutSettings } from '../ShortcutSettings';
 import { TemplateSelector } from '../TemplateSelector';
 import { BookmarkPanel } from '../BookmarkPanel';
@@ -29,7 +30,8 @@ export function TitleBar() {
     pomodoroEnabled, togglePomodoro, 
     wordGoalEnabled, toggleWordGoal 
   } = useUIState();
-  
+  const notify = useNotificationStore((s) => s.notify);
+
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [showShortcutSettings, setShowShortcutSettings] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
@@ -41,6 +43,7 @@ export function TitleBar() {
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [recentFiles, setRecentFiles] = useState<string[]>([]);
+  const [showAboutDialog, setShowAboutDialog] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   
   const fileName = currentPath ? currentPath.split('/').pop() : 'Untitled';
@@ -90,14 +93,17 @@ export function TitleBar() {
             window.open('https://github.com/jacksoncode/Markhere/releases', '_blank');
             break;
           case 'about':
-            alert(`Markhere v0.3.0\n\nA Modern, Cross-Platform WYSIWYG Markdown Editor\n\nBuilt with Tauri 2 & React 19\n\n© 2025 Markhere Team`);
+            setActiveMenu(null);
+            setShowAboutDialog(true);
             break;
         }
       } catch (error) {
         console.error('Menu event handling failed:', error);
+        notify('error', 'A menu action failed');
       }
     }).catch((error) => {
       console.error('Failed to listen to menu events:', error);
+      notify('error', 'Failed to initialize menu shortcuts');
     });
     
     return () => {
@@ -140,6 +146,7 @@ export function TitleBar() {
       }
     } catch (err) {
       console.error('Open failed:', err);
+      notify('error', 'Failed to open file');
     }
   };
   
@@ -153,6 +160,7 @@ export function TitleBar() {
       addToRecentFiles(path);
     } catch (err) {
       console.error('Open recent failed:', err);
+      notify('error', 'Failed to open recent file');
       const updated = recentFiles.filter(f => f !== path);
       setRecentFiles(updated);
       localStorage.setItem('markhere-recent-files', JSON.stringify(updated));
@@ -174,6 +182,7 @@ export function TitleBar() {
         setSavedContent(content);
       } catch (err) {
         console.error('Save failed:', err);
+        notify('error', 'Failed to save file');
       }
     } else {
       handleSaveAs();
@@ -196,6 +205,7 @@ export function TitleBar() {
       }
     } catch (err) {
       console.error('Save As failed:', err);
+        notify('error', 'Failed to save file');
     }
   };
   
@@ -214,6 +224,7 @@ export function TitleBar() {
       }
     } catch (err) {
       console.error('Export PDF failed:', err);
+        notify('error', 'Failed to export PDF');
     }
   };
   
@@ -232,6 +243,7 @@ export function TitleBar() {
       }
     } catch (err) {
       console.error('Export Word failed:', err);
+        notify('error', 'Failed to export Word document');
     }
   };
   
@@ -268,6 +280,7 @@ ${html}
       }
     } catch (err) {
       console.error('Export HTML failed:', err);
+        notify('error', 'Failed to export HTML');
     }
   };
   
@@ -286,6 +299,7 @@ ${html}
       }
     } catch (err) {
       console.error('Export EPUB failed:', err);
+        notify('error', 'Failed to export EPUB');
     }
   };
   
@@ -306,6 +320,7 @@ ${html}
       editorInstance?.commands.clearContent();
     } catch (err) {
       console.error('Cut failed:', err);
+      notify('error', 'Failed to cut content');
     }
   };
   
@@ -315,6 +330,7 @@ ${html}
       await navigator.clipboard.writeText(editorInstance?.getText() || '');
     } catch (err) {
       console.error('Copy failed:', err);
+      notify('error', 'Failed to copy content');
     }
   };
   
@@ -325,6 +341,7 @@ ${html}
       await navigator.clipboard.writeText(markdown);
     } catch (err) {
       console.error('Copy as Markdown failed:', err);
+      notify('error', 'Failed to copy as Markdown');
     }
   };
   
@@ -335,6 +352,7 @@ ${html}
       await navigator.clipboard.writeText(html);
     } catch (err) {
       console.error('Copy as HTML failed:', err);
+      notify('error', 'Failed to copy as HTML');
     }
   };
   
@@ -345,6 +363,7 @@ ${html}
       editorInstance?.commands.insertContent(text);
     } catch (err) {
       console.error('Paste failed:', err);
+      notify('error', 'Failed to paste content');
     }
   };
   
@@ -500,6 +519,7 @@ ${html}
       }
     } catch (err) {
       console.error('Insert image failed:', err);
+        notify('error', 'Failed to insert image');
     }
   };
   
@@ -524,6 +544,7 @@ ${html}
       editorInstance?.chain().focus().insertContent(text).run();
     } catch (err) {
       console.error('Paste as plain text failed:', err);
+      notify('error', 'Failed to paste content');
     }
   };
 
@@ -535,6 +556,7 @@ ${html}
       await win.close();
     } catch (err) {
       console.error('Close window failed:', err);
+      notify('error', 'Failed to close window');
     }
   };
 
@@ -722,6 +744,7 @@ tags: []
       await win.setFullscreen(!isFullscreen);
     } catch (err) {
       console.error('Fullscreen failed:', err);
+      notify('error', 'Failed to toggle fullscreen');
     }
   };
   
@@ -1229,7 +1252,7 @@ tags: []
                 <span>{t('help.reportIssue')}</span>
               </div>
               <div className="menu-divider" />
-              <div className="menu-item" onClick={() => { setActiveMenu(null); alert(`Markhere v0.2.0\n\nA Modern, Cross-Platform WYSIWYG Markdown Editor\n\nBuilt with Tauri 2.5 & React 19\n\n© 2025 Markhere Team`); }}>
+              <div className="menu-item" onClick={() => { setActiveMenu(null); setShowAboutDialog(true); }}>
                 <span>{t('help.about')}</span>
               </div>
             </div>
@@ -1248,6 +1271,26 @@ tags: []
       <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
       
       {showSearchPanel && <SearchPanel />}
+
+      {showAboutDialog && (
+        <div className="about-dialog-overlay" onClick={() => setShowAboutDialog(false)}>
+          <div className="about-dialog" onClick={(e) => e.stopPropagation()}>
+            <h2 className="about-dialog-title">Markhere</h2>
+            <div className="about-dialog-version">Version 0.4.8</div>
+            <p className="about-dialog-desc">A modern WYSIWYG Markdown editor with cross-platform support</p>
+            <div className="about-dialog-tech">
+              <span>Tauri 2.5</span>
+              <span className="about-dialog-sep">|</span>
+              <span>React 19</span>
+            </div>
+            <div className="about-dialog-license">MIT License</div>
+            <div className="about-dialog-copyright">2026 Markhere Team</div>
+            <button className="about-dialog-close-btn" onClick={() => setShowAboutDialog(false)}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

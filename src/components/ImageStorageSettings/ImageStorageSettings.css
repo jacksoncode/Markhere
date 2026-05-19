@@ -175,3 +175,231 @@
   outline: none;
   border-color: var(--color-primary);
 }
+
+.config-textarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 12px;
+}
+
+/* ---- External Hosting Provider List ---- */
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.section-header-row h3 {
+  margin-bottom: 0;
+}
+
+.add-provider-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.add-provider-btn:hover {
+  opacity: 0.85;
+}
+
+.empty-providers {
+  padding: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  border: 2px dashed var(--color-border);
+}
+
+.provider-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.provider-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  transition: border-color 0.2s;
+}
+
+.provider-list-item.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.provider-list-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.provider-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.provider-radio-label input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+.provider-item-type {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+  border-radius: 4px;
+}
+
+.provider-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.provider-action-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.provider-action-btn:hover {
+  background: var(--color-bg-hover);
+}
+
+.provider-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.test-btn {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.edit-btn {
+  color: var(--color-text-primary);
+}
+
+.delete-btn {
+  color: var(--color-error, #dc2626);
+  border-color: var(--color-error, #dc2626);
+}
+
+.test-result {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.test-result.success {
+  color: var(--color-success, #16a34a);
+}
+
+.test-result.fail {
+  color: var(--color-error, #dc2626);
+}
+
+.active-provider-hint {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-size: 13px;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.link-btn:hover {
+  opacity: 0.8;
+}
+
+/* ---- Add / Edit Provider Form ---- */
+.provider-form-section {
+  background: var(--color-bg-secondary);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.save-provider-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.save-provider-btn:hover {
+  opacity: 0.85;
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancel-btn:hover {
+  background: var(--color-bg-hover);
+}
+
+select.config-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%23666' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
