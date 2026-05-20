@@ -59,25 +59,35 @@ jobs:
       - name: Build Tauri app
         run: npx tauri build --target ${{ matrix.target }}
 
-      # ---- Plan A: Windows smoke test (install MSI, launch, verify stability) ----
-      - name: Smoke test - install MSI and launch app
+      # ---- Plan A: Windows smoke test (launch binary directly, verify stability) ----
+      - name: Smoke test - launch app and verify stability
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          $msi = Get-ChildItem "src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi" | Select-Object -First 1
-          if (-not $msi) { Write-Host "No MSI found"; exit 1 }
-          Write-Host "Installing $($msi.Name)..."
-          msiexec /i "$msi" /qn /norestart
-          Start-Sleep -Seconds 5
-          Write-Host "Launching Markhere..."
-          $proc = Start-Process "C:\Program Files\Markhere\Markhere.exe" -PassThru
-          Start-Sleep -Seconds 15
-          if ($proc.HasExited) {
-            Write-Host "SMOKE TEST FAILED: App exited with code $($proc.ExitCode)"
+          $ErrorActionPreference = "Stop"
+          # Find the built binary
+          $binary = Get-ChildItem "src-tauri/target" -Recurse -Filter "markhere.exe" |
+            Where-Object { $_.FullName -match 'release' } |
+            Select-Object -First 1
+          if (-not $binary) {
+            Write-Host "ERROR: markhere.exe not found in build output"
+            Write-Host "Searching all exes..."
+            Get-ChildItem "src-tauri/target" -Recurse -Filter "*.exe" | ForEach-Object { Write-Host "  $($_.FullName)" }
             exit 1
           }
-          Write-Host "SMOKE TEST PASSED: App running stable for 15 seconds"
-          Stop-Process -Name "Markhere" -Force -ErrorAction SilentlyContinue
+          Write-Host "Found binary: $($binary.FullName)"
+          Write-Host "Size: $([math]::Round($binary.Length / 1MB, 2)) MB"
+          Write-Host "Launching Markhere..."
+          $proc = Start-Process -FilePath $binary.FullName -PassThru -WindowStyle Minimized
+          Write-Host "Process ID: $($proc.Id)"
+          Write-Host "Waiting 15s for stability check..."
+          Start-Sleep -Seconds 15
+          if ($proc.HasExited) {
+            Write-Host "SMOKE TEST FAILED: App exited with code $($proc.ExitCode) after $((Get-Date) - $proc.StartTime) seconds"
+            exit 1
+          }
+          Write-Host "SMOKE TEST PASSED: App running stable for 15+ seconds"
+          Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 
       # ---- Plan B: WebDriver E2E test against real Tauri Windows app ----
       - name: Install tauri-driver
