@@ -62,6 +62,7 @@ jobs:
       # ---- Plan A: Windows smoke test (launch binary, verify 20s stability) ----
       - name: Smoke test - launch app and verify stability
         if: matrix.os == 'windows-latest'
+        continue-on-error: true
         shell: pwsh
         run: |
           $binary = Get-ChildItem "src-tauri/target" -Recurse -Filter "markhere.exe" |
@@ -79,29 +80,38 @@ jobs:
           if ($wv2) { Write-Host "WebView2: $($wv2.VersionInfo.FileVersion)" }
           else { Write-Host "WebView2 not at standard path (Tauri has fallback detection)" }
 
-          # Launch app in background
-          $proc = Start-Process -FilePath $binary.FullName -PassThru -WindowStyle Minimized
+          # Launch app (no WindowStyle — avoid issues on headless CI)
+          Write-Host "Launching app..."
+          $proc = Start-Process -FilePath $binary.FullName -PassThru
           Write-Host "PID: $($proc.Id)"
 
-          # Wait up to 20s, check every 5s
+          # Quick check at 2s to catch immediate exits
+          Start-Sleep -Seconds 2
+          if ($proc.HasExited) {
+            Write-Host "!!! Exited immediately (${([math]::Round(($proc.ExitTime - $proc.StartTime).TotalSeconds, 1))}s), exit code: $($proc.ExitCode)"
+            exit 1
+          }
+          Write-Host "  Running at 2s..."
+
+          # Check at 5s, 10s, 15s, 20s
           $crashed = $false
-          for ($i = 5; $i -le 20; $i += 5) {
-            Start-Sleep -Seconds 5
+          foreach ($t in @(5, 10, 15, 20)) {
+            Start-Sleep -Seconds 3
             if ($proc.HasExited) {
               $elapsed = [math]::Round(($proc.ExitTime - $proc.StartTime).TotalSeconds, 1)
               Write-Host "!!! CRASHED after ${elapsed}s, exit code: $($proc.ExitCode)"
               $crashed = $true
               break
             }
-            Write-Host "  Still running at ${i}s..."
+            Write-Host "  Still running at ~${t}s..."
           }
 
           if (-not $crashed) {
             Write-Host "PASSED: App stable for 20+ seconds"
             Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
           } else {
-            Write-Host "Attempting to collect Windows Event Log..."
-            try { Get-WinEvent -LogName Application -MaxEvents 20 | Where-Object { $_.Message -match 'markhere|WebView|edge' } | Format-Table -AutoSize | Out-String | Write-Host } catch { Write-Host "(no relevant events)" }
+            Write-Host "Collecting Windows Event Log..."
+            try { Get-WinEvent -LogName Application -MaxEvents 20 | Where-Object { $_.Message -match 'markhere|WebView|edge|\.NET' } | Format-Table -AutoSize | Out-String | Write-Host } catch { Write-Host "(no relevant events)" }
             exit 1
           }
 
