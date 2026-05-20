@@ -715,17 +715,18 @@ async fn save_image(app: tauri::AppHandle, image_data: String, filename: String)
 #[tauri::command]
 async fn validate_link(url: String) -> Result<bool, String> {
     if url.starts_with("http://") || url.starts_with("https://") {
-        let client = reqwest::blocking::Client::builder()
+        let client = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(5))
             .user_agent("Markhere/1.0")
             .build()
             .map_err(|e| e.to_string())?;
-        
+
         let response = client
             .head(&url)
             .send()
+            .await
             .map_err(|e| e.to_string())?;
-        
+
         Ok(response.status().is_success())
     } else {
         Ok(true)

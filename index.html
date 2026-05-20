@@ -8,6 +8,15 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.addEventListener('error', function(e) {
+        console.error('[Markhere] Global error:', e.message, e.filename, e.lineno, e.colno, e.error);
+        document.body.innerHTML += '<div style="position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;padding:12px;font:14px monospace;z-index:99999">Error: ' + e.message + '</div>';
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        console.error('[Markhere] Unhandled promise rejection:', e.reason);
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
