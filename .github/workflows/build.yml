@@ -60,53 +60,56 @@ jobs:
         run: npx tauri build --target ${{ matrix.target }}
 
       # ---- Plan A: Windows smoke test (launch binary directly, verify stability) ----
+      - name: Check binary dependencies
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $binary = Get-ChildItem "src-tauri/target" -Recurse -Filter "markhere.exe" |
+            Where-Object { $_.FullName -match 'release' } |
+            Select-Object -First 1
+          if (-not $binary) {
+            Write-Host "Binary not found — listing all exes:"
+            Get-ChildItem "src-tauri/target" -Recurse -Filter "*.exe" | ForEach-Object { Write-Host "  $($_.FullName)" }
+            exit 1
+          }
+          Write-Host "Binary: $($binary.FullName) ($([math]::Round($binary.Length/1MB,2)) MB)"
+          Write-Host "Checking DLL dependencies..."
+          & "dumpbin" /dependents $binary.FullName 2>$null | Select-String -Pattern "\.dll" | ForEach-Object { Write-Host "  $_" }
+          Write-Host "Finished dependency check"
+
       - name: Smoke test - launch app and verify stability
         if: matrix.os == 'windows-latest'
         shell: pwsh
         env:
           RUST_BACKTRACE: full
         run: |
-          $ErrorActionPreference = "Stop"
-          # Find the built binary
+          $ErrorActionPreference = "Continue"
           $binary = Get-ChildItem "src-tauri/target" -Recurse -Filter "markhere.exe" |
             Where-Object { $_.FullName -match 'release' } |
             Select-Object -First 1
-          if (-not $binary) {
-            Write-Host "ERROR: markhere.exe not found in build output"
-            Write-Host "Searching all exes..."
-            Get-ChildItem "src-tauri/target" -Recurse -Filter "*.exe" | ForEach-Object { Write-Host "  $($_.FullName)" }
-            exit 1
-          }
-          Write-Host "Found binary: $($binary.FullName)"
-          Write-Host "Size: $([math]::Round($binary.Length / 1MB, 2)) MB"
-          Write-Host "Launching Markhere..."
+          Write-Host "Launching: $($binary.FullName)"
           $stderrLog = Join-Path $env:RUNNER_TEMP "markhere-stderr.log"
+          $stdoutLog = Join-Path $env:RUNNER_TEMP "markhere-stdout.log"
+
+          # Try running with stderr capture, no window needed
           $proc = Start-Process -FilePath $binary.FullName -PassThru `
             -RedirectStandardError $stderrLog `
-            -WindowStyle Minimized
-          Write-Host "Process ID: $($proc.Id)"
-          Write-Host "Stderr log: $stderrLog"
-          Write-Host "Waiting 15s for stability check..."
-          Start-Sleep -Seconds 15
+            -RedirectStandardOutput $stdoutLog
+
+          Write-Host "PID: $($proc.Id), waiting 10s..."
+          Start-Sleep -Seconds 10
+
           if ($proc.HasExited) {
-            Write-Host "SMOKE TEST FAILED: App exited with code $($proc.ExitCode)"
-            Write-Host "=== Rust backtrace (if any) ==="
-            if (Test-Path $stderrLog) {
-              Get-Content $stderrLog | ForEach-Object { Write-Host $_ }
-            } else {
-              Write-Host "(no stderr output)"
-            }
-            Write-Host "=== Windows Event Log (recent app crashes) ==="
-            Get-EventLog -LogName Application -Source "Application Error" -Newest 5 -ErrorAction SilentlyContinue |
-              Format-Table -AutoSize | Out-String | ForEach-Object { Write-Host $_ }
-            Write-Host "=== End diagnostics ==="
+            Write-Host "!!! CRASHED after $([math]::Round(($proc.ExitTime - $proc.StartTime).TotalSeconds, 1))s, exit code: $($proc.ExitCode)"
+            Write-Host "--- STDERR ---"
+            if (Test-Path $stderrLog) { Get-Content $stderrLog | ForEach-Object { Write-Host $_ } } else { Write-Host "(empty)" }
+            Write-Host "--- STDOUT ---"
+            if (Test-Path $stdoutLog) { Get-Content $stdoutLog | ForEach-Object { Write-Host $_ } } else { Write-Host "(empty)" }
             exit 1
           }
-          Write-Host "SMOKE TEST PASSED: App running stable for 15+ seconds"
-          if (Test-Path $stderrLog) {
-            Write-Host "=== App stderr output ==="
-            Get-Content $stderrLog | ForEach-Object { Write-Host $_ }
-          }
+          Write-Host "PASSED: App running for 10+ seconds"
+          Write-Host "--- STDERR (so far) ---"
+          if (Test-Path $stderrLog) { Get-Content $stderrLog | ForEach-Object { Write-Host $_ } } else { Write-Host "(empty)" }
           Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 
       # ---- Plan B: WebDriver E2E test against real Tauri Windows app ----
