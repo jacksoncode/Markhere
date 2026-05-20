@@ -59,65 +59,55 @@ jobs:
       - name: Build Tauri app
         run: npx tauri build --target ${{ matrix.target }}
 
-      # ---- Plan A: Windows smoke test (launch binary directly, verify stability) ----
+      # ---- Plan A: Windows smoke test (launch binary, verify 20s stability) ----
       - name: Smoke test - launch app and verify stability
-        id: smoke
         if: matrix.os == 'windows-latest'
-        continue-on-error: true
         shell: pwsh
         env:
           RUST_BACKTRACE: full
         run: |
-          $ErrorActionPreference = "Continue"
+          $ErrorActionPreference = "Stop"
+          trap { Write-Host "SCRIPT ERROR: $_"; exit 1 }
           $binary = Get-ChildItem "src-tauri/target" -Recurse -Filter "markhere.exe" |
             Where-Object { $_.FullName -match 'release' } |
             Select-Object -First 1
           if (-not $binary) {
-            Write-Host "ERROR: Binary not found. Searching all exes..."
-            Get-ChildItem "src-tauri/target" -Recurse -Filter "*.exe" | ForEach-Object { Write-Host "  $($_.FullName)" }
-            "BINARY_NOT_FOUND" | Out-File -FilePath (Join-Path $env:RUNNER_TEMP "smoke-result.txt")
+            Write-Host "ERROR: Binary not found"
+            Get-ChildItem "src-tauri/target" -Recurse -Filter "*.exe" | ForEach-Object { Write-Host "  $_" }
             exit 1
           }
           Write-Host "Binary: $($binary.FullName) ($([math]::Round($binary.Length/1MB,2)) MB)"
+          Set-Location $binary.DirectoryName
+          $wv2 = Get-Item "C:\Program Files (x86)\Microsoft\EdgeWebView\Application\*\msedgewebview2.exe" -ErrorAction SilentlyContinue | Select-Object -Last 1
+          if ($wv2) { Write-Host "WebView2: $($wv2.VersionInfo.FileVersion)" }
+          else { Write-Host "WebView2 NOT found at standard path"; exit 1 }
 
           $stderrLog = Join-Path $env:RUNNER_TEMP "markhere-stderr.log"
           $stdoutLog = Join-Path $env:RUNNER_TEMP "markhere-stdout.log"
-          Set-Location $binary.DirectoryName
-
-          # WebView2 check
-          $wv2 = Get-Item "C:\Program Files (x86)\Microsoft\EdgeWebView\Application\*\msedgewebview2.exe" -ErrorAction SilentlyContinue | Select-Object -Last 1
-          if ($wv2) { Write-Host "WebView2: $($wv2.VersionInfo.FileVersion)" }
-          else { Write-Host "WebView2 NOT found at standard path" }
-
-          # Launch app
-          Write-Host "CWD: $(Get-Location)"
+          Write-Host "Launching from $(Get-Location)..."
           $proc = Start-Process -FilePath $binary.FullName -PassThru `
-            -RedirectStandardError $stderrLog `
-            -RedirectStandardOutput $stdoutLog `
-            -WorkingDirectory $binary.DirectoryName
+            -RedirectStandardError $stderrLog -RedirectStandardOutput $stdoutLog
+          Write-Host "PID: $($proc.Id)"
 
-          Write-Host "PID: $($proc.Id), waiting 12s..."
-          Start-Sleep -Seconds 12
-
-          if ($proc.HasExited) {
-            $elapsed = [math]::Round(($proc.ExitTime - $proc.StartTime).TotalSeconds, 1)
-            Write-Host "!!! CRASHED after ${elapsed}s, exit code: $($proc.ExitCode)"
-            "CRASHED_$($proc.ExitCode)" | Out-File -FilePath (Join-Path $env:RUNNER_TEMP "smoke-result.txt")
-          } else {
-            Write-Host "PASSED: App running for 12+ seconds"
-            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-            "PASSED" | Out-File -FilePath (Join-Path $env:RUNNER_TEMP "smoke-result.txt")
+          # Poll every 5s up to 20s
+          $stable = $false
+          for ($i = 5; $i -le 20; $i += 5) {
+            Start-Sleep -Seconds 5
+            if ($proc.HasExited) {
+              $elapsed = [math]::Round(($proc.ExitTime - $proc.StartTime).TotalSeconds, 1)
+              Write-Host "!!! CRASHED after ${elapsed}s, exit code: $($proc.ExitCode)"
+              Write-Host "--- STDERR ---"
+              if ((Test-Path $stderrLog) -and ((Get-Item $stderrLog).Length -gt 0)) { Get-Content $stderrLog | ForEach-Object { Write-Host $_ } } else { Write-Host "(empty)" }
+              Write-Host "--- STDOUT ---"
+              if ((Test-Path $stdoutLog) -and ((Get-Item $stdoutLog).Length -gt 0)) { Get-Content $stdoutLog | ForEach-Object { Write-Host $_ } } else { Write-Host "(empty)" }
+              exit 1
+            }
+            Write-Host "  Still running at ${i}s..."
+            if ($i -ge 20) { $stable = $true }
           }
 
-          # Always print diagnostics
-          Write-Host "=== STDERR ==="
-          if ((Test-Path $stderrLog) -and ((Get-Item $stderrLog).Length -gt 0)) {
-            Get-Content $stderrLog -Tail 50 | ForEach-Object { Write-Host $_ }
-          } else { Write-Host "(empty)" }
-          Write-Host "=== STDOUT ==="
-          if ((Test-Path $stdoutLog) -and ((Get-Item $stdoutLog).Length -gt 0)) {
-            Get-Content $stdoutLog -Tail 50 | ForEach-Object { Write-Host $_ }
-          } else { Write-Host "(empty)" }
+          Write-Host "PASSED: App stable for 20+ seconds"
+          Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 
       - name: Upload smoke test logs
         if: matrix.os == 'windows-latest' && always()
@@ -127,24 +117,7 @@ jobs:
           path: |
             ${{ runner.temp }}/markhere-stderr.log
             ${{ runner.temp }}/markhere-stdout.log
-            ${{ runner.temp }}/smoke-result.txt
           if-no-files-found: ignore
-
-      - name: Check smoke test result
-        if: matrix.os == 'windows-latest' && always()
-        shell: pwsh
-        run: |
-          $resultFile = Join-Path $env:RUNNER_TEMP "smoke-result.txt"
-          if (-not (Test-Path $resultFile)) {
-            Write-Host "No smoke result file — assuming failure"
-            exit 1
-          }
-          $result = Get-Content $resultFile -Raw
-          Write-Host "Smoke test result: $result"
-          if ($result -notmatch 'PASSED') {
-            Write-Host "Smoke test failed: $result"
-            exit 1
-          }
 
       # ---- Upload artifacts BEFORE WebDriver (so they're available even if WebDriver fails) ----
       - name: Upload Linux artifact
