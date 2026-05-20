@@ -34,7 +34,7 @@ interface CloudState {
 // ---------------------------------------------------------------------------
 
 function _isTauri(): boolean {
-  return !!(window as unknown as { __TAURI__?: unknown }).__TAURI__;
+  return !!(window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
 }
 
 /** Map each provider to a list of candidate filesystem paths to try. */

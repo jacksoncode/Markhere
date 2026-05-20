@@ -13,10 +13,17 @@ declare module '@tiptap/core' {
   }
 }
 
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'default',
-});
+let mermaidInitialized = false;
+
+function ensureMermaid() {
+  if (!mermaidInitialized) {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+    });
+    mermaidInitialized = true;
+  }
+}
 
 export const MermaidExtension = Node.create<MermaidOptions>({
   name: 'mermaid',
@@ -94,6 +101,7 @@ export const MermaidExtension = Node.create<MermaidOptions>({
 
       const renderMermaid = async () => {
         try {
+          ensureMermaid();
           const id = `mermaid-${Date.now()}`;
           const { svg } = await mermaid.render(id, textarea.value);
           previewDiv.innerHTML = svg;

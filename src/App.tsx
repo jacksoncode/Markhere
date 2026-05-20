@@ -118,7 +118,7 @@ function App() {
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
-    
+
     import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
       getCurrentWindow().onCloseRequested((event) => {
         if (checkUnsavedChanges()) {
@@ -126,9 +126,10 @@ function App() {
           setPendingClose(true);
           setShowUnsavedDialog(true);
         }
-      }).then((fn) => { unlisten = fn; });
-    });
-    
+      }).then((fn) => { unlisten = fn; })
+        .catch((e) => { console.error('[Markhere] onCloseRequested failed:', e); });
+    }).catch((e) => { console.error('[Markhere] Failed to load window API:', e); });
+
     return () => { unlisten?.(); };
   }, []);
 
