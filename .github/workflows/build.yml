@@ -63,11 +63,7 @@ jobs:
       - name: Smoke test - launch app and verify stability
         if: matrix.os == 'windows-latest'
         shell: pwsh
-        env:
-          RUST_BACKTRACE: full
         run: |
-          $ErrorActionPreference = "Stop"
-          trap { Write-Host "SCRIPT ERROR: $_"; exit 1 }
           $binary = Get-ChildItem "src-tauri/target" -Recurse -Filter "markhere.exe" |
             Where-Object { $_.FullName -match 'release' } |
             Select-Object -First 1
@@ -77,47 +73,37 @@ jobs:
             exit 1
           }
           Write-Host "Binary: $($binary.FullName) ($([math]::Round($binary.Length/1MB,2)) MB)"
-          Set-Location $binary.DirectoryName
+
+          # Check WebView2 (informational)
           $wv2 = Get-Item "C:\Program Files (x86)\Microsoft\EdgeWebView\Application\*\msedgewebview2.exe" -ErrorAction SilentlyContinue | Select-Object -Last 1
           if ($wv2) { Write-Host "WebView2: $($wv2.VersionInfo.FileVersion)" }
-          else { Write-Host "WebView2 NOT found at standard path (Tauri uses its own detection)" }
+          else { Write-Host "WebView2 not at standard path (Tauri has fallback detection)" }
 
-          $stderrLog = Join-Path $env:RUNNER_TEMP "markhere-stderr.log"
-          $stdoutLog = Join-Path $env:RUNNER_TEMP "markhere-stdout.log"
-          Write-Host "Launching from $(Get-Location)..."
-          $proc = Start-Process -FilePath $binary.FullName -PassThru `
-            -RedirectStandardError $stderrLog -RedirectStandardOutput $stdoutLog
+          # Launch app in background
+          $proc = Start-Process -FilePath $binary.FullName -PassThru -WindowStyle Minimized
           Write-Host "PID: $($proc.Id)"
 
-          # Poll every 5s up to 20s
-          $stable = $false
+          # Wait up to 20s, check every 5s
+          $crashed = $false
           for ($i = 5; $i -le 20; $i += 5) {
             Start-Sleep -Seconds 5
             if ($proc.HasExited) {
               $elapsed = [math]::Round(($proc.ExitTime - $proc.StartTime).TotalSeconds, 1)
               Write-Host "!!! CRASHED after ${elapsed}s, exit code: $($proc.ExitCode)"
-              Write-Host "--- STDERR ---"
-              if ((Test-Path $stderrLog) -and ((Get-Item $stderrLog).Length -gt 0)) { Get-Content $stderrLog | ForEach-Object { Write-Host $_ } } else { Write-Host "(empty)" }
-              Write-Host "--- STDOUT ---"
-              if ((Test-Path $stdoutLog) -and ((Get-Item $stdoutLog).Length -gt 0)) { Get-Content $stdoutLog | ForEach-Object { Write-Host $_ } } else { Write-Host "(empty)" }
-              exit 1
+              $crashed = $true
+              break
             }
             Write-Host "  Still running at ${i}s..."
-            if ($i -ge 20) { $stable = $true }
           }
 
-          Write-Host "PASSED: App stable for 20+ seconds"
-          Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-
-      - name: Upload smoke test logs
-        if: matrix.os == 'windows-latest' && always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-smoke-test-logs
-          path: |
-            ${{ runner.temp }}/markhere-stderr.log
-            ${{ runner.temp }}/markhere-stdout.log
-          if-no-files-found: ignore
+          if (-not $crashed) {
+            Write-Host "PASSED: App stable for 20+ seconds"
+            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+          } else {
+            Write-Host "Attempting to collect Windows Event Log..."
+            try { Get-WinEvent -LogName Application -MaxEvents 20 | Where-Object { $_.Message -match 'markhere|WebView|edge' } | Format-Table -AutoSize | Out-String | Write-Host } catch { Write-Host "(no relevant events)" }
+            exit 1
+          }
 
       # ---- Upload artifacts BEFORE WebDriver (so they're available even if WebDriver fails) ----
       - name: Upload Linux artifact
@@ -150,12 +136,12 @@ jobs:
 
       # ---- Plan B: WebDriver E2E test against real Windows WebView2 ----
       - name: Install tauri-driver
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-latest' && always()
         run: cargo install tauri-driver --locked
 
       - name: WebDriver E2E test
         id: webdriver
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-latest' && always()
         continue-on-error: true
         shell: pwsh
         run: |

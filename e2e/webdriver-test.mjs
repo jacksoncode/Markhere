@@ -59,15 +59,17 @@ function jsonRequest(method, path, body = null) {
 async function startDriver() {
   console.log('[webdriver] Starting tauri-driver...');
 
-  const appPath = process.env.TAURI_DRIVER_APP_PATH || process.env.CARGO_TARGET_DIR
-    ? `${process.env.CARGO_TARGET_DIR || 'src-tauri/target'}/release/markhere`
-    : null;
+  // Use TAURI_DRIVER_APP_PATH from env if set, otherwise try to compute from CARGO_TARGET_DIR
+  const appPath = process.env.TAURI_DRIVER_APP_PATH || (process.env.CARGO_TARGET_DIR
+    ? `${process.env.CARGO_TARGET_DIR}/release/markhere`
+    : null);
 
   driverProcess = spawn('tauri-driver', [], {
     stdio: ['ignore', 'pipe', 'pipe'],
     env: {
       ...process.env,
-      ...(appPath ? { TAURI_DRIVER_APP_PATH: appPath } : {}),
+      // Only override if appPath differs from what's already in env
+      ...(appPath && appPath !== process.env.TAURI_DRIVER_APP_PATH ? { TAURI_DRIVER_APP_PATH: appPath } : {}),
     },
   });
 
