@@ -59,6 +59,38 @@ jobs:
       - name: Build Tauri app
         run: npx tauri build --target ${{ matrix.target }}
 
+      # ---- Plan A: Windows smoke test (install MSI, launch, verify stability) ----
+      - name: Smoke test - install MSI and launch app
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $msi = Get-ChildItem "src-tauri/target/${{ matrix.target }}/release/bundle/msi/*.msi" | Select-Object -First 1
+          if (-not $msi) { Write-Host "No MSI found"; exit 1 }
+          Write-Host "Installing $($msi.Name)..."
+          msiexec /i "$msi" /qn /norestart
+          Start-Sleep -Seconds 5
+          Write-Host "Launching Markhere..."
+          $proc = Start-Process "C:\Program Files\Markhere\Markhere.exe" -PassThru
+          Start-Sleep -Seconds 15
+          if ($proc.HasExited) {
+            Write-Host "SMOKE TEST FAILED: App exited with code $($proc.ExitCode)"
+            exit 1
+          }
+          Write-Host "SMOKE TEST PASSED: App running stable for 15 seconds"
+          Stop-Process -Name "Markhere" -Force -ErrorAction SilentlyContinue
+
+      # ---- Plan B: WebDriver E2E test against real Tauri Windows app ----
+      - name: Install tauri-driver
+        if: matrix.os == 'windows-latest'
+        run: cargo install tauri-driver --locked
+
+      - name: WebDriver E2E test
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        env:
+          TAURI_DRIVER_APP_PATH: ${{ github.workspace }}/src-tauri/target/${{ matrix.target }}/release/markhere.exe
+        run: node e2e/webdriver-test.mjs
+
       - name: Upload Linux artifact
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
