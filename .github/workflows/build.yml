@@ -63,6 +63,8 @@ jobs:
       - name: Smoke test - launch app and verify stability
         if: matrix.os == 'windows-latest'
         shell: pwsh
+        env:
+          RUST_BACKTRACE: full
         run: |
           $ErrorActionPreference = "Stop"
           # Find the built binary
@@ -78,15 +80,33 @@ jobs:
           Write-Host "Found binary: $($binary.FullName)"
           Write-Host "Size: $([math]::Round($binary.Length / 1MB, 2)) MB"
           Write-Host "Launching Markhere..."
-          $proc = Start-Process -FilePath $binary.FullName -PassThru -WindowStyle Minimized
+          $stderrLog = Join-Path $env:RUNNER_TEMP "markhere-stderr.log"
+          $proc = Start-Process -FilePath $binary.FullName -PassThru `
+            -RedirectStandardError $stderrLog `
+            -WindowStyle Minimized
           Write-Host "Process ID: $($proc.Id)"
+          Write-Host "Stderr log: $stderrLog"
           Write-Host "Waiting 15s for stability check..."
           Start-Sleep -Seconds 15
           if ($proc.HasExited) {
-            Write-Host "SMOKE TEST FAILED: App exited with code $($proc.ExitCode) after $((Get-Date) - $proc.StartTime) seconds"
+            Write-Host "SMOKE TEST FAILED: App exited with code $($proc.ExitCode)"
+            Write-Host "=== Rust backtrace (if any) ==="
+            if (Test-Path $stderrLog) {
+              Get-Content $stderrLog | ForEach-Object { Write-Host $_ }
+            } else {
+              Write-Host "(no stderr output)"
+            }
+            Write-Host "=== Windows Event Log (recent app crashes) ==="
+            Get-EventLog -LogName Application -Source "Application Error" -Newest 5 -ErrorAction SilentlyContinue |
+              Format-Table -AutoSize | Out-String | ForEach-Object { Write-Host $_ }
+            Write-Host "=== End diagnostics ==="
             exit 1
           }
           Write-Host "SMOKE TEST PASSED: App running stable for 15+ seconds"
+          if (Test-Path $stderrLog) {
+            Write-Host "=== App stderr output ==="
+            Get-Content $stderrLog | ForEach-Object { Write-Host $_ }
+          }
           Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
 
       # ---- Plan B: WebDriver E2E test against real Tauri Windows app ----
