@@ -452,7 +452,7 @@ describe('cloudStore + file I/O interaction', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Simulate Tauri environment
-    (window as unknown as { __TAURI__?: boolean }).__TAURI__ = true;
+    (window as unknown as { __TAURI_INTERNALS__?: boolean }).__TAURI_INTERNALS__ = true;
     // Reset cloudStore state
     useCloudStore.setState({
       cloudPath: null,

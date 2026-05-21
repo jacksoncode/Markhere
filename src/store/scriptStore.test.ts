@@ -1,15 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useScriptStore, Script } from './scriptStore';
 
+// Mock @tauri-apps/api/core for Tauri v2 dynamic import pattern
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: vi.fn().mockResolvedValue('mock execution result'),
+}));
+
 describe('useScriptStore', () => {
   beforeEach(() => {
     localStorage.clear();
     useScriptStore.setState({ scripts: [] });
-
-    // Mock Tauri invoke on window
-    (window as any).__TAURI__ = {
-      invoke: vi.fn().mockResolvedValue('mock execution result'),
-    };
+    vi.clearAllMocks();
   });
 
   describe('initial state', () => {
@@ -88,8 +89,8 @@ describe('useScriptStore', () => {
 
   describe('executeScript', () => {
     it('returns the result from Tauri invoke when script exists', async () => {
-      const mockInvoke = (window as any).__TAURI__.invoke;
-      mockInvoke.mockResolvedValueOnce('output from script');
+      const { invoke } = await import('@tauri-apps/api/core');
+      (invoke as ReturnType<typeof vi.fn>).mockResolvedValueOnce('output from script');
 
       useScriptStore.getState().addScript({
         name: 'test',
@@ -100,7 +101,7 @@ describe('useScriptStore', () => {
       const result = await useScriptStore.getState().executeScript('test');
 
       expect(result).toBe('output from script');
-      expect(mockInvoke).toHaveBeenCalledWith('run_script', {
+      expect(invoke).toHaveBeenCalledWith('run_script', {
         scriptPath: '/test.sh',
         args: ['--verbose'],
       });
@@ -113,7 +114,10 @@ describe('useScriptStore', () => {
     });
 
     it('throws an error when Tauri is not available', async () => {
-      delete (window as any).__TAURI__;
+      // Re-mock to simulate import failure
+      vi.doMock('@tauri-apps/api/core', () => {
+        throw new Error('Module not available');
+      });
 
       useScriptStore.getState().addScript({
         name: 'test',
@@ -121,8 +125,14 @@ describe('useScriptStore', () => {
         args: [],
       });
 
+      // Import the store fresh with the failed mock
+      const { useScriptStore: freshStore } = await import('./scriptStore');
+      freshStore.setState({
+        scripts: [{ name: 'test', path: '/test.sh', args: [] }],
+      });
+
       await expect(
-        useScriptStore.getState().executeScript('test')
+        freshStore.getState().executeScript('test')
       ).rejects.toThrow('Tauri not available');
     });
   });

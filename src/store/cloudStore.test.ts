@@ -20,11 +20,11 @@ import { useCloudStore } from './cloudStore';
 // Helpers: make the store "think" it is running inside Tauri
 // ---------------------------------------------------------------------------
 function enableTauri() {
-  (window as any).__TAURI__ = {};
+  (window as any).__TAURI_INTERNALS__ = {};
 }
 
 function disableTauri() {
-  delete (window as any).__TAURI__;
+  delete (window as any).__TAURI_INTERNALS__;
 }
 
 // ---------------------------------------------------------------------------
