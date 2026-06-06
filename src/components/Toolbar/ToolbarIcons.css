@@ -1,6 +1,6 @@
 .toolbar-icon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   display: inline-block;
   vertical-align: middle;
 }
@@ -11,24 +11,4 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-}
-
-.toolbar-btn-with-label {
-  position: relative;
-}
-
-.toolbar-btn-label {
-  position: absolute;
-  bottom: -20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px;
-  color: var(--color-text-tertiary);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-  white-space: nowrap;
-}
-
-.toolbar-btn-with-label:hover .toolbar-btn-label {
-  opacity: 1;
 }

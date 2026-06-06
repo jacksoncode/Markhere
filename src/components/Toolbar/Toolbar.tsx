@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useEditorState } from '../../store/editorStore';
-import { useUIState } from '../../store/uiStore';
 import { useTranslation } from '../../i18n';
 import { useImageStorageStore } from '../../store/imageStorageStore';
 import { ToolbarIcons } from './ToolbarIcons';
@@ -27,17 +26,14 @@ const SHORTCUT_MAP: Record<string, string> = {
   'paragraph.codeBlock': 'Ctrl+Shift+C',
 };
 
-/** Items always visible on mobile (first 5 essential buttons). */
-const MOBILE_ESSENTIAL_INDICES = new Set([0, 1, 9, 12, 13]); // Bold, Italic, Heading1, BulletList, NumberList
+const MOBILE_ESSENTIAL_INDICES = new Set([0, 1, 9, 12, 13]);
 
 export function Toolbar() {
   const { t } = useTranslation();
   const { editorInstance } = useEditorState();
-  const { toggleFocusMode, toggleTypewriterMode } = useUIState();
   const [isMobile, setIsMobile] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
-  /* ── Detect mobile via matchMedia ── */
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
     const handler = (e: MediaQueryListEvent | MediaQueryList) => {
@@ -48,7 +44,6 @@ export function Toolbar() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  /* ── Close bottom sheet on Escape ── */
   useEffect(() => {
     if (!showMore) return;
     const onKey = (e: KeyboardEvent) => {
@@ -58,7 +53,6 @@ export function Toolbar() {
     return () => document.removeEventListener('keydown', onKey);
   }, [showMore]);
 
-  /* ── Lock body scroll when bottom sheet open ── */
   useEffect(() => {
     document.body.style.overflow = showMore ? 'hidden' : '';
     return () => {
@@ -148,7 +142,6 @@ export function Toolbar() {
             }
             const base64 = btoa(chunks.join(''));
 
-            // Try uploading to an active external hosting provider first
             try {
               const filename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
               const imageBlob = new Blob([bytes], { type: 'image/png' });
@@ -172,12 +165,11 @@ export function Toolbar() {
               });
               editorInstance.chain().focus().setImage({ src: savedPath }).run();
             } catch {
-              // Fallback: use original file path directly
               editorInstance.chain().focus().setImage({ src: selected }).run();
             }
           }
         } catch {
-          // Tauri APIs not available (e.g., running in browser) – silently ignore
+          // Tauri APIs not available – silently ignore
         }
       },
       active: editorInstance.isActive('resizableImage')
@@ -238,132 +230,45 @@ export function Toolbar() {
     },
   ];
 
-  const FocusModeIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-    </svg>
-  );
-
-  const TypewriterModeIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-    </svg>
-  );
-
-  const focusModeItem = {
-    icon: FocusModeIcon,
-    label: t('view.focusMode'),
-    action: toggleFocusMode,
-    active: false,
+  const makeTitle = (label: string) => {
+    const shortcut = SHORTCUT_MAP[label];
+    return shortcut ? `${label} (${shortcut})` : label;
   };
 
-  const typewriterModeItem = {
-    icon: TypewriterModeIcon,
-    label: t('view.typewriterMode'),
-    action: toggleTypewriterMode,
-    active: false,
-  };
-
-  const allItems = [...items, focusModeItem, typewriterModeItem];
+  const renderButton = (item: typeof items[number], index: number) => (
+    <button
+      key={item.label}
+      className={`toolbar-btn${item.active ? ' active' : ''}`}
+      onClick={item.action}
+      onKeyDown={(e) => handleButtonKeyDown(e, item.action)}
+      title={makeTitle(item.label)}
+      aria-label={makeTitle(item.label)}
+      aria-pressed={item.active}
+      tabIndex={0}
+      data-responsive={isMobile && !MOBILE_ESSENTIAL_INDICES.has(index) ? 'hide-on-mobile' : 'show-on-mobile'}
+    >
+      <item.icon className="toolbar-icon" aria-hidden="true" />
+    </button>
+  );
 
   return (
     <>
       <div className="toolbar auto-hide-ui" role="toolbar" aria-label={t('toolbar.label') || 'Formatting toolbar'}>
+        {/* Text formatting */}
         <div className="toolbar-group">
-          {items.slice(0, 6).map((item, index) => (
-            <button
-              key={item.label}
-              className={`toolbar-btn toolbar-btn-with-label ${item.active ? 'active' : ''}`}
-              onClick={item.action}
-              onKeyDown={(e) => handleButtonKeyDown(e, item.action)}
-              title={item.label}
-              aria-label={SHORTCUT_MAP[item.label] ? `${item.label} (${SHORTCUT_MAP[item.label]})` : item.label}
-              aria-pressed={item.active}
-              tabIndex={0}
-              data-responsive={isMobile && !MOBILE_ESSENTIAL_INDICES.has(index) ? 'hide-on-mobile' : 'show-on-mobile'}
-            >
-              <item.icon className="toolbar-icon" aria-hidden="true" />
-              <span className="toolbar-btn-label">{item.label}</span>
-            </button>
-          ))}
+          {items.slice(0, 6).map((item, i) => renderButton(item, i))}
         </div>
 
-        <div className="toolbar-divider" />
-
+        {/* Insert */}
         <div className="toolbar-group">
-          {items.slice(6, 9).map((item, index) => (
-            <button
-              key={item.label}
-              className={`toolbar-btn toolbar-btn-with-label ${item.active ? 'active' : ''}`}
-              onClick={item.action}
-              onKeyDown={(e) => handleButtonKeyDown(e, item.action)}
-              title={item.label}
-              aria-label={SHORTCUT_MAP[item.label] ? `${item.label} (${SHORTCUT_MAP[item.label]})` : item.label}
-              aria-pressed={item.active}
-              tabIndex={0}
-              data-responsive={isMobile && !MOBILE_ESSENTIAL_INDICES.has(index + 6) ? 'hide-on-mobile' : 'show-on-mobile'}
-            >
-              <item.icon className="toolbar-icon" aria-hidden="true" />
-              <span className="toolbar-btn-label">{item.label}</span>
-            </button>
-          ))}
+          {items.slice(6, 9).map((item, i) => renderButton(item, i + 6))}
         </div>
 
-        <div className="toolbar-divider" />
-
+        {/* Block formatting */}
         <div className="toolbar-group">
-          {items.slice(9).map((item, index) => (
-            <button
-              key={item.label}
-              className={`toolbar-btn toolbar-btn-with-label ${item.active ? 'active' : ''}`}
-              onClick={item.action}
-              onKeyDown={(e) => handleButtonKeyDown(e, item.action)}
-              title={item.label}
-              aria-label={SHORTCUT_MAP[item.label] ? `${item.label} (${SHORTCUT_MAP[item.label]})` : item.label}
-              aria-pressed={item.active}
-              tabIndex={0}
-              data-responsive={isMobile && !MOBILE_ESSENTIAL_INDICES.has(index + 9) ? 'hide-on-mobile' : 'show-on-mobile'}
-            >
-              <item.icon className="toolbar-icon" aria-hidden="true" />
-              <span className="toolbar-btn-label">{item.label}</span>
-            </button>
-          ))}
+          {items.slice(9).map((item, i) => renderButton(item, i + 9))}
         </div>
 
-        <div className="toolbar-divider" />
-
-        <div className="toolbar-group">
-          <button
-            className="toolbar-btn toolbar-btn-with-label"
-            onClick={toggleFocusMode}
-            onKeyDown={(e) => handleButtonKeyDown(e, toggleFocusMode)}
-            title={t('view.focusMode')}
-            aria-label={t('view.focusMode')}
-            tabIndex={0}
-            data-responsive={isMobile ? 'hide-on-mobile' : 'show-on-mobile'}
-          >
-            <svg className="toolbar-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
-            </svg>
-            <span className="toolbar-btn-label">{t('view.focusMode')}</span>
-          </button>
-          <button
-            className="toolbar-btn toolbar-btn-with-label"
-            onClick={toggleTypewriterMode}
-            onKeyDown={(e) => handleButtonKeyDown(e, toggleTypewriterMode)}
-            title={t('view.typewriterMode')}
-            aria-label={t('view.typewriterMode')}
-            tabIndex={0}
-            data-responsive={isMobile ? 'hide-on-mobile' : 'show-on-mobile'}
-          >
-            <svg className="toolbar-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-            </svg>
-            <span className="toolbar-btn-label">{t('view.typewriterMode')}</span>
-          </button>
-        </div>
-
-        {/* ── "More" button on mobile ── */}
         {isMobile && (
           <button
             className="toolbar-more-btn"
@@ -377,7 +282,7 @@ export function Toolbar() {
         )}
       </div>
 
-      {/* ── Bottom sheet with full toolbar (mobile only) ── */}
+      {/* Bottom sheet with full toolbar (mobile only) */}
       <div
         className={`toolbar-bottom-sheet-backdrop${showMore ? ' open' : ''}`}
         onClick={handleBackdropClick}
@@ -388,7 +293,7 @@ export function Toolbar() {
           {t('toolbar.moreTools') ?? 'More Tools'}
         </div>
         <div className="toolbar-bottom-sheet-grid">
-          {allItems.map((item) => (
+          {items.map((item) => (
             <button
               key={item.label}
               className={`toolbar-bottom-sheet-item${item.active ? ' active' : ''}`}
