@@ -58,58 +58,66 @@ export function TitleBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
+  const menuHandlerRef = useRef<((menuId: string) => void) | null>(null);
+
+  menuHandlerRef.current = (menuId: string) => {
+    try {
+      switch (menuId) {
+        case 'new':
+          handleNewFile();
+          break;
+        case 'open':
+          handleOpen();
+          break;
+        case 'save':
+          handleSave();
+          break;
+        case 'save_as':
+          handleSaveAs();
+          break;
+        case 'toggle_sidebar':
+          toggleSidebar();
+          break;
+        case 'focus_mode':
+          toggleFocusMode();
+          break;
+        case 'docs':
+          window.open('https://github.com/jacksoncode/Markhere#readme', '_blank');
+          break;
+        case 'updates':
+          window.open('https://github.com/jacksoncode/Markhere/releases', '_blank');
+          break;
+        case 'about':
+          setActiveMenu(null);
+          setShowAboutDialog(true);
+          break;
+      }
+    } catch (error) {
+      console.error('Menu event handling failed:', error);
+      notify('error', 'A menu action failed');
+    }
+  };
+
   useEffect(() => {
     const saved = localStorage.getItem('markhere-recent-files');
     if (saved) {
-      setRecentFiles(JSON.parse(saved));
+      try { setRecentFiles(JSON.parse(saved)); } catch { /* ignore corrupt data */ }
     }
-    
+
+    let unlisten: (() => void) | undefined;
+
     listen<string>('menu-event', (event) => {
-      try {
-        const menuId = event.payload;
-        switch (menuId) {
-          case 'new':
-            handleNewFile();
-            break;
-          case 'open':
-            handleOpen();
-            break;
-          case 'save':
-            handleSave();
-            break;
-          case 'save_as':
-            handleSaveAs();
-            break;
-          case 'toggle_sidebar':
-            toggleSidebar();
-            break;
-          case 'focus_mode':
-            toggleFocusMode();
-            break;
-          case 'docs':
-            window.open('https://github.com/jacksoncode/Markhere#readme', '_blank');
-            break;
-          case 'updates':
-            window.open('https://github.com/jacksoncode/Markhere/releases', '_blank');
-            break;
-          case 'about':
-            setActiveMenu(null);
-            setShowAboutDialog(true);
-            break;
-        }
-      } catch (error) {
-        console.error('Menu event handling failed:', error);
-        notify('error', 'A menu action failed');
-      }
+      menuHandlerRef.current?.(event.payload);
+    }).then((fn) => {
+      unlisten = fn;
     }).catch((error) => {
       console.error('Failed to listen to menu events:', error);
-      notify('error', 'Failed to initialize menu shortcuts');
     });
-    
+
     return () => {
-      // Cleanup will be handled by the promise chain
+      unlisten?.();
     };
-  }, [toggleSidebar, toggleFocusMode]);
+  }, []);
   
   const addToRecentFiles = (path: string) => {
     const updated = [path, ...recentFiles.filter(f => f !== path)].slice(0, 10);
