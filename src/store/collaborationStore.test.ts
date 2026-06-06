@@ -145,29 +145,29 @@ describe('useCollaborationStore', () => {
   // connect
   // -----------------------------------------------------------------------
   describe('connect', () => {
-    it('creates a Y.Doc with "content" text type', () => {
+    it('creates a Y.Doc with "content" text type', async () => {
       const { connect } = useCollaborationStore.getState();
 
-      connect('room-123', 'Alice');
+      await connect('room-123', 'Alice');
 
       expect(Y.Doc).toHaveBeenCalledTimes(1);
       expect(mockDoc.getText).toHaveBeenCalledWith('content');
     });
 
-    it('creates a WebrtcProvider with the roomId and ydoc', () => {
+    it('creates a WebrtcProvider with the roomId and ydoc', async () => {
       const { connect } = useCollaborationStore.getState();
 
-      connect('room-abc', 'Bob');
+      await connect('room-abc', 'Bob');
 
       expect(WebrtcProvider).toHaveBeenCalledWith('room-abc', mockDoc, {
         signaling: ['wss://signaling.yjs.dev'],
       });
     });
 
-    it('sets user name and color in awareness', () => {
+    it('sets user name and color in awareness', async () => {
       const { connect } = useCollaborationStore.getState();
 
-      connect('room-1', 'Charlie');
+      await connect('room-1', 'Charlie');
 
       expect(mockAwareness.setLocalStateField).toHaveBeenCalledWith(
         'user',
@@ -179,10 +179,10 @@ describe('useCollaborationStore', () => {
       );
     });
 
-    it('sets isConnected to true after connect', () => {
+    it('sets isConnected to true after connect', async () => {
       const { connect } = useCollaborationStore.getState();
 
-      connect('room-x', 'Dave');
+      await connect('room-x', 'Dave');
 
       const state = useCollaborationStore.getState();
       expect(state.isConnected).toBe(true);
@@ -192,10 +192,10 @@ describe('useCollaborationStore', () => {
       expect(state.ytext).toBe(mockYtext);
     });
 
-    it('registers awareness change listener for collaborators', () => {
+    it('registers awareness change listener for collaborators', async () => {
       // Verify that awareness.on was called with 'change'
       const { connect } = useCollaborationStore.getState();
-      connect('room-test', 'Eve');
+      await connect('room-test', 'Eve');
       expect(mockAwareness.on).toHaveBeenCalledWith('change', expect.any(Function));
     });
   });
@@ -204,26 +204,26 @@ describe('useCollaborationStore', () => {
   // disconnect
   // -----------------------------------------------------------------------
   describe('disconnect', () => {
-    it('disconnects and destroys the provider', () => {
+    it('disconnects and destroys the provider', async () => {
       const { connect, disconnect } = useCollaborationStore.getState();
-      connect('room-1', 'Alice');
+      await connect('room-1', 'Alice');
       disconnect();
 
       expect(mockProvider.disconnect).toHaveBeenCalled();
       expect(mockProvider.destroy).toHaveBeenCalled();
     });
 
-    it('destroys the Y.Doc', () => {
+    it('destroys the Y.Doc', async () => {
       const { connect, disconnect } = useCollaborationStore.getState();
-      connect('room-2', 'Bob');
+      await connect('room-2', 'Bob');
       disconnect();
 
       expect(mockDoc.destroy).toHaveBeenCalled();
     });
 
-    it('resets all state to defaults after disconnect', () => {
+    it('resets all state to defaults after disconnect', async () => {
       const { connect, disconnect } = useCollaborationStore.getState();
-      connect('room-3', 'Charlie');
+      await connect('room-3', 'Charlie');
       disconnect();
 
       const state = useCollaborationStore.getState();
@@ -241,9 +241,9 @@ describe('useCollaborationStore', () => {
   // updateAwareness
   // -----------------------------------------------------------------------
   describe('updateAwareness', () => {
-    it('sets a local state field on the provider awareness', () => {
+    it('sets a local state field on the provider awareness', async () => {
       const { connect, updateAwareness } = useCollaborationStore.getState();
-      connect('room-aw', 'Alice');
+      await connect('room-aw', 'Alice');
 
       updateAwareness('cursor', { from: 5, to: 10 });
 
@@ -264,9 +264,9 @@ describe('useCollaborationStore', () => {
   // syncContent
   // -----------------------------------------------------------------------
   describe('syncContent', () => {
-    it('clears existing Y.Text and inserts new content', () => {
+    it('clears existing Y.Text and inserts new content', async () => {
       const { connect, syncContent } = useCollaborationStore.getState();
-      connect('room-sync', 'Alice');
+      await connect('room-sync', 'Alice');
 
       syncContent('# New Content');
 
@@ -284,9 +284,9 @@ describe('useCollaborationStore', () => {
   // getContent
   // -----------------------------------------------------------------------
   describe('getContent', () => {
-    it('returns the current Y.Text content as string', () => {
+    it('returns the current Y.Text content as string', async () => {
       const { connect, syncContent, getContent } = useCollaborationStore.getState();
-      connect('room-gc', 'Alice');
+      await connect('room-gc', 'Alice');
       syncContent('Hello World');
 
       expect(getContent()).toBe('Hello World');
@@ -302,9 +302,9 @@ describe('useCollaborationStore', () => {
   // observeUpdates
   // -----------------------------------------------------------------------
   describe('observeUpdates', () => {
-    it('registers an observer on ytext (wraps callback in observer fn)', () => {
+    it('registers an observer on ytext (wraps callback in observer fn)', async () => {
       const { connect, observeUpdates } = useCollaborationStore.getState();
-      connect('room-ob', 'Alice');
+      await connect('room-ob', 'Alice');
 
       const callback = vi.fn();
       observeUpdates(callback);
@@ -315,9 +315,9 @@ describe('useCollaborationStore', () => {
       expect(typeof observerArg).toBe('function');
     });
 
-    it('returns an unsubscribe function that calls unobserve with the same observer', () => {
+    it('returns an unsubscribe function that calls unobserve with the same observer', async () => {
       const { connect, observeUpdates } = useCollaborationStore.getState();
-      connect('room-ob2', 'Alice');
+      await connect('room-ob2', 'Alice');
 
       const callback = vi.fn();
       const unsubscribe = observeUpdates(callback);
@@ -341,9 +341,9 @@ describe('useCollaborationStore', () => {
   // bindEditor / unbindEditor
   // -----------------------------------------------------------------------
   describe('bindEditor', () => {
-    it('attaches update, selectionUpdate, and ytext observe listeners', () => {
+    it('attaches update, selectionUpdate, and ytext observe listeners', async () => {
       const { connect, bindEditor } = useCollaborationStore.getState();
-      connect('room-be', 'Alice');
+      await connect('room-be', 'Alice');
 
       const editor = createMockEditor('<p>Hello</p>');
       bindEditor(editor);
@@ -353,9 +353,9 @@ describe('useCollaborationStore', () => {
       expect(mockYtextObserve).toHaveBeenCalled();
     });
 
-    it('stores the binding in state', () => {
+    it('stores the binding in state', async () => {
       const { connect, bindEditor } = useCollaborationStore.getState();
-      connect('room-be2', 'Alice');
+      await connect('room-be2', 'Alice');
 
       const editor = createMockEditor();
       bindEditor(editor);
@@ -373,9 +373,9 @@ describe('useCollaborationStore', () => {
   });
 
   describe('unbindEditor', () => {
-    it('removes all listener bindings from the editor', () => {
+    it('removes all listener bindings from the editor', async () => {
       const { connect, bindEditor, unbindEditor } = useCollaborationStore.getState();
-      connect('room-ub', 'Alice');
+      await connect('room-ub', 'Alice');
 
       const editor = createMockEditor('<p>Test</p>');
       bindEditor(editor);
@@ -385,9 +385,9 @@ describe('useCollaborationStore', () => {
       expect(editor.off).toHaveBeenCalledWith('selectionUpdate', expect.any(Function));
     });
 
-    it('clears cursor from awareness on unbind', () => {
+    it('clears cursor from awareness on unbind', async () => {
       const { connect, bindEditor, unbindEditor } = useCollaborationStore.getState();
-      connect('room-ub2', 'Alice');
+      await connect('room-ub2', 'Alice');
 
       const editor = createMockEditor();
       bindEditor(editor);
@@ -396,9 +396,9 @@ describe('useCollaborationStore', () => {
       expect(mockAwareness.setLocalStateField).toHaveBeenCalledWith('cursor', null);
     });
 
-    it('sets binding to null in state', () => {
+    it('sets binding to null in state', async () => {
       const { connect, bindEditor, unbindEditor } = useCollaborationStore.getState();
-      connect('room-ub3', 'Alice');
+      await connect('room-ub3', 'Alice');
 
       const editor = createMockEditor();
       bindEditor(editor);

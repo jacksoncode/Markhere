@@ -1,7 +1,5 @@
 import { create } from 'zustand';
 import { Editor } from '@tiptap/react';
-import * as Y from 'yjs';
-import { WebrtcProvider } from 'y-webrtc';
 
 export interface Collaborator {
   id: string;
@@ -22,9 +20,9 @@ interface CollaborationState {
   isConnected: boolean;
   roomId: string | null;
   collaborators: Collaborator[];
-  ydoc: Y.Doc | null;
-  provider: WebrtcProvider | null;
-  ytext: Y.Text | null;
+  ydoc: any | null;
+  provider: any | null;
+  ytext: any | null;
   binding: EditorBinding | null;
 
   connect: (roomId: string, userName: string) => void;
@@ -50,50 +48,56 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
   provider: null,
   ytext: null,
   binding: null,
-  
-  connect: (roomId: string, userName: string) => {
-    const ydoc = new Y.Doc();
-    const ytext = ydoc.getText('content');
-    
-    const provider = new WebrtcProvider(roomId, ydoc, {
-      signaling: ['wss://signaling.yjs.dev'],
-    });
-    
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    
-    provider.awareness.setLocalStateField('user', {
-      id: provider.awareness.clientID.toString(),
-      name: userName,
-      color,
-    });
-    
-    provider.awareness.on('change', () => {
-      const collaborators: Collaborator[] = [];
-      provider.awareness.getStates().forEach((state: any, clientId: number) => {
-        if (state.user) {
-          collaborators.push({
-            id: clientId.toString(),
-            name: state.user.name || 'Anonymous',
-            color: state.user.color || '#3b82f6',
-            cursor: state.cursor,
-            selection: state.selection,
-          });
-        }
+
+  connect: async (roomId: string, userName: string) => {
+    try {
+      const Y = await import('yjs');
+      const { WebrtcProvider } = await import('y-webrtc');
+
+      const ydoc = new Y.Doc();
+      const ytext = ydoc.getText('content');
+
+      const provider = new WebrtcProvider(roomId, ydoc, {
+        signaling: ['wss://signaling.yjs.dev'],
       });
-      set({ collaborators });
-    });
-    
-    set({
-      isConnected: true,
-      roomId,
-      ydoc,
-      provider,
-      ytext,
-    });
+
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      provider.awareness.setLocalStateField('user', {
+        id: provider.awareness.clientID.toString(),
+        name: userName,
+        color,
+      });
+
+      provider.awareness.on('change', () => {
+        const collaborators: Collaborator[] = [];
+        provider.awareness.getStates().forEach((state: any, clientId: number) => {
+          if (state.user) {
+            collaborators.push({
+              id: clientId.toString(),
+              name: state.user.name || 'Anonymous',
+              color: state.user.color || '#3b82f6',
+              cursor: state.cursor,
+              selection: state.selection,
+            });
+          }
+        });
+        set({ collaborators });
+      });
+
+      set({
+        isConnected: true,
+        roomId,
+        ydoc,
+        provider,
+        ytext,
+      });
+    } catch (err) {
+      console.error('[collaborationStore] Failed to load collaboration modules:', err);
+    }
   },
-  
+
   disconnect: () => {
-    // Unbind editor before tearing down Yjs objects
     get().unbindEditor();
 
     const { provider, ydoc } = get();
@@ -114,14 +118,14 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
       binding: null,
     });
   },
-  
+
   updateAwareness: (field: string, value: any) => {
     const { provider } = get();
     if (provider) {
       provider.awareness.setLocalStateField(field, value);
     }
   },
-  
+
   syncContent: (content: string) => {
     const { ytext } = get();
     if (ytext) {
@@ -129,12 +133,12 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
       ytext.insert(0, content);
     }
   },
-  
+
   getContent: () => {
     const { ytext } = get();
     return ytext ? ytext.toString() : '';
   },
-  
+
   observeUpdates: (callback: (content: string) => void) => {
     const { ytext } = get();
     if (!ytext) return () => {};
@@ -151,17 +155,12 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
     const { ytext, provider, binding: existingBinding } = get();
     if (!ytext) return;
 
-    // Clean up any previous binding
     if (existingBinding) {
       get().unbindEditor();
     }
 
-    // Guard against infinite loops: track whether the current change
-    // originated locally (editor → Y.Text) or remotely (Y.Text → editor).
     let isLocalUpdate = false;
 
-    // ---- Editor → Y.Text ----
-    // When the user types, push HTML content into the shared Y.Text.
     const updateHandler = () => {
       if (!isLocalUpdate) {
         isLocalUpdate = true;
@@ -172,8 +171,6 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
       }
     };
 
-    // ---- Y.Text → Editor ----
-    // When a remote peer changes the Y.Text, load it into the editor.
     const ytextObserver = () => {
       if (!isLocalUpdate) {
         isLocalUpdate = true;
@@ -183,8 +180,6 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
       }
     };
 
-    // ---- Cursor / selection → Awareness ----
-    // Broadcast the local cursor position so remote peers can see it.
     const selectionHandler = () => {
       const { from, to } = editor.state.selection;
       if (provider) {
@@ -192,14 +187,10 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
       }
     };
 
-    // Wire up listeners
     editor.on('update', updateHandler);
     editor.on('selectionUpdate', selectionHandler);
     ytext.observe(ytextObserver);
 
-    // ---- Initial sync ----
-    // If the shared document already has content (a peer was here first),
-    // load it. Otherwise push the local editor content to the shared doc.
     if (ytext.length > 0) {
       const content = ytext.toString();
       editor.commands.setContent(content);
@@ -227,7 +218,6 @@ export const useCollaborationStore = create<CollaborationState>((set, get) => ({
       binding.editor.off('selectionUpdate', binding.selectionHandler);
       ytext.unobserve(binding.ytextObserver);
 
-      // Clear cursor from awareness
       const { provider } = get();
       if (provider) {
         provider.awareness.setLocalStateField('cursor', null);
