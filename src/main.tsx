@@ -23,10 +23,20 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
-import 'katex/dist/katex.min.css';
+
+// KaTeX CSS is loaded dynamically on first math render — see MathExtension.ts
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
+
+// Remove splash screen after React mounts
+const splash = document.getElementById('splash-screen');
+if (splash) {
+  splash.classList.add('fade-out');
+  splash.addEventListener('transitionend', () => splash.remove());
+  // Safety fallback
+  setTimeout(() => { splash.remove(); }, 1000);
+}

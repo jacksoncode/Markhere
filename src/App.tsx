@@ -1,24 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { EditorProvider } from './components/Editor/EditorProvider';
 import { MainEditor } from './components/Editor/MainEditor';
 import { SidebarNew } from './components/Sidebar/SidebarNew';
 import { Toolbar } from './components/Toolbar/Toolbar';
 import { TitleBar } from './components/TitleBar/TitleBar';
 import { StatusBar } from './components/StatusBar/StatusBar';
-import { SearchPanel } from './components/Search/SearchPanel';
-import { CommandPalette, useCommands } from './components/CommandPalette';
-import { FocusMode } from './components/FocusMode/FocusMode';
-import { TypewriterMode } from './components/TypewriterMode/TypewriterMode';
 import { AutoHideUI } from './components/AutoHideUI/AutoHideUI';
 import { RecoveryDialog } from './components/RecoveryDialog/RecoveryDialog';
-import { AIAssistant } from './components/AIAssistant/AIAssistant';
-import { WordGoalProgress } from './components/WordGoalProgress';
-import { PomodoroTimer } from './components/PomodoroTimer';
 import { LinkValidator } from './components/LinkValidator';
 import { TabBar } from './components/TabBar';
-import { WordCountDialog } from './components/WordCountDialog/WordCountDialog';
-import { QuickOpenPanel } from './components/QuickOpen/QuickOpenPanel';
-import { TocPanel } from './components/TocPanel/TocPanel';
+import { TypewriterMode } from './components/TypewriterMode/TypewriterMode';
 import { UnsavedChangesDialog } from './components/UnsavedChangesDialog';
 import { ErrorBoundary } from './components/ErrorBoundary/ErrorBoundary';
 import { NotificationContainer } from './components/Notification/Notification';
@@ -27,8 +18,20 @@ import { useEditorState } from './store/editorStore';
 import { useUIState } from './store/uiStore';
 import { useAutoSaveStore } from './store/autoSaveStore';
 import { initTheme } from './store/themeStore';
+import { useCommands } from './components/CommandPalette';
 import './styles/App.css';
 import './styles/theme.css';
+
+// Lazy-loaded non-critical components
+const SearchPanel = lazy(() => import('./components/Search/SearchPanel').then(m => ({ default: m.SearchPanel })));
+const CommandPalette = lazy(() => import('./components/CommandPalette/CommandPalette').then(m => ({ default: m.CommandPalette })));
+const FocusMode = lazy(() => import('./components/FocusMode/FocusMode').then(m => ({ default: m.FocusMode })));
+const AIAssistant = lazy(() => import('./components/AIAssistant/AIAssistant').then(m => ({ default: m.AIAssistant })));
+const WordGoalProgress = lazy(() => import('./components/WordGoalProgress').then(m => ({ default: m.WordGoalProgress })));
+const PomodoroTimer = lazy(() => import('./components/PomodoroTimer').then(m => ({ default: m.PomodoroTimer })));
+const WordCountDialog = lazy(() => import('./components/WordCountDialog/WordCountDialog').then(m => ({ default: m.WordCountDialog })));
+const QuickOpenPanel = lazy(() => import('./components/QuickOpen/QuickOpenPanel').then(m => ({ default: m.QuickOpenPanel })));
+const TocPanel = lazy(() => import('./components/TocPanel/TocPanel').then(m => ({ default: m.TocPanel })));
 
 function App() {
   const { focusMode, pomodoroEnabled, wordGoalEnabled, toggleSidebar, toggleFocusMode, toggleTypewriterMode, toggleSourceMode, togglePomodoro, toggleWordGoal } = useUIState();
@@ -101,16 +104,16 @@ function App() {
     if (content && lastSaved) {
       setShowRecovery(true);
     }
-    
+
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (checkUnsavedChanges()) {
         e.preventDefault();
         e.returnValue = '';
       }
     };
-    
+
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
@@ -136,7 +139,7 @@ function App() {
   useEffect(() => {
     const handleKeyboard = (e: KeyboardEvent) => {
       const isMod = e.metaKey || e.ctrlKey;
-      
+
       if (isMod && e.key === 'k') {
         e.preventDefault();
         setShowCommandPalette(true);
@@ -318,29 +321,51 @@ function App() {
           </EditorProvider>
         </main>
         <StatusBar />
-        <SearchPanel />
-        <CommandPalette
-          isOpen={showCommandPalette}
-          onClose={() => setShowCommandPalette(false)}
-          commands={commands}
-        />
-        <FocusMode />
-        <AIAssistant />
-        {wordGoalEnabled && <WordGoalProgress />}
-        {pomodoroEnabled && <PomodoroTimer />}
+        <Suspense fallback={null}>
+          <SearchPanel />
+        </Suspense>
+        <Suspense fallback={null}>
+          <CommandPalette
+            isOpen={showCommandPalette}
+            onClose={() => setShowCommandPalette(false)}
+            commands={commands}
+          />
+        </Suspense>
+        <Suspense fallback={null}>
+          <FocusMode />
+        </Suspense>
+        <Suspense fallback={null}>
+          <AIAssistant />
+        </Suspense>
+        {wordGoalEnabled && (
+          <Suspense fallback={null}>
+            <WordGoalProgress />
+          </Suspense>
+        )}
+        {pomodoroEnabled && (
+          <Suspense fallback={null}>
+            <PomodoroTimer />
+          </Suspense>
+        )}
         <LinkValidator />
-        <WordCountDialog
-          isOpen={showWordCount}
-          onClose={() => setShowWordCount(false)}
-        />
-        <QuickOpenPanel
-          isOpen={showQuickOpen}
-          onClose={() => setShowQuickOpen(false)}
-        />
-        <TocPanel
-          isOpen={showTocPanel}
-          onClose={() => setShowTocPanel(false)}
-        />
+        <Suspense fallback={null}>
+          <WordCountDialog
+            isOpen={showWordCount}
+            onClose={() => setShowWordCount(false)}
+          />
+        </Suspense>
+        <Suspense fallback={null}>
+          <QuickOpenPanel
+            isOpen={showQuickOpen}
+            onClose={() => setShowQuickOpen(false)}
+          />
+        </Suspense>
+        <Suspense fallback={null}>
+          <TocPanel
+            isOpen={showTocPanel}
+            onClose={() => setShowTocPanel(false)}
+          />
+        </Suspense>
         {showUnsavedDialog && (
           <UnsavedChangesDialog
             onSave={handleSaveBeforeClose}
