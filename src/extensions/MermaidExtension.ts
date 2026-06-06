@@ -1,5 +1,4 @@
 import { Node, mergeAttributes } from '@tiptap/core';
-import mermaid from 'mermaid';
 
 export interface MermaidOptions {
   HTMLAttributes: Record<string, any>;
@@ -13,17 +12,25 @@ declare module '@tiptap/core' {
   }
 }
 
-let mermaidInitialized = false;
+// Preload mermaid in background
+let mermaidModule: typeof import('mermaid').default | null = null;
+let mermaidLoadPromise: Promise<void> | null = null;
 
-function ensureMermaid() {
-  if (!mermaidInitialized) {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'default',
+function preloadMermaid(): Promise<void> {
+  if (!mermaidLoadPromise) {
+    mermaidLoadPromise = import('mermaid').then((m) => {
+      mermaidModule = m.default;
+      mermaidModule.initialize({
+        startOnLoad: false,
+        theme: 'default',
+      });
     });
-    mermaidInitialized = true;
   }
+  return mermaidLoadPromise;
 }
+
+// Start preloading immediately
+preloadMermaid();
 
 export const MermaidExtension = Node.create<MermaidOptions>({
   name: 'mermaid',
@@ -101,9 +108,13 @@ export const MermaidExtension = Node.create<MermaidOptions>({
 
       const renderMermaid = async () => {
         try {
-          ensureMermaid();
+          await preloadMermaid();
+          if (!mermaidModule) {
+            previewDiv.innerHTML = `<pre class="mermaid-error">${textarea.value}</pre>`;
+            return;
+          }
           const id = `mermaid-${Date.now()}`;
-          const { svg } = await mermaid.render(id, textarea.value);
+          const { svg } = await mermaidModule.render(id, textarea.value);
           previewDiv.innerHTML = svg;
         } catch (e) {
           previewDiv.innerHTML = `<pre class="mermaid-error">${textarea.value}</pre>`;
@@ -125,7 +136,7 @@ export const MermaidExtension = Node.create<MermaidOptions>({
       textarea.addEventListener('blur', () => {
         textarea.style.display = 'none';
         previewDiv.style.display = 'block';
-        
+
         const pos = getPos?.();
         if (pos !== undefined && editor.isEditable) {
           editor.commands.command(({ tr }) => {
@@ -135,7 +146,7 @@ export const MermaidExtension = Node.create<MermaidOptions>({
             return true;
           });
         }
-        
+
         renderMermaid();
       });
 

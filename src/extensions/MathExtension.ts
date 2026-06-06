@@ -1,5 +1,27 @@
 import { Node, mergeAttributes, InputRule } from '@tiptap/core';
-import katex from 'katex';
+
+// ---- Dynamic KaTeX loading ----
+
+let katexModule: typeof import('katex').default | null = null;
+let katexLoadPromise: Promise<void> | null = null;
+
+function preloadKatex(): Promise<void> {
+  if (!katexLoadPromise) {
+    katexLoadPromise = Promise.all([
+      import('katex'),
+      import('katex/dist/katex.min.css'),
+    ]).then(([m]) => {
+      katexModule = m.default;
+    });
+  }
+  return katexLoadPromise;
+}
+
+// Start preloading in background
+preloadKatex();
+
+// Exported for tests to await katex readiness
+export { preloadKatex as _loadKatex };
 
 // ---- Utility ----
 
@@ -18,12 +40,11 @@ function safeKatexRender(content: string, displayMode: boolean): string {
   }
 
   try {
-    // Check that katex is actually available (it may fail to load in some environments)
-    if (typeof katex?.renderToString !== 'function') {
+    if (typeof katexModule?.renderToString !== 'function') {
       return `<span class="math-error math-fallback" data-latex="${escapeHtml(content)}">${escapeHtml(content)}</span>`;
     }
 
-    const rendered = katex.renderToString(content, {
+    const rendered = katexModule.renderToString(content, {
       throwOnError: false,
       displayMode,
       strict: false,
@@ -31,7 +52,6 @@ function safeKatexRender(content: string, displayMode: boolean): string {
     });
     return rendered;
   } catch (e) {
-    // KaTeX threw an unexpected exception — show raw LaTeX as fallback
     const errMsg = e instanceof Error ? e.message : String(e);
     return `<span class="math-error" title="KaTeX error: ${escapeHtml(errMsg)}" data-latex="${escapeHtml(content)}">${escapeHtml(content)}</span>`;
   }
@@ -127,7 +147,6 @@ export const MathExtension = Node.create<MathOptions>({
   addInputRules() {
     return [
       new InputRule({
-        // Match $$...$$ at the end of input
         find: /\$\$([^\$]+)\$\$\s*$/,
         handler: ({ range, match, chain }) => {
           const content = match[1].trim();
@@ -158,12 +177,13 @@ export const MathExtension = Node.create<MathOptions>({
       textarea.placeholder = 'Enter LaTeX formula...';
       textarea.style.display = 'none';
 
-      const renderMath = () => {
+      const renderMath = async () => {
         const val = textarea.value;
         if (!val || val.trim().length === 0) {
           contentDiv.innerHTML = '';
           return;
         }
+        await preloadKatex();
         contentDiv.innerHTML = safeKatexRender(val, true);
       };
 
@@ -276,8 +296,6 @@ export const InlineMathExtension = Node.create<MathOptions>({
   addInputRules() {
     return [
       new InputRule({
-        // Match $...$ at the end of input, but NOT $$ (block math).
-        // Negative lookbehind prevents matching the second $ of $$.
         find: /(?<!\$)\$([^\$\s](?:[^\$]*[^\$\s])?)\$$/,
         handler: ({ range, match, chain }) => {
           const content = match[1].trim();
@@ -310,12 +328,13 @@ export const InlineMathExtension = Node.create<MathOptions>({
       textarea.rows = 1;
       textarea.style.width = '200px';
 
-      const renderMath = () => {
+      const renderMath = async () => {
         const val = textarea.value;
         if (!val || val.trim().length === 0) {
           contentSpan.innerHTML = '';
           return;
         }
+        await preloadKatex();
         contentSpan.innerHTML = safeKatexRender(val, false);
       };
 

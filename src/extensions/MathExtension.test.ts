@@ -7,7 +7,7 @@ vi.mock('katex', () => ({
 }));
 
 import katex from 'katex';
-import { MathExtension, InlineMathExtension } from './MathExtension';
+import { MathExtension, InlineMathExtension, _loadKatex } from './MathExtension';
 
 function renderBlockMath(attrs: Record<string, any> = {}) {
   return (MathExtension as any).config.renderHTML.call(MathExtension, { HTMLAttributes: attrs });
@@ -77,7 +77,8 @@ describe('InlineMathExtension', () => {
 // ====================================================================
 
 describe('safeKatexRender (via renderHTML)', () => {
-  it('valid LaTeX -> rendered HTML with katex', () => {
+  it('valid LaTeX -> rendered HTML with katex', async () => {
+    await _loadKatex();
     const result = renderBlockMath({ 'data-content': 'x^2' });
     const rendered = result[2][2];
     expect(rendered).toContain('katex');

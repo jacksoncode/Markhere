@@ -1,18 +1,30 @@
 import { Extension } from '@tiptap/core';
-import Prism from 'prismjs';
 
-/**
- * Highlight all code blocks scoped to the editor's own DOM element.
- * This avoids touching anything outside the Tiptap editor, preventing
- * conflicts with React's virtual DOM reconciliation.
- */
+// Preload PrismJS in background
+let PrismModule: any = null;
+let prismLoadPromise: Promise<void> | null = null;
+
+function preloadPrism(): Promise<void> {
+  if (!prismLoadPromise) {
+    prismLoadPromise = import('prismjs').then((m) => {
+      PrismModule = m.default;
+    });
+  }
+  return prismLoadPromise;
+}
+
+// Start preloading immediately
+preloadPrism();
+
 function highlightCodeBlocks(scope: HTMLElement) {
+  if (!PrismModule) return;
+
   const codeBlocks = scope.querySelectorAll<HTMLElement>('pre code');
 
   codeBlocks.forEach((block) => {
     const language = block.parentElement?.getAttribute('data-language') || 'plaintext';
-    if (Prism.languages[language]) {
-      Prism.highlightElement(block);
+    if (PrismModule!.languages[language]) {
+      PrismModule!.highlightElement(block);
     }
   });
 }
@@ -40,9 +52,11 @@ export const CodeBlockHighlight = Extension.create({
   },
 
   onCreate() {
-    // Defer initial highlighting so Prosemirror has rendered the content.
     const dom = this.editor.view.dom;
-    requestAnimationFrame(() => highlightCodeBlocks(dom));
+    requestAnimationFrame(async () => {
+      await preloadPrism();
+      highlightCodeBlocks(dom);
+    });
   },
 
   onUpdate() {
