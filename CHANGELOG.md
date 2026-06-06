@@ -9,13 +9,22 @@
 
 ## [Unreleased]
 
+---
+
+## [0.4.9] - 2025-01-XX
+
 ### 修复 (Fixed)
-- **[关键]** 修复 Windows 平台启动时菜单系统与 Tauri v2 冲突导致的崩溃问题
-- 修复 TitleBar 菜单事件处理的闭包陈旧问题
+- **[P0 关键]** 修复 Windows 平台启动时菜单系统与 Tauri v2 冲突导致的崩溃问题
+- **[P1]** 修复 TitleBar 菜单事件处理的闭包陈旧问题
 
 ### 新增 (Added)
+- **[监控]** 集成 Sentry 错误追踪系统
+- **[监控]** Web Vitals 性能监控 (LCP, CLS, INP, FCP, TTFB)
+- **[监控]** 自定义性能指标追踪（文件操作、编辑器操作）
 - 启动画面，带平滑淡出动画，提升启动体验
+- ErrorBoundary 友好错误提示界面
 - 完整的开发路线图文档 (NEXT_STEPS.md)
+- P0/P1 修复报告文档
 
 ### 变更 (Changed)
 - **[性能]** 懒加载 9 个非关键组件（CommandPalette、FocusMode、AIAssistant 等）
@@ -25,12 +34,19 @@
 - 简化 Toolbar 组件，移除重复的模式按钮
 - 使用 useRef 模式改进 TitleBar 菜单事件处理
 - 重构协作存储以支持异步初始化
+- 开发模式保留可视化错误提示，生产模式使用 Sentry
 
 ### 性能影响
 - **初始包体积减少约 1.3MB（约 40%）**
 - **预计启动时间提升: 30-50%**
 - 通过 vendor chunk 分离提高缓存效率
 - Time to Interactive (TTI) 显著改善
+- 实时性能指标监控和报告
+
+### 测试覆盖
+- ✅ 所有 1807 个测试通过
+- ✅ TypeScript 编译无错误
+- ✅ 构建验证成功
 
 ---
 
