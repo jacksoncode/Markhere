@@ -27,6 +27,29 @@ export default defineConfig({
     minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
     sourcemap: !!process.env.TAURI_DEBUG,
     outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-tiptap': [
+            '@tiptap/react',
+            '@tiptap/starter-kit',
+            '@tiptap/extension-placeholder',
+            '@tiptap/extension-highlight',
+            '@tiptap/extension-link',
+            '@tiptap/extension-image',
+            '@tiptap/extension-table',
+            '@tiptap/extension-task-list',
+            '@tiptap/extension-task-item',
+            '@tiptap/extension-underline',
+          ],
+          'vendor-mermaid': ['mermaid'],
+          'vendor-katex': ['katex'],
+          'vendor-prism': ['prismjs'],
+          'vendor-yjs': ['yjs', 'y-webrtc'],
+        },
+      },
+    },
   },
   resolve: {
     alias: {
