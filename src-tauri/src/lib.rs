@@ -948,13 +948,13 @@ pub fn run() {
                     .item(&MenuItem::with_id(app, "about", "About Markhere", true, None::<&str>)?)
                     .build()?;
                 
-                let menu = MenuBuilder::new(app)
+                let _menu = MenuBuilder::new(app)
                     .item(&file_submenu)
                     .item(&edit_submenu)
                     .item(&view_submenu)
                     .item(&help_submenu)
                     .build()?;
-                
+
                 let _window = WebviewWindowBuilder::new(app, "main", WebviewUrl::default())
                     .title("Markhere - Markdown Editor")
                     .inner_size(1200.0, 800.0)
@@ -962,7 +962,6 @@ pub fn run() {
                     .resizable(true)
                     .center()
                     .decorations(true)
-                    .menu(menu)
                     .build()
                     .expect("Failed to create window");
             }
