@@ -2,6 +2,7 @@ import { useEffect, useReducer } from 'react';
 import type { Editor } from '@tiptap/react';
 import { useEditorState } from '../../store/editorStore';
 import { useFileStore } from '../../store/fileStore';
+import { useUIState } from '../../store/uiStore';
 import { useTranslation } from '../../i18n';
 import './StatusBar.css';
 
@@ -94,20 +95,57 @@ export function StatusBar() {
         </span>
       </div>
 
-      {/* Right: file info */}
+      {/* Right: mode switcher + file info */}
       <div className="status-bar-right">
-        <span className="status-bar-item" title={t('statusBar.fileNameTitle')} aria-label={t('statusBar.fileNameTitle')}>
+        {/* Mode switcher (Typora-style) */}
+        <ModeSwitcher />
+        <span className="status-bar-separator" aria-hidden="true" />
+        <span className="status-bar-item" title={t('statusBar.fileNameTitle')}>
           {fileName}
         </span>
         <span className="status-bar-separator" aria-hidden="true" />
-        <span className="status-bar-item" title={t('statusBar.encodingTitle')} aria-label={t('statusBar.encoding')}>
+        <span className="status-bar-item" title={t('statusBar.encodingTitle')}>
           {t('statusBar.encoding')}
         </span>
         <span className="status-bar-separator" aria-hidden="true" />
-        <span className="status-bar-item" title={t('statusBar.lineEndingTitle')} aria-label={t('statusBar.lineEndingTitle')}>
+        <span className="status-bar-item" title={t('statusBar.lineEndingTitle')}>
           {lineEnding}
         </span>
       </div>
+    </div>
+  );
+}
+
+/** Typora-style mode switcher: Focus / WYSIWYG / Source */
+function ModeSwitcher() {
+  const { focusMode, typewriterMode, sourceMode, toggleFocusMode, toggleTypewriterMode, toggleSourceMode } = useUIState();
+
+  return (
+    <div className="status-bar-mode-switcher" role="group" aria-label="Editor mode switcher">
+      <button
+        className={`status-bar-mode-btn${focusMode ? ' active' : ''}`}
+        onClick={toggleFocusMode}
+        title="Focus Mode (Cmd+Shift+F)"
+        aria-pressed={focusMode}
+      >
+        👁
+      </button>
+      <button
+        className={`status-bar-mode-btn${typewriterMode ? ' active' : ''}`}
+        onClick={toggleTypewriterMode}
+        title="Typewriter Mode (Cmd+Shift+T)"
+        aria-pressed={typewriterMode}
+      >
+        ⌨
+      </button>
+      <button
+        className={`status-bar-mode-btn${sourceMode ? ' active' : ''}`}
+        onClick={toggleSourceMode}
+        title="Source Mode (Cmd+/)"
+        aria-pressed={sourceMode}
+      >
+        {'</>'}
+      </button>
     </div>
   );
 }

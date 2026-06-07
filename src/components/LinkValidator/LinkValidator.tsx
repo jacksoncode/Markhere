@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useEditorState } from '../../store/editorStore';
 import { useTranslation } from '../../i18n';
+import { useDraggable } from '../../hooks/useDraggable';
 import './LinkValidator.css';
 
 interface LinkInfo {
@@ -16,6 +17,7 @@ export function LinkValidator() {
   const [links, setLinks] = useState<LinkInfo[]>([]);
   const [isValidating, setIsValidating] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { ref, onMouseDown } = useDraggable('markhere-linkvalidator-pos');
 
   useEffect(() => {
     if (!content) return;
@@ -63,8 +65,10 @@ export function LinkValidator() {
   if (!isOpen) {
     return (
       <button
+        ref={ref}
         className="link-validator-toggle"
         onClick={() => setIsOpen(true)}
+        onMouseDown={onMouseDown}
         title={t('linkValidator.title')}
       >
         🔗

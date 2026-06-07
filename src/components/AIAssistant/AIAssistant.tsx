@@ -3,6 +3,7 @@ import { useAIStore, callAIStream, AI_PROVIDERS } from '../../store/aiStore';
 import { useEditorState } from '../../store/editorStore';
 import { useTranslation } from '../../i18n';
 import { useNotificationStore } from '../Notification/Notification';
+import { useDraggable } from '../../hooks/useDraggable';
 import './AIAssistant.css';
 
 export function AIAssistant() {
@@ -22,6 +23,7 @@ export function AIAssistant() {
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
+  const { ref, onMouseDown } = useDraggable('markhere-ai-pos');
 
   const currentProvider = useMemo(
     () => AI_PROVIDERS.find((p) => p.id === config.providerId),
@@ -41,7 +43,7 @@ export function AIAssistant() {
   if (!isEnabled) {
     return (
       <div className="ai-assistant-collapsed">
-        <button className="ai-toggle-btn" onClick={toggleEnabled}>
+        <button ref={ref} className="ai-toggle-btn" onClick={toggleEnabled} onMouseDown={onMouseDown}>
           🤖 {t('ai.assistant')}
         </button>
       </div>

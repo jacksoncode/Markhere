@@ -1,5 +1,4 @@
-@import './design-tokens.css';
-
+/* Design tokens moved to global.css + themes/dark-contrast.css */
 .app-container {
   display: flex;
   height: 100vh;

@@ -283,32 +283,36 @@ export function Toolbar() {
       </div>
 
       {/* Bottom sheet with full toolbar (mobile only) */}
-      <div
-        className={`toolbar-bottom-sheet-backdrop${showMore ? ' open' : ''}`}
-        onClick={handleBackdropClick}
-      />
-      <div className={`toolbar-bottom-sheet${showMore ? ' open' : ''}`}>
-        <div className="toolbar-bottom-sheet-handle" />
-        <div className="toolbar-bottom-sheet-title">
-          {t('toolbar.moreTools') ?? 'More Tools'}
-        </div>
-        <div className="toolbar-bottom-sheet-grid">
-          {items.map((item) => (
-            <button
-              key={item.label}
-              className={`toolbar-bottom-sheet-item${item.active ? ' active' : ''}`}
-              onClick={() => {
-                item.action();
-                setShowMore(false);
-              }}
-              type="button"
-            >
-              <item.icon className="toolbar-icon" />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {isMobile && (
+        <>
+          <div
+            className={`toolbar-bottom-sheet-backdrop${showMore ? ' open' : ''}`}
+            onClick={handleBackdropClick}
+          />
+          <div className={`toolbar-bottom-sheet${showMore ? ' open' : ''}`}>
+            <div className="toolbar-bottom-sheet-handle" />
+            <div className="toolbar-bottom-sheet-title">
+              More Tools
+            </div>
+            <div className="toolbar-bottom-sheet-grid">
+              {items.map((item) => (
+                <button
+                  key={item.label}
+                  className={`toolbar-bottom-sheet-item${item.active ? ' active' : ''}`}
+                  onClick={() => {
+                    item.action();
+                    setShowMore(false);
+                  }}
+                  type="button"
+                >
+                  <item.icon className="toolbar-icon" />
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

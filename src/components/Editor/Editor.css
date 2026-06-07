@@ -1,5 +1,6 @@
 .editor-wrapper {
   flex: 1;
+  min-height: 0;
   display: flex;
   position: relative;
   overflow: auto;
@@ -7,6 +8,13 @@
   background: var(--color-bg);
   transition: background-color var(--transition-slow);
   scrollbar-width: none;
+}
+
+/* Make sure the Tiptap editor DOM fills the wrapper */
+.editor-wrapper .ProseMirror {
+  flex: 1;
+  min-height: 100%;
+  outline: none;
 }
 
 .editor-wrapper::-webkit-scrollbar {

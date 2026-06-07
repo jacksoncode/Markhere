@@ -58,3 +58,30 @@
   background: var(--color-bg-secondary);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* ── Mode Switcher ── */
+.status-bar-mode-switcher {
+  display: flex;
+  gap: 2px;
+}
+
+.status-bar-mode-btn {
+  padding: 2px 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 3px;
+  line-height: 1;
+}
+
+.status-bar-mode-btn:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.status-bar-mode-btn.active {
+  background: var(--color-primary);
+  color: white;
+}
