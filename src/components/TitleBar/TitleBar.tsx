@@ -556,16 +556,10 @@ ${html}
     }
   };
 
-  const handleCloseWindow = async () => {
+  const handleCloseWindow = () => {
     setActiveMenu(null);
-    try {
-      const { getCurrentWindow } = await import('@tauri-apps/api/window');
-      const win = getCurrentWindow();
-      await win.close();
-    } catch (err) {
-      console.error('Close window failed:', err);
-      notify('error', 'Failed to close window');
-    }
+    // Delegate to App.tsx which handles unsaved dialog + actual close
+    window.dispatchEvent(new CustomEvent('markhere:close-requested'));
   };
 
   const handleIncreaseHeading = () => {
@@ -1269,6 +1263,11 @@ tags: []
       </div>
       
       <span className="typora-titlebar-title">{fileName} - Markhere</span>
+
+      {/* Fallback close button — works even if macOS traffic lights are blocked */}
+      <button className="typora-titlebar-close-btn" onClick={handleCloseWindow} title="Close Window (Cmd+W)">
+        ×
+      </button>
       
       <ShortcutSettings isOpen={showShortcutSettings} onClose={() => setShowShortcutSettings(false)} />
       <TemplateSelector isOpen={showTemplateSelector} onClose={() => setShowTemplateSelector(false)} />

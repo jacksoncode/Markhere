@@ -58,7 +58,12 @@ function App() {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
 
-  const checkUnsavedChanges = () => useAutoSaveStore.getState().hasUnsavedChanges;
+  const checkUnsavedChanges = () => {
+    const { hasUnsavedChanges } = useAutoSaveStore.getState();
+    // Only flag as dirty if there's actual content worth saving
+    const text = editorInstance?.getText() || '';
+    return hasUnsavedChanges && text.trim().length > 0;
+  };
 
   const closeWindow = async () => {
     const api = await getWindowApi();
@@ -112,15 +117,36 @@ function App() {
     return () => window.removeEventListener('beforeunload', h);
   }, []);
 
-  // ---- Close guard ----
+  // ---- Close guard (macOS traffic light + Cmd+W + custom close button) ----
   useEffect(() => {
+    // Listen for custom close events from TitleBar
+    const onCustomClose = () => {
+      if (checkUnsavedChanges()) {
+        setPendingClose(true);
+        setShowUnsavedDialog(true);
+      } else {
+        closeWindow();
+      }
+    };
+    window.addEventListener('markhere:close-requested', onCustomClose);
+
     let unlisten: (() => void) | undefined;
     getWindowApi().then(api => {
       api.getCurrentWindow().onCloseRequested((event) => {
-        if (checkUnsavedChanges()) { event.preventDefault(); setPendingClose(true); setShowUnsavedDialog(true); }
-      }).then(fn => { unlisten = fn; });
-    });
-    return () => { unlisten?.(); };
+        if (checkUnsavedChanges()) {
+          event.preventDefault();
+          setPendingClose(true);
+          setShowUnsavedDialog(true);
+        }
+        // No unsaved changes → window closes naturally (no preventDefault)
+      }).then(fn => { unlisten = fn; })
+      .catch(() => {}); // Tauri not available — will use beforeunload
+    }).catch(() => {});
+
+    return () => {
+      window.removeEventListener('markhere:close-requested', onCustomClose);
+      unlisten?.();
+    };
   }, []);
 
   const handleRecover = () => {
