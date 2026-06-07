@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useThemeStore } from '../../store/themeStore';
 import { safeInvoke } from '../../services/ipcWrapper';
+import './ThemeMarketplace.css';
 
 interface ThemeFile { name: string; author: string; colors: Record<string, string> }
 
