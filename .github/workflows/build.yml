@@ -39,7 +39,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.target }}
+          target: ${{ matrix.target }}
 
       - name: Install Linux system dependencies
         if: matrix.os == 'ubuntu-latest'
