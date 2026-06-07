@@ -134,9 +134,9 @@ describe('useTranslation', () => {
     });
 
     it('falls back to zh-CN locale when language is invalid', () => {
-      currentLanguage = 'fr-FR' as 'zh-CN'; // Override to unknown language
+      currentLanguage = 'xx-XX' as 'zh-CN'; // Override to truly unknown language
       const { t } = useTranslation();
-      // Should fall back to zh-CN since 'fr-FR' is not in translations
+      // Should fall back to zh-CN since 'xx-XX' is not in translations
       expect(t('menu.file')).toBe('文件');
     });
   });

@@ -19,17 +19,18 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   applyTheme: () => {
     const theme = themes[get().currentTheme];
     const root = document.documentElement;
-    
-    root.style.setProperty('--bg-color', theme.colors.bg);
-    root.style.setProperty('--text-color', theme.colors.text);
-    root.style.setProperty('--border-color', theme.colors.border);
-    root.style.setProperty('--primary-color', theme.colors.primary);
-    root.style.setProperty('--code-bg', theme.colors.codeBg);
-    root.style.setProperty('--hover-bg', theme.colors.hoverBg);
-    root.style.setProperty('--shadow-color', `${theme.colors.border}40`);
-    
+
+    // Use CSS custom properties so they can be overridden by .dark-contrast.css
+    root.style.setProperty('--theme-bg', theme.colors.bg);
+    root.style.setProperty('--theme-text', theme.colors.text);
+    root.style.setProperty('--theme-border', theme.colors.border);
+    root.style.setProperty('--theme-primary', theme.colors.primary);
+    root.style.setProperty('--theme-code-bg', theme.colors.codeBg);
+    root.style.setProperty('--theme-hover-bg', theme.colors.hoverBg);
+    root.style.setProperty('--theme-shadow', `${theme.colors.border}40`);
+
     const isDark = theme.colors.bg.toLowerCase() < '#888888';
-    document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   },
 }));
 

@@ -1,0 +1,17 @@
+.dataview-panel { padding: 16px; height: 100%; display: flex; flex-direction: column; gap: 12px; }
+.dv-path-row { display: flex; gap: 8px; align-items: center; }
+.dv-path-row label { font-size: 13px; white-space: nowrap; }
+.dv-path-row input { flex: 1; padding: 4px 8px; border: 1px solid var(--border-primary); border-radius: 4px; }
+.dv-path-row button { padding: 4px 12px; cursor: pointer; }
+.dv-stats { font-size: 12px; color: var(--text-secondary); }
+.dv-query { display: flex; flex-direction: column; gap: 8px; }
+.dv-query textarea { width: 100%; padding: 8px; border: 1px solid var(--border-primary); border-radius: 4px; font-family: monospace; font-size: 13px; resize: vertical; background: var(--bg-secondary); }
+.dv-query button { align-self: flex-start; padding: 6px 16px; cursor: pointer; background: var(--color-primary); color: #fff; border: none; border-radius: 4px; }
+.dv-query button:disabled { opacity: 0.5; }
+.dv-error { color: var(--color-error); padding: 8px; background: var(--bg-secondary); border-radius: 4px; }
+.dv-results { flex: 1; overflow: auto; }
+.dv-results-info { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.dv-results table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dv-results th { background: var(--bg-secondary); padding: 6px 8px; text-align: left; border-bottom: 2px solid var(--border-primary); }
+.dv-results td { padding: 4px 8px; border-bottom: 1px solid var(--border-primary); }
+.dv-empty { text-align: center; padding: 32px; color: var(--text-secondary); }

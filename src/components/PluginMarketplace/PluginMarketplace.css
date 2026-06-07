@@ -1,0 +1,30 @@
+.plugin-marketplace { padding: 16px; }
+.plugin-marketplace h2 { margin: 0 0 12px; font-size: 16px; }
+.pm-controls input { width: 100%; padding: 8px; border: 1px solid var(--border-primary); border-radius: 6px; margin-bottom: 8px; }
+.pm-categories { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.pm-categories button { padding: 4px 10px; border: 1px solid var(--border-primary); border-radius: 4px; background: var(--bg-secondary); cursor: pointer; font-size: 12px; }
+.pm-categories button.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.pm-grid { display: grid; gap: 6px; }
+.pm-card { border: 1px solid var(--border-primary); border-radius: 6px; padding: 10px; cursor: pointer; background: var(--bg-secondary); }
+.pm-card:hover { border-color: var(--color-primary); }
+.pm-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.pm-icon { font-size: 18px; }
+.pm-name { font-weight: 600; font-size: 13px; flex: 1; }
+.pm-badge { font-size: 10px; background: var(--color-success, #22c55e); color: #fff; padding: 1px 6px; border-radius: 4px; }
+.pm-card-desc { font-size: 12px; color: var(--text-secondary); margin: 0 0 6px; }
+.pm-card-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); }
+.pm-empty { text-align: center; padding: 32px; color: var(--text-secondary); }
+.pm-detail { padding: 4px 0; }
+.pm-back { background: none; border: none; color: var(--color-primary); cursor: pointer; padding: 4px 0; margin-bottom: 8px; font-size: 13px; }
+.pm-author { font-size: 12px; color: var(--text-secondary); margin: 2px 0 8px; }
+.pm-desc { font-size: 13px; margin-bottom: 8px; }
+.pm-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+.pm-tag { font-size: 11px; background: var(--bg-secondary); padding: 2px 8px; border-radius: 4px; }
+.pm-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
+.pm-repo { font-size: 12px; margin-bottom: 8px; }
+.pm-repo a { color: var(--color-primary); }
+.pm-perms { font-size: 12px; margin-bottom: 12px; }
+.pm-perms ul { margin: 4px 0 0 16px; }
+.pm-btn { padding: 6px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; border: none; }
+.pm-btn.primary { background: var(--color-primary); color: #fff; }
+.pm-btn.danger { background: var(--color-error); color: #fff; }

@@ -1,0 +1,46 @@
+/* High Contrast Mode - WCAG AAA Compliant */
+
+[data-contrast="high"] {
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #1a1a1a;
+
+  --text-primary: #ffffff;
+  --text-secondary: #e0e0e0;
+
+  --icon-default: #ffffff;
+  --icon-hover: #ffdd57;
+  --icon-active: #ffffff;
+  --icon-disabled: #808080;
+
+  --color-primary: #4da3e0;
+  --color-primary-hover: #6db8ed;
+  --color-success: #6ad4b9;
+  --color-warning: #ffdd57;
+  --color-error: #ff8a75;
+  --color-info: #75beff;
+
+  --border-primary: #808080;
+  --border-secondary: #606060;
+
+  --selection-bg: #1a4a7a;
+  --selection-text: #ffffff;
+}
+
+[data-contrast="high"] * {
+  border-color: var(--border-primary) !important;
+}
+
+[data-contrast="high"] .toolbar-button {
+  border: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+}
+
+[data-contrast="high"] .toolbar-button:hover {
+  background: var(--bg-tertiary);
+}
+
+[data-contrast="high"] *:focus-visible {
+  outline: 3px solid #ffdd57;
+  outline-offset: 3px;
+}

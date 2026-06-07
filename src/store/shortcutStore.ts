@@ -1,3 +1,5 @@
+// shortcutStore (singular) — lightweight config for ShortcutEditor component
+// Distinct from shortcutsStore (plural) which powers ShortcutSettings with category browsing
 import { create } from 'zustand';
 
 export interface ShortcutConfig {

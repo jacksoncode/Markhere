@@ -1,0 +1,21 @@
+{
+  "app": { "title": "Markhere" },
+  "menu": { "file": "ファイル", "edit": "編集", "paragraph": "段落", "format": "書式", "view": "表示", "help": "ヘルプ" },
+  "file": { "new": "新規", "open": "開く", "save": "保存", "saveAs": "名前を付けて保存", "exportPdf": "PDFにエクスポート", "exportWord": "Wordにエクスポート", "exportHtml": "HTMLにエクスポート", "exportEpub": "EPUBにエクスポート", "close": "閉じる" },
+  "edit": { "undo": "元に戻す", "redo": "やり直し", "cut": "切り取り", "copy": "コピー", "paste": "貼り付け", "selectAll": "すべて選択", "find": "検索", "replace": "置換" },
+  "paragraph": { "heading1": "見出し1", "heading2": "見出し2", "heading3": "見出し3", "bulletList": "リスト", "orderedList": "番号付きリスト", "taskList": "タスクリスト", "codeBlock": "コードブロック", "table": "表" },
+  "format": { "bold": "太字", "italic": "斜体", "underline": "下線", "strikethrough": "打ち消し線", "inlineCode": "インラインコード", "link": "リンク", "image": "画像" },
+  "view": { "showSidebar": "サイドバーを表示", "hideSidebar": "サイドバーを隠す", "focusMode": "集中モード", "typewriterMode": "タイプライターモード", "sourceMode": "ソースモード", "wordCount": "文字カウント", "versionHistory": "バージョン履歴" },
+  "sidebar": { "label": "サイドバー", "tabsLabel": "タブ", "files": "ファイル", "outline": "アウトライン", "bookmarks": "ブックマーク", "closeSidebar": "サイドバーを閉じる", "newFile": "新規ファイル", "openFile": "ファイルを開く", "noHeadings": "見出しがありません", "dragToReorder": "ドラッグで並べ替え", "browseFolder": "フォルダを開く", "noRecentFiles": "最近のファイルはありません" },
+  "toolbar": { "label": "書式設定ツールバー" },
+  "unsaved": { "title": "未保存の変更", "message": "保存されていない変更があります。保存しますか？", "save": "保存", "discard": "破棄", "cancel": "キャンセル" },
+  "search": { "title": "検索と置換", "find": "検索", "replace": "置換", "replaceAll": "すべて置換", "caseSensitive": "大文字小文字を区別", "useRegex": "正規表現", "close": "閉じる", "noResults": "結果が見つかりません", "results": "{{count}}件の一致" },
+  "settings": { "title": "設定", "language": "言語", "theme": "テーマ", "autoSave": "自動保存", "editor": "エディタ設定", "general": "一般", "appearance": "外観" },
+  "ai": { "summarize": "要約", "translate": "翻訳", "polish": "推敲", "tags": "タグ提案", "suggestions": "執筆アドバイス", "outline": "アウトライン生成", "send": "送信", "enableAI": "AIアシスタントを有効にする" },
+  "export": { "export": "エクスポート", "exportFailed": "エクスポート失敗：{{error}}" },
+  "collaboration": { "title": "リアルタイムコラボレーション", "connect": "接続", "disconnect": "切断", "connected": "接続済み", "collaborators": "コラボレーター" },
+  "versionHistory": { "title": "バージョン履歴", "diffView": "差分表示", "loading": "読み込み中" },
+  "plugins": { "title": "プラグインマネージャー", "install": "インストール", "uninstall": "アンインストール", "search": "プラグインを検索" },
+  "wordCount": { "words": "単語", "characters": "文字", "paragraphs": "段落", "readingTime": "読了時間", "minutes": "分" },
+  "statusBar": { "words": "{{count}}単語", "chars": "{{count}}文字", "untitled": "無題" }
+}

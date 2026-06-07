@@ -45,10 +45,6 @@ describe('useEditorState', () => {
     it('has null fileName', () => {
       expect(useEditorState.getState().fileName).toBeNull();
     });
-
-    it('has isDirty=false', () => {
-      expect(useEditorState.getState().isDirty).toBe(false);
-    });
   });
 
   // -----------------------------------------------------------------------
@@ -62,21 +58,13 @@ describe('useEditorState', () => {
       expect(useEditorState.getState().content).toBe('# Hello World');
     });
 
-    it('marks isDirty=true when content is set', () => {
-      const { setContent } = useEditorState.getState();
-      setContent('# New Document');
-
-      expect(useEditorState.getState().isDirty).toBe(true);
-    });
-
     it('allows setting empty content', () => {
-      useEditorState.setState({ content: '# Previous', isDirty: false });
+      useEditorState.setState({ content: '# Previous' });
 
       const { setContent } = useEditorState.getState();
       setContent('');
 
       expect(useEditorState.getState().content).toBe('');
-      expect(useEditorState.getState().isDirty).toBe(true);
     });
   });
 
@@ -127,24 +115,6 @@ describe('useEditorState', () => {
   // -----------------------------------------------------------------------
   // markDirty
   // -----------------------------------------------------------------------
-  describe('markDirty', () => {
-    it('sets isDirty to true', () => {
-      const { markDirty } = useEditorState.getState();
-      markDirty(true);
-
-      expect(useEditorState.getState().isDirty).toBe(true);
-    });
-
-    it('sets isDirty to false', () => {
-      useEditorState.setState({ isDirty: true });
-
-      const { markDirty } = useEditorState.getState();
-      markDirty(false);
-
-      expect(useEditorState.getState().isDirty).toBe(false);
-    });
-  });
-
   // -----------------------------------------------------------------------
   // reset
   // -----------------------------------------------------------------------
@@ -155,7 +125,6 @@ describe('useEditorState', () => {
         content: '# Some Content',
         editorInstance: editor,
         fileName: 'notes.md',
-        isDirty: true,
       });
 
       const { reset } = useEditorState.getState();
@@ -165,7 +134,6 @@ describe('useEditorState', () => {
       expect(state.content).toBe('');
       expect(state.editorInstance).toBeNull();
       expect(state.fileName).toBeNull();
-      expect(state.isDirty).toBe(false);
     });
 
     it('can be called from initial state without error', () => {

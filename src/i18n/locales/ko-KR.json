@@ -1,0 +1,21 @@
+{
+  "app": { "title": "Markhere" },
+  "menu": { "file": "파일", "edit": "편집", "paragraph": "단락", "format": "서식", "view": "보기", "help": "도움말" },
+  "file": { "new": "새로 만들기", "open": "열기", "save": "저장", "saveAs": "다른 이름으로 저장", "exportPdf": "PDF로 내보내기", "exportWord": "Word로 내보내기", "exportHtml": "HTML로 내보내기", "exportEpub": "EPUB로 내보내기", "close": "닫기" },
+  "edit": { "undo": "실행 취소", "redo": "다시 실행", "cut": "잘라내기", "copy": "복사", "paste": "붙여넣기", "selectAll": "전체 선택", "find": "찾기", "replace": "바꾸기" },
+  "paragraph": { "heading1": "제목1", "heading2": "제목2", "heading3": "제목3", "bulletList": "글머리 기호", "orderedList": "번호 매기기", "taskList": "할 일 목록", "codeBlock": "코드 블록", "table": "표" },
+  "format": { "bold": "굵게", "italic": "기울임꼴", "underline": "밑줄", "strikethrough": "취소선", "inlineCode": "인라인 코드", "link": "링크", "image": "이미지" },
+  "view": { "showSidebar": "사이드바 표시", "hideSidebar": "사이드바 숨기기", "focusMode": "집중 모드", "typewriterMode": "타자기 모드", "sourceMode": "소스 모드", "wordCount": "단어 수", "versionHistory": "버전 기록" },
+  "sidebar": { "label": "사이드바", "tabsLabel": "탭", "files": "파일", "outline": "개요", "bookmarks": "북마크", "closeSidebar": "사이드바 닫기", "newFile": "새 파일", "openFile": "파일 열기", "noHeadings": "제목 없음", "dragToReorder": "드래그하여 재정렬", "browseFolder": "폴더 찾아보기", "noRecentFiles": "최근 파일 없음" },
+  "toolbar": { "label": "서식 도구 모음" },
+  "unsaved": { "title": "저장되지 않은 변경사항", "message": "저장되지 않은 변경사항이 있습니다. 저장하시겠습니까?", "save": "저장", "discard": "변경사항 취소", "cancel": "취소" },
+  "search": { "title": "찾기 및 바꾸기", "find": "찾기", "replace": "바꾸기", "replaceAll": "모두 바꾸기", "caseSensitive": "대소문자 구분", "useRegex": "정규식", "close": "닫기", "noResults": "결과 없음", "results": "{{count}}개 일치" },
+  "settings": { "title": "설정", "language": "언어", "theme": "테마", "autoSave": "자동 저장", "editor": "편집기 설정", "general": "일반", "appearance": "모양" },
+  "ai": { "summarize": "요약", "translate": "번역", "polish": "다듬기", "tags": "태그 제안", "suggestions": "글쓰기 조언", "outline": "개요 생성", "send": "보내기", "enableAI": "AI 도우미 활성화" },
+  "export": { "export": "내보내기", "exportFailed": "내보내기 실패：{{error}}" },
+  "collaboration": { "title": "실시간 협업", "connect": "연결", "disconnect": "연결 해제", "connected": "연결됨", "collaborators": "협업자" },
+  "versionHistory": { "title": "버전 기록", "diffView": "차이 보기", "loading": "로딩 중" },
+  "plugins": { "title": "플러그인 관리자", "install": "설치", "uninstall": "제거", "search": "플러그인 검색" },
+  "wordCount": { "words": "단어", "characters": "문자", "paragraphs": "단락", "readingTime": "읽는 시간", "minutes": "분" },
+  "statusBar": { "words": "{{count}}단어", "chars": "{{count}}문자", "untitled": "제목 없음" }
+}

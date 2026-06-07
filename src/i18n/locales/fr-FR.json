@@ -1,0 +1,21 @@
+{
+  "app": { "title": "Markhere" },
+  "menu": { "file": "Fichier", "edit": "Édition", "paragraph": "Paragraphe", "format": "Format", "view": "Affichage", "help": "Aide" },
+  "file": { "new": "Nouveau", "open": "Ouvrir", "save": "Enregistrer", "saveAs": "Enregistrer sous", "exportPdf": "Exporter en PDF", "exportWord": "Exporter en Word", "exportHtml": "Exporter en HTML", "exportEpub": "Exporter en EPUB", "close": "Fermer" },
+  "edit": { "undo": "Annuler", "redo": "Rétablir", "cut": "Couper", "copy": "Copier", "paste": "Coller", "selectAll": "Tout sélectionner", "find": "Rechercher", "replace": "Remplacer" },
+  "paragraph": { "heading1": "Titre 1", "heading2": "Titre 2", "heading3": "Titre 3", "bulletList": "Liste à puces", "orderedList": "Liste numérotée", "taskList": "Liste de tâches", "codeBlock": "Bloc de code", "table": "Tableau" },
+  "format": { "bold": "Gras", "italic": "Italique", "underline": "Souligné", "strikethrough": "Barré", "inlineCode": "Code en ligne", "link": "Lien", "image": "Image" },
+  "view": { "showSidebar": "Afficher la barre latérale", "hideSidebar": "Masquer la barre", "focusMode": "Mode concentration", "typewriterMode": "Mode machine à écrire", "sourceMode": "Mode source", "wordCount": "Compteur de mots", "versionHistory": "Historique" },
+  "sidebar": { "label": "Barre latérale", "tabsLabel": "Onglets", "files": "FICHIERS", "outline": "PLAN", "bookmarks": "FAVORIS", "closeSidebar": "Fermer", "newFile": "Nouveau", "openFile": "Ouvrir", "noHeadings": "Aucun titre", "dragToReorder": "Glisser pour réorganiser", "browseFolder": "Parcourir", "noRecentFiles": "Aucun fichier récent" },
+  "toolbar": { "label": "Barre d'outils" },
+  "unsaved": { "title": "Modifications non sauvegardées", "message": "Voulez-vous enregistrer les modifications ?", "save": "Enregistrer", "discard": "Abandonner", "cancel": "Annuler" },
+  "search": { "title": "Rechercher et remplacer", "find": "Rechercher", "replace": "Remplacer", "replaceAll": "Tout remplacer", "caseSensitive": "Sensible à la casse", "useRegex": "Expression régulière", "close": "Fermer", "noResults": "Aucun résultat", "results": "{{count}} correspondances" },
+  "settings": { "title": "Paramètres", "language": "Langue", "theme": "Thème", "autoSave": "Sauvegarde automatique", "editor": "Paramètres de l'éditeur", "general": "Général", "appearance": "Apparence" },
+  "ai": { "summarize": "Résumer", "translate": "Traduire", "polish": "Améliorer", "tags": "Suggérer des étiquettes", "suggestions": "Conseils d'écriture", "outline": "Générer le plan", "send": "Envoyer", "enableAI": "Activer l'assistant IA" },
+  "export": { "export": "Exporter", "exportFailed": "Échec de l'exportation：{{error}}" },
+  "collaboration": { "title": "Collaboration en temps réel", "connect": "Connecter", "disconnect": "Déconnecter", "connected": "Connecté", "collaborators": "Collaborateurs" },
+  "versionHistory": { "title": "Historique des versions", "diffView": "Voir les différences", "loading": "Chargement" },
+  "plugins": { "title": "Gestionnaire de plugins", "install": "Installer", "uninstall": "Désinstaller", "search": "Rechercher des plugins" },
+  "wordCount": { "words": "mots", "characters": "caractères", "paragraphs": "paragraphes", "readingTime": "Temps de lecture", "minutes": "min" },
+  "statusBar": { "words": "{{count}} mots", "chars": "{{count}} car.", "untitled": "Sans titre" }
+}

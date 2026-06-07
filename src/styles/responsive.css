@@ -1,0 +1,206 @@
+/* ─── Responsive Breakpoints ─── */
+:root {
+  --breakpoint-mobile: 480px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --keyboard-height: 0px;
+}
+
+/* ─── Mobile (Phone) ─── */
+@media (max-width: 480px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "header"
+      "content"
+      "toolbar";
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+    display: none;
+  }
+
+  .sidebar.open ~ .sidebar-overlay {
+    display: block;
+  }
+
+  .toolbar {
+    position: fixed;
+    bottom: var(--keyboard-height, 0px);
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 8px 4px;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-primary);
+    z-index: 100;
+  }
+
+  .toolbar-button {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 20px;
+    padding: 8px;
+  }
+
+  .editor-wrapper {
+    padding: 8px;
+    font-size: 16px;
+    padding-bottom: calc(var(--keyboard-height, 0px) + 60px);
+  }
+
+  .status-bar {
+    display: none;
+  }
+
+  .title-bar {
+    padding: 8px 12px;
+  }
+
+  .modal,
+  .dialog {
+    width: calc(100vw - 32px);
+    max-width: 400px;
+    margin: 0 16px;
+    border-radius: 12px 12px 0 0;
+  }
+}
+
+/* ─── Tablet ─── */
+@media (min-width: 481px) and (max-width: 768px) {
+  .app-layout {
+    grid-template-columns: 56px 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "sidebar header"
+      "sidebar content"
+      "sidebar status";
+  }
+
+  .sidebar {
+    width: 56px;
+    overflow: hidden;
+  }
+
+  .sidebar-item-text {
+    display: none;
+  }
+
+  .sidebar-item-icon {
+    font-size: 20px;
+  }
+
+  .toolbar {
+    flex-wrap: wrap;
+    padding: 8px;
+  }
+
+  .toolbar-button {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .editor-wrapper {
+    padding: 12px;
+  }
+}
+
+/* ─── Desktop ─── */
+@media (min-width: 769px) {
+  .app-layout {
+    grid-template-columns: 260px 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "sidebar header"
+      "sidebar content"
+      "sidebar status";
+  }
+
+  .sidebar {
+    width: 260px;
+  }
+
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
+/* ─── Large Screens ─── */
+@media (min-width: 1440px) {
+  .app-layout {
+    grid-template-columns: 280px 1fr 240px;
+    grid-template-areas:
+      "sidebar header header"
+      "sidebar content outline"
+      "sidebar status status";
+  }
+
+  .outline-panel {
+    display: block;
+  }
+}
+
+/* ─── Touch-optimized interactions ─── */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .toolbar-button:active,
+  .sidebar-item:active {
+    background: var(--bg-tertiary);
+    transform: scale(0.97);
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* ─── Landscape mode ─── */
+@media (max-width: 900px) and (orientation: landscape) {
+  .app-layout {
+    grid-template-rows: auto 1fr;
+  }
+
+  .toolbar {
+    position: static;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .editor-wrapper {
+    max-height: calc(100vh - 120px);
+  }
+}

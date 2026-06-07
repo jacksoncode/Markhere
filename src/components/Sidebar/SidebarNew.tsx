@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { Editor } from '@tiptap/react';
 import { useFileStore } from '../../store/fileStore';
 import { useEditorState } from '../../store/editorStore';
@@ -14,7 +14,7 @@ import { useNotificationStore } from '../Notification/Notification';
 import { BookmarkList } from '../Bookmarks/BookmarkList';
 import './Sidebar-New.css';
 
-type SidebarTab = 'files' | 'outline' | 'bookmarks';
+type SidebarTab = 'files' | 'outline' | 'bookmarks' | 'database' | 'dataview' | 'canvas';
 
 function formatRelativeTime(timestamp: number): string {
   const diffMs = Date.now() - timestamp;
@@ -76,7 +76,10 @@ function findSectionEnd(editor: Editor, headingPos: number, level: number): numb
   return end;
 }
 
-const TAB_ORDER: SidebarTab[] = ['files', 'outline', 'bookmarks'];
+const TAB_ORDER: SidebarTab[] = ['files', 'outline', 'bookmarks', 'database', 'dataview', 'canvas'];
+const DatabasePanelLazy = lazy(() => import('../Database/DatabasePanel').then(m => ({ default: m.DatabasePanel })));
+const DataviewPanelLazy = lazy(() => import('../Dataview/DataviewPanel').then(m => ({ default: m.DataviewPanel })));
+const CanvasBoardLazy = lazy(() => import('../Canvas/CanvasBoard').then(m => ({ default: m.CanvasBoard })));
 
 export function SidebarNew() {
   const [activeTab, setActiveTab] = useState<SidebarTab>('files');
@@ -416,6 +419,9 @@ export function SidebarNew() {
     { key: 'files', label: t('sidebar.files') },
     { key: 'outline', label: t('sidebar.outline') },
     { key: 'bookmarks', label: t('sidebar.bookmarks') },
+    { key: 'database', label: '🗄 DB' },
+    { key: 'dataview', label: '🔍 Query' },
+    { key: 'canvas', label: '🎨 Canvas' },
   ];
 
   /** Recursively render a single directory level for the Browse view. */
@@ -757,6 +763,12 @@ export function SidebarNew() {
         return renderOutlineView();
       case 'bookmarks':
         return renderBookmarksView();
+      case 'database':
+        return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><DatabasePanelLazy /></Suspense>;
+      case 'dataview':
+        return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><DataviewPanelLazy /></Suspense>;
+      case 'canvas':
+        return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><CanvasBoardLazy /></Suspense>;
       case 'files':
       default:
         return renderFileTreeView();

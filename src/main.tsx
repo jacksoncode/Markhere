@@ -23,7 +23,7 @@ if (SENTRY_DSN || isProduction) {
     replaysSessionSampleRate: 0.1, // 10% of normal sessions
     replaysOnErrorSampleRate: 1.0, // 100% of error sessions
     // Release tracking
-    release: `markhere@${import.meta.env.VITE_APP_VERSION || '0.4.9'}`,
+    release: `markhere@${import.meta.env.VITE_APP_VERSION || '1.0.0'}`,
     // Additional context
     beforeSend(event) {
       // Add Tauri-specific context
@@ -66,10 +66,13 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/global.css';
-import { initPerformanceMonitoring } from './services/performanceMonitoring';
+import './styles/themes/dark-contrast.css';
+import './styles/themes/high-contrast.css';
+import './styles/responsive.css';
+import { MonitoringService } from './services/MonitoringService';
 
-// Initialize performance monitoring
-initPerformanceMonitoring();
+// 统一初始化所有监控和可访问性服务
+MonitoringService.init();
 
 // KaTeX CSS is loaded dynamically on first math render — see MathExtension.ts
 

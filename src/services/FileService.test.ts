@@ -26,9 +26,13 @@ describe('FileService', () => {
   // openFile
   // -----------------------------------------------------------------------
   describe('openFile', () => {
-    it('opens file dialog and reads file content', async () => {
+    it('opens file dialog and reads file content via LargeFileService', async () => {
       mockOpen.mockResolvedValue('/path/to/document.md');
-      mockInvoke.mockResolvedValue('# Hello\n\nThis is some content.');
+      mockInvoke.mockImplementation(async (cmd: string) => {
+        if (cmd === 'get_file_size') return 0;  // small file → read_file path
+        if (cmd === 'read_file') return '# Hello\n\nThis is some content.';
+        return '';
+      });
 
       const result = await FileService.openFile();
 
@@ -36,9 +40,8 @@ describe('FileService', () => {
         filters: [{ name: 'Markdown', extensions: ['md'] }],
         multiple: false,
       });
-      expect(mockInvoke).toHaveBeenCalledWith('read_file', {
-        path: '/path/to/document.md',
-      });
+      expect(mockInvoke).toHaveBeenCalledWith('get_file_size', { path: '/path/to/document.md' });
+      expect(mockInvoke).toHaveBeenCalledWith('read_file', { path: '/path/to/document.md' });
       expect(result).toEqual({
         path: '/path/to/document.md',
         content: '# Hello\n\nThis is some content.',
@@ -63,11 +66,13 @@ describe('FileService', () => {
       expect(result).toBeNull();
     });
 
-    it('throws when invoke fails with file not found', async () => {
+    it('returns null on invoke error (handled by LargeFileService)', async () => {
       mockOpen.mockResolvedValue('/path/to/file.md');
       mockInvoke.mockRejectedValue(new Error('File not found'));
 
-      await expect(FileService.openFile()).rejects.toThrow('File not found');
+      const result = await FileService.openFile();
+      // LargeFileService catches the error and returns null
+      expect(result).toBeNull();
     });
   });
 
@@ -157,11 +162,12 @@ describe('FileService', () => {
   // Error handling: file not found / permission denied
   // -----------------------------------------------------------------------
   describe('error handling', () => {
-    it('openFile surfaces file I/O errors', async () => {
+    it('openFile returns null on file I/O errors (handled by LargeFileService)', async () => {
       mockOpen.mockResolvedValue('/path/to/file.md');
       mockInvoke.mockRejectedValue(new Error('Disk I/O error'));
 
-      await expect(FileService.openFile()).rejects.toThrow('Disk I/O error');
+      const result = await FileService.openFile();
+      expect(result).toBeNull();
     });
 
     it('saveFile surfaces write errors', async () => {

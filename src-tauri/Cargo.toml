@@ -1,6 +1,6 @@
 [package]
 name = "markhere"
-version = "0.4.9"
+version = "1.0.0"
 description = "A modern WYSIWYG Markdown editor"
 authors = ["markhere-team"]
 edition = "2021"
@@ -28,9 +28,17 @@ docx-rs = "0.4"
 html2text = "0.12"
 git2 = "0.18"
 reqwest = { version = "0.11", features = [] }
+sysinfo = "0.30"
+pulldown-cmark = { version = "0.12", default-features = false, features = ["html"] }
+dirs-next = "2.0"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = { version = "2", features = ["rustls-tls"] }
+arboard = { version = "3.4", features = ["image-data"] }
+image = "0.25"
+
+[dev-dependencies]
+tempfile = "3.8"
 
 [profile.release]
 panic = "unwind"
@@ -38,3 +46,11 @@ codegen-units = 1
 lto = true
 opt-level = "s"
 strip = true
+
+# ── Tauri Mobile (iOS / Android) ──
+# Build target: cargo tauri android init / cargo tauri ios init
+[target.aarch64-apple-ios.dependencies]
+image = { version = "0.25", optional = true }
+
+[target.aarch64-linux-android.dependencies]
+image = { version = "0.25", optional = true }

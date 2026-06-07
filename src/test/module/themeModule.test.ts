@@ -338,15 +338,15 @@ describe('useThemeStore - simple theme switching', () => {
     setTheme('sepia');
 
     const root = document.documentElement;
-    expect(root.style.getPropertyValue('--bg-color')).toBe(themes.sepia.colors.bg);
-    expect(root.style.getPropertyValue('--text-color')).toBe(themes.sepia.colors.text);
-    expect(root.style.getPropertyValue('--border-color')).toBe(themes.sepia.colors.border);
-    expect(root.style.getPropertyValue('--primary-color')).toBe(themes.sepia.colors.primary);
-    expect(root.style.getPropertyValue('--code-bg')).toBe(themes.sepia.colors.codeBg);
-    expect(root.style.getPropertyValue('--hover-bg')).toBe(themes.sepia.colors.hoverBg);
+    expect(root.style.getPropertyValue('--theme-bg')).toBe(themes.sepia.colors.bg);
+    expect(root.style.getPropertyValue('--theme-text')).toBe(themes.sepia.colors.text);
+    expect(root.style.getPropertyValue('--theme-border')).toBe(themes.sepia.colors.border);
+    expect(root.style.getPropertyValue('--theme-primary')).toBe(themes.sepia.colors.primary);
+    expect(root.style.getPropertyValue('--theme-code-bg')).toBe(themes.sepia.colors.codeBg);
+    expect(root.style.getPropertyValue('--theme-hover-bg')).toBe(themes.sepia.colors.hoverBg);
 
     // The simple store also sets data-theme attribute based on bg colour lightness
-    expect(document.body.getAttribute('data-theme')).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
 
     // localStorage should hold the selected theme name
     expect(localStorage.getItem('markhere-theme')).toBe('sepia');
@@ -357,7 +357,7 @@ describe('useThemeStore - simple theme switching', () => {
 
     setTheme('night'); // Night has bg '#1E1E1E' which is dark
 
-    expect(document.body.getAttribute('data-theme')).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 
   it('initial applyTheme on the default "github" theme works', () => {
@@ -366,7 +366,7 @@ describe('useThemeStore - simple theme switching', () => {
     applyTheme();
 
     const root = document.documentElement;
-    expect(root.style.getPropertyValue('--bg-color')).toBe(themes.github.colors.bg);
-    expect(document.body.getAttribute('data-theme')).toBe('light');
+    expect(root.style.getPropertyValue('--theme-bg')).toBe(themes.github.colors.bg);
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
   });
 });

@@ -1,0 +1,14 @@
+.export-advanced { padding: 16px; max-width: 500px; }
+.export-advanced h2 { margin: 0 0 12px; font-size: 16px; }
+.exp-formats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+.exp-format { display: flex; align-items: center; gap: 6px; padding: 10px; border: 1px solid var(--border-primary); border-radius: 6px; background: var(--bg-secondary); cursor: pointer; font-size: 13px; }
+.exp-format.active { border-color: var(--color-primary); background: rgba(59,130,246,0.08); }
+.exp-icon { font-size: 18px; }
+.exp-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; font-size: 13px; }
+.exp-options select { margin-left: 8px; padding: 4px 8px; border: 1px solid var(--border-primary); border-radius: 4px; }
+.exp-check { display: flex; align-items: center; gap: 6px; }
+.exp-btn { width: 100%; padding: 10px; background: var(--color-primary); color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+.exp-btn:disabled { opacity: 0.5; }
+.exp-status { padding: 8px; margin-top: 8px; border-radius: 4px; background: var(--bg-secondary); font-size: 13px; }
+.exp-status.success { color: var(--color-success); } .exp-status.error { color: var(--color-error); }
+.exp-result { margin-top: 4px; color: var(--text-secondary); }

@@ -1,0 +1,68 @@
+/* Dark Theme - WCAG AA Compliant Colors */
+
+[data-theme="dark"] {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #252526;
+  --bg-tertiary: #2d2d30;
+  --text-primary: #d4d4d4;
+  --text-secondary: #a0a0a0;
+  --icon-default: #a0a0a0;
+  --icon-hover: #c5c5c5;
+  --icon-active: #ffffff;
+  --icon-disabled: #6e6e6e;
+  --color-primary: #4da3e0;
+  --color-primary-hover: #6db8ed;
+  --color-success: #4ec9b0;
+  --color-warning: #dcdcaa;
+  --color-error: #f48771;
+  --color-info: #75beff;
+  --border-primary: #404040;
+  --border-secondary: #333333;
+  --selection-bg: #264f78;
+  --selection-text: #ffffff;
+}
+
+[data-theme="dark"] .toolbar-button {
+  color: var(--icon-default);
+}
+
+[data-theme="dark"] .toolbar-button:hover {
+  color: var(--icon-hover);
+}
+
+[data-theme="dark"] .toolbar-button:active,
+[data-theme="dark"] .toolbar-button.active {
+  color: var(--icon-active);
+}
+
+[data-theme="dark"] .toolbar-button:disabled {
+  color: var(--icon-disabled);
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .sidebar-icon {
+  color: var(--icon-default);
+}
+
+[data-theme="dark"] .sidebar-icon:hover {
+  color: var(--icon-hover);
+}
+
+[data-theme="dark"] .icon svg,
+[data-theme="dark"] button svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+[data-theme="dark"] *:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+[data-theme="dark"] a {
+  color: var(--color-primary);
+}
+
+[data-theme="dark"] a:hover {
+  color: var(--color-primary-hover);
+}

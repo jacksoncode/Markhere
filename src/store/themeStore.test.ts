@@ -32,38 +32,38 @@ describe('useThemeStore', () => {
       useThemeStore.getState().setTheme('night');
 
       const root = document.documentElement;
-      expect(root.style.getPropertyValue('--bg-color')).toBe('#1E1E1E');
-      expect(root.style.getPropertyValue('--text-color')).toBe('#D4D4D4');
-      expect(root.style.getPropertyValue('--border-color')).toBe('#3E3E3E');
-      expect(root.style.getPropertyValue('--primary-color')).toBe('#569CD6');
+      expect(root.style.getPropertyValue('--theme-bg')).toBe('#1E1E1E');
+      expect(root.style.getPropertyValue('--theme-text')).toBe('#D4D4D4');
+      expect(root.style.getPropertyValue('--theme-border')).toBe('#3E3E3E');
+      expect(root.style.getPropertyValue('--theme-primary')).toBe('#569CD6');
     });
   });
 
   describe('applyTheme', () => {
-    it('sets all seven CSS custom properties on documentElement', () => {
+    it('sets all CSS custom properties on documentElement', () => {
       useThemeStore.setState({ currentTheme: 'github' });
       useThemeStore.getState().applyTheme();
 
       const root = document.documentElement;
-      expect(root.style.getPropertyValue('--bg-color')).toBe('#FFFFFF');
-      expect(root.style.getPropertyValue('--text-color')).toBe('#24292E');
-      expect(root.style.getPropertyValue('--border-color')).toBe('#E1E4E8');
-      expect(root.style.getPropertyValue('--primary-color')).toBe('#0366D6');
-      expect(root.style.getPropertyValue('--code-bg')).toBe('#F6F8FA');
-      expect(root.style.getPropertyValue('--hover-bg')).toBe('#F3F4F6');
-      expect(root.style.getPropertyValue('--shadow-color')).toBe('#E1E4E840');
+      expect(root.style.getPropertyValue('--theme-bg')).toBe('#FFFFFF');
+      expect(root.style.getPropertyValue('--theme-text')).toBe('#24292E');
+      expect(root.style.getPropertyValue('--theme-border')).toBe('#E1E4E8');
+      expect(root.style.getPropertyValue('--theme-primary')).toBe('#0366D6');
+      expect(root.style.getPropertyValue('--theme-code-bg')).toBe('#F6F8FA');
+      expect(root.style.getPropertyValue('--theme-hover-bg')).toBe('#F3F4F6');
+      expect(root.style.getPropertyValue('--theme-shadow')).toBe('#E1E4E840');
     });
 
-    it('sets data-theme="light" on body for light-colored backgrounds', () => {
+    it('sets data-theme="light" on documentElement for light-colored backgrounds', () => {
       useThemeStore.setState({ currentTheme: 'github' }); // bg: #FFFFFF
       useThemeStore.getState().applyTheme();
-      expect(document.body.getAttribute('data-theme')).toBe('light');
+      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     });
 
-    it('sets data-theme="dark" on body for dark-colored backgrounds', () => {
+    it('sets data-theme="dark" on documentElement for dark-colored backgrounds', () => {
       useThemeStore.setState({ currentTheme: 'night' }); // bg: #1E1E1E
       useThemeStore.getState().applyTheme();
-      expect(document.body.getAttribute('data-theme')).toBe('dark');
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     });
   });
 
@@ -78,7 +78,7 @@ describe('useThemeStore', () => {
       initThemeStore();
       // Should still be 'github' (default unchanged) and CSS should be applied
       expect(useThemeStore.getState().currentTheme).toBe('github');
-      expect(document.documentElement.style.getPropertyValue('--bg-color')).toBe('#FFFFFF');
+      expect(document.documentElement.style.getPropertyValue('--theme-bg')).toBe('#FFFFFF');
     });
 
     it('ignores invalid theme names in localStorage', () => {
@@ -95,7 +95,7 @@ describe('useThemeStore', () => {
       expect(themeNames.length).toBeGreaterThanOrEqual(25);
     });
 
-    it('every theme can be applied without throwing and sets its own --bg-color', () => {
+    it('every theme can be applied without throwing and sets its own --theme-bg', () => {
       const themeNames = Object.keys(themes) as ThemeName[];
       const { setTheme } = useThemeStore.getState();
 
@@ -104,7 +104,7 @@ describe('useThemeStore', () => {
         expect(useThemeStore.getState().currentTheme).toBe(name);
 
         const expectedBg = themes[name].colors.bg;
-        expect(document.documentElement.style.getPropertyValue('--bg-color')).toBe(expectedBg);
+        expect(document.documentElement.style.getPropertyValue('--theme-bg')).toBe(expectedBg);
       }
     });
 

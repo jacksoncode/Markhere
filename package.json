@@ -1,6 +1,6 @@
 {
   "name": "markhere",
-  "version": "0.4.9",
+  "version": "1.0.0",
   "description": "A modern WYSIWYG Markdown editor with cross-platform support",
   "type": "module",
   "scripts": {
@@ -45,7 +45,9 @@
     "clsx": "^2.1.0",
     "emoji-picker-react": "^4.19.1",
     "katex": "^0.16.45",
+    "lz-string": "^1.5.0",
     "mermaid": "^11.14.0",
+    "pptxgenjs": "^4.0.1",
     "prismjs": "^1.30.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

@@ -3,10 +3,26 @@ import { useLanguageStore } from './languageStore';
 import zhCN from './locales/zh-CN.json';
 import enUS from './locales/en-US.json';
 
-const translations = {
+// Lazy-load additional locales
+const translations: Record<string, Record<string, unknown>> = {
   'zh-CN': zhCN,
   'en-US': enUS,
 };
+
+// Dynamic import for non-default locales
+const localeLoaders: Record<string, () => Promise<Record<string, unknown>>> = {
+  'ja-JP': () => import('./locales/ja-JP.json'),
+  'ko-KR': () => import('./locales/ko-KR.json'),
+  'fr-FR': () => import('./locales/fr-FR.json'),
+};
+
+// Preload fallback locale
+for (const [lang, loader] of Object.entries(localeLoaders)) {
+  loader().then(mod => {
+    const data = (mod as { default?: Record<string, unknown> }).default || (mod as Record<string, unknown>);
+    translations[lang] = data;
+  }).catch(() => { /* locale not available, will use fallback */ });
+}
 
 type TranslationParams = Record<string, string | number>;
 

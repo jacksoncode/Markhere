@@ -1,5 +1,6 @@
-import { invoke } from '@tauri-apps/api/core';
+import { safeInvoke } from './ipcWrapper';
 import { open, save } from '@tauri-apps/plugin-dialog';
+import { LargeFileService } from './LargeFileService';
 
 export interface FileResult {
   path: string;
@@ -15,12 +16,12 @@ export class FileService {
 
     if (!path || typeof path !== 'string') return null;
 
-    const content = await invoke<string>('read_file', { path });
-    return { path, content };
+    // 使用 LargeFileService 加载文件，自动检测大文件并按需分块
+    return LargeFileService.loadFile(path);
   }
 
   static async saveFile(path: string, content: string): Promise<void> {
-    await invoke('save_file', { path, content });
+    await safeInvoke('save_file', { path, content });
   }
 
   static async newFile(): Promise<string | null> {
@@ -33,6 +34,6 @@ export class FileService {
   }
 
   static async fileExists(path: string): Promise<boolean> {
-    return await invoke<boolean>('file_exists', { path });
+    return await safeInvoke<boolean>('file_exists', { path });
   }
 }

@@ -1,0 +1,80 @@
+.database-panel { display: flex; height: 100%; background: var(--bg-primary, #fff); }
+.db-sidebar { width: 220px; border-right: 1px solid var(--border-primary, #e0e0e0); padding: 12px; overflow-y: auto; }
+.db-sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.db-sidebar-header h3 { margin: 0; font-size: 14px; }
+.db-sidebar-header button { padding: 2px 8px; cursor: pointer; }
+.db-new-form { display: flex; gap: 4px; margin-bottom: 8px; }
+.db-new-form input { flex: 1; padding: 4px 6px; border: 1px solid var(--border-primary); border-radius: 4px; }
+.db-new-form button { padding: 4px 8px; }
+.db-list { list-style: none; padding: 0; margin: 0; }
+.db-list li { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; cursor: pointer; border-radius: 4px; }
+.db-list li:hover { background: var(--bg-secondary, #f5f5f5); }
+.db-list li.active { background: var(--color-primary, #3b82f6); color: #fff; }
+.db-list li.active button { color: #fff; }
+.btn-icon-sm { background: none; border: none; cursor: pointer; font-size: 14px; padding: 0 2px; opacity: 0.5; }
+.btn-icon-sm:hover { opacity: 1; }
+
+.db-main { flex: 1; padding: 16px; overflow: auto; }
+.db-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+.db-toolbar h2 { margin: 0; font-size: 18px; }
+.db-view-tabs { display: flex; gap: 4px; }
+.db-view-tabs button { padding: 4px 12px; background: var(--bg-secondary, #f0f0f0); border: 1px solid var(--border-primary); border-radius: 4px; cursor: pointer; font-size: 13px; }
+.db-view-tabs button.active { background: var(--color-primary, #3b82f6); color: #fff; border-color: var(--color-primary); }
+.db-view-tabs select { padding: 4px 8px; border: 1px solid var(--border-primary); border-radius: 4px; font-size: 13px; }
+.db-empty, .db-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: var(--text-secondary, #666); }
+.db-empty-state button { margin-top: 12px; padding: 8px 16px; }
+
+/* Table view */
+.db-table-view table { width: 100%; border-collapse: collapse; }
+.db-table-view th { background: var(--bg-secondary, #f5f5f5); padding: 8px; text-align: left; font-size: 13px; border-bottom: 2px solid var(--border-primary); }
+.db-table-view th.sortable { cursor: pointer; user-select: none; }
+.db-table-view td { padding: 6px 8px; border-bottom: 1px solid var(--border-primary, #eee); font-size: 13px; }
+.db-table-view input, .db-table-view select { width: 100%; padding: 4px; border: 1px solid transparent; background: transparent; }
+.db-table-view tr:hover td { background: var(--bg-secondary, #fafafa); }
+.db-table-view tr:hover input, .db-table-view tr:hover select { border-color: var(--border-primary); background: #fff; }
+.col-num { width: 40px; text-align: center; color: var(--text-secondary); }
+.col-action { width: 40px; text-align: center; }
+.btn-add-row { margin-top: 8px; padding: 6px 16px; cursor: pointer; background: var(--bg-secondary); border: 1px dashed var(--border-primary); border-radius: 4px; width: 100%; }
+.btn-add-row:hover { background: var(--bg-tertiary); }
+
+/* Board view */
+.db-board-view { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px; }
+.board-column { min-width: 240px; max-width: 280px; background: var(--bg-secondary, #f5f5f5); border-radius: 8px; padding: 8px; }
+.board-column.drag-over { box-shadow: 0 0 0 2px var(--color-primary); }
+.board-col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px; }
+.board-col-title { font-weight: 600; font-size: 13px; }
+.board-col-count { font-size: 12px; color: var(--text-secondary); background: var(--bg-tertiary); padding: 1px 6px; border-radius: 8px; }
+.board-card { background: #fff; border-radius: 6px; padding: 8px; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; cursor: grab; }
+.board-card:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+.board-card .btn-icon-sm { position: absolute; top: 4px; right: 4px; }
+.card-title { font-weight: 500; margin-bottom: 4px; }
+.card-field { color: var(--text-secondary); }
+.board-add-col { background: transparent; border: 1px dashed var(--border-primary); display: flex; align-items: center; justify-content: center; min-height: 60px; }
+.board-add-col button { color: var(--text-secondary); background: none; border: none; cursor: pointer; width: 100%; padding: 16px; }
+.db-board-empty, .db-calendar-empty, .db-timeline-empty { padding: 32px; text-align: center; color: var(--text-secondary); }
+
+/* Calendar view */
+.db-calendar-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.calendar-day { background: var(--bg-secondary, #f5f5f5); border-radius: 6px; padding: 8px; min-height: 80px; }
+.calendar-day.today { border: 2px solid var(--color-primary); }
+.cal-date { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.cal-event { font-size: 12px; padding: 2px 6px; background: var(--color-primary); color: #fff; border-radius: 3px; margin-bottom: 2px; }
+.cal-empty { grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 32px; }
+
+/* Timeline view */
+.db-timeline-view { position: relative; padding-left: 24px; }
+.db-timeline-view::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border-primary); }
+.timeline-item { position: relative; padding: 8px 0 8px 24px; }
+.timeline-item.end .timeline-dot { background: var(--text-secondary); width: 8px; height: 8px; }
+.timeline-dot { position: absolute; left: -20px; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: var(--color-primary); border: 2px solid #fff; box-shadow: 0 0 0 2px var(--color-primary); }
+.timeline-content { display: flex; gap: 12px; align-items: baseline; }
+.timeline-date { font-size: 12px; color: var(--text-secondary); min-width: 90px; }
+.timeline-name { font-size: 14px; }
+
+/* Dark theme */
+[data-theme="dark"] .board-card { background: var(--bg-tertiary); }
+[data-theme="dark"] .db-table-view tr:hover input, [data-theme="dark"] .db-table-view tr:hover select { background: var(--bg-secondary); }
+
+/* Hide scrollbar for board */
+.db-board-view::-webkit-scrollbar { height: 6px; }
+.db-board-view::-webkit-scrollbar-thumb { background: var(--border-primary); border-radius: 3px; }

@@ -1,6 +1,6 @@
 {
   "productName": "Markhere",
-  "version": "0.4.9",
+  "version": "1.0.0",
   "identifier": "com.markhere.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -42,7 +42,8 @@
       "endpoints": [
         "https://github.com/jacksoncode/Markhere/releases/latest/download/latest.json"
       ],
-      "pubkey": "PLACEHOLDER - generate with `npx tauri signer generate`",
+      "pubkey": "",
+      "_pubkey_note": "REQUIRED BEFORE RELEASE: run `npx tauri signer generate --password YOUR_SECRET` and paste the public key here. Without this, auto-update will not work.",
       "windows": {
         "installMode": "passive"
       }

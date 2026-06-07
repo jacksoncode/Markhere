@@ -254,6 +254,7 @@ describe('File I/O chains', () => {
     mockedOpen.mockResolvedValue('/projects/report.md');
 
     const mockedInvoke = vi.mocked(invoke);
+    mockedInvoke.mockResolvedValueOnce(0);                                        // get_file_size (0 = small file)
     mockedInvoke.mockResolvedValueOnce('# Quarterly Report\n\nData: Q1 2025');   // read_file
     mockedInvoke.mockResolvedValueOnce(undefined);                               // save_file
 

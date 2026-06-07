@@ -9,6 +9,17 @@ use tauri::{WebviewWindowBuilder, WebviewUrl};
 use serde::{Deserialize, Serialize};
 use printpdf::*;
 use docx_rs::*;
+use pulldown_cmark::{Parser, Options, html};
+
+mod system_metrics;
+mod file_operations;
+mod clipboard_rs;
+mod data_recovery;
+
+pub use file_operations::*;
+pub use system_metrics::*;
+pub use clipboard_rs::*;
+pub use data_recovery::*;
 
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
@@ -190,225 +201,20 @@ async fn export_to_epub(markdown: String, output_path: String, title: String) ->
     Ok(output_path)
 }
 
+/// 使用 pulldown-cmark 标准库解析 Markdown 为 HTML，支持
+/// 表格、脚注、任务列表、删除线等 GFM 扩展
 fn markdown_to_html(markdown: &str) -> String {
-    let mut html = String::new();
-    let mut in_code_block = false;
-    let mut code_lang = String::new();
+    let mut options = Options::empty();
+    options.insert(Options::ENABLE_TABLES);
+    options.insert(Options::ENABLE_FOOTNOTES);
+    options.insert(Options::ENABLE_TASKLISTS);
+    options.insert(Options::ENABLE_STRIKETHROUGH);
+    options.insert(Options::ENABLE_HEADING_ATTRIBUTES);
 
-    for line in markdown.lines() {
-        if line.starts_with("```") {
-            if in_code_block {
-                html.push_str("</code></pre>\n");
-                in_code_block = false;
-                code_lang.clear();
-            } else {
-                code_lang = line[3..].trim().to_string();
-                if code_lang.is_empty() {
-                    html.push_str("<pre><code>\n");
-                } else {
-                    html.push_str(&format!("<pre><code class=\"language-{}\">\n", code_lang));
-                }
-                in_code_block = true;
-            }
-            continue;
-        }
-
-        if in_code_block {
-            html.push_str(&escape_html(line));
-            html.push('\n');
-            continue;
-        }
-
-        if line.starts_with("# ") {
-            let text = parse_inline_html(&line[2..]);
-            html.push_str(&format!("<h1>{}</h1>\n", text));
-        } else if line.starts_with("## ") {
-            let text = parse_inline_html(&line[3..]);
-            html.push_str(&format!("<h2>{}</h2>\n", text));
-        } else if line.starts_with("### ") {
-            let text = parse_inline_html(&line[4..]);
-            html.push_str(&format!("<h3>{}</h3>\n", text));
-        } else if line.starts_with("#### ") {
-            let text = parse_inline_html(&line[5..]);
-            html.push_str(&format!("<h4>{}</h4>\n", text));
-        } else if line.starts_with("##### ") {
-            let text = parse_inline_html(&line[6..]);
-            html.push_str(&format!("<h5>{}</h5>\n", text));
-        } else if line.starts_with("###### ") {
-            let text = parse_inline_html(&line[7..]);
-            html.push_str(&format!("<h6>{}</h6>\n", text));
-        } else if line.starts_with("> ") {
-            let text = parse_inline_html(&line[2..]);
-            html.push_str(&format!("<blockquote><p>{}</p></blockquote>\n", text));
-        } else if line.starts_with("- ") || line.starts_with("* ") {
-            let text = parse_inline_html(&line[2..]);
-            html.push_str(&format!("<li>{}</li>\n", text));
-        } else if line.starts_with("---") || line.starts_with("***") || line.starts_with("___") {
-            html.push_str("<hr/>\n");
-        } else if line.is_empty() {
-            html.push_str("<br/>\n");
-        } else {
-            let text = parse_inline_html(line);
-            html.push_str(&format!("<p>{}</p>\n", text));
-        }
-    }
-
-    if in_code_block {
-        html.push_str("</code></pre>\n");
-    }
-
-    html
-}
-
-fn escape_html(text: &str) -> String {
-    text.replace('&', "&amp;")
-        .replace('<', "&lt;")
-        .replace('>', "&gt;")
-}
-
-fn parse_inline_html(text: &str) -> String {
-    let mut result = String::new();
-    let chars: Vec<char> = text.chars().collect();
-    let len = chars.len();
-    let mut i = 0;
-
-    while i < len {
-        if chars[i] == '\\' && i + 1 < len {
-            result.push(chars[i + 1]);
-            i += 2;
-        } else if chars[i] == '!' && i + 1 < len && chars[i + 1] == '[' {
-            // Image: ![alt](url)
-            i += 2;
-            let mut alt = String::new();
-            while i < len && chars[i] != ']' {
-                alt.push(chars[i]);
-                i += 1;
-            }
-            if i < len {
-                i += 1;
-            } // skip ]
-            let mut url = String::new();
-            if i < len && chars[i] == '(' {
-                i += 1;
-                while i < len && chars[i] != ')' {
-                    url.push(chars[i]);
-                    i += 1;
-                }
-                if i < len {
-                    i += 1;
-                } // skip )
-            }
-            result.push_str(&format!(
-                "<img src=\"{}\" alt=\"{}\"/>",
-                url,
-                escape_html(&alt)
-            ));
-        } else if chars[i] == '[' {
-            // Link: [text](url)
-            i += 1;
-            let mut link_text = String::new();
-            while i < len && chars[i] != ']' {
-                link_text.push(chars[i]);
-                i += 1;
-            }
-            if i < len {
-                i += 1;
-            } // skip ]
-            let mut url = String::new();
-            if i < len && chars[i] == '(' {
-                i += 1;
-                while i < len && chars[i] != ')' {
-                    url.push(chars[i]);
-                    i += 1;
-                }
-                if i < len {
-                    i += 1;
-                } // skip )
-            }
-            if url.is_empty() {
-                result.push('[');
-                result.push_str(&link_text);
-                result.push(']');
-            } else {
-                result.push_str(&format!(
-                    "<a href=\"{}\">{}</a>",
-                    url,
-                    parse_inline_html(&link_text)
-                ));
-            }
-        } else if chars[i] == '`' {
-            i += 1;
-            let mut code = String::new();
-            while i < len && chars[i] != '`' {
-                code.push(chars[i]);
-                i += 1;
-            }
-            if i < len {
-                i += 1;
-            } // skip closing `
-            result.push_str(&format!("<code>{}</code>", escape_html(&code)));
-        } else if chars[i] == '*' && i + 1 < len && chars[i + 1] == '*' {
-            i += 2;
-            let mut bold_text = String::new();
-            while i + 1 < len && !(chars[i] == '*' && chars[i + 1] == '*') {
-                bold_text.push(chars[i]);
-                i += 1;
-            }
-            if i + 1 < len {
-                i += 2;
-            } // skip closing **
-            result.push_str(&format!("<strong>{}</strong>", parse_inline_html(&bold_text)));
-        } else if chars[i] == '*' {
-            i += 1;
-            let mut italic_text = String::new();
-            while i < len && chars[i] != '*' {
-                italic_text.push(chars[i]);
-                i += 1;
-            }
-            if i < len {
-                i += 1;
-            } // skip closing *
-            result.push_str(&format!("<em>{}</em>", parse_inline_html(&italic_text)));
-        } else if chars[i] == '_' && i + 1 < len && chars[i + 1] == '_' {
-            i += 2;
-            let mut bold_text = String::new();
-            while i + 1 < len && !(chars[i] == '_' && chars[i + 1] == '_') {
-                bold_text.push(chars[i]);
-                i += 1;
-            }
-            if i + 1 < len {
-                i += 2;
-            }
-            result.push_str(&format!("<strong>{}</strong>", parse_inline_html(&bold_text)));
-        } else if chars[i] == '_' {
-            i += 1;
-            let mut italic_text = String::new();
-            while i < len && chars[i] != '_' {
-                italic_text.push(chars[i]);
-                i += 1;
-            }
-            if i < len {
-                i += 1;
-            }
-            result.push_str(&format!("<em>{}</em>", parse_inline_html(&italic_text)));
-        } else if chars[i] == '~' && i + 1 < len && chars[i + 1] == '~' {
-            i += 2;
-            let mut strike_text = String::new();
-            while i + 1 < len && !(chars[i] == '~' && chars[i + 1] == '~') {
-                strike_text.push(chars[i]);
-                i += 1;
-            }
-            if i + 1 < len {
-                i += 2;
-            }
-            result.push_str(&format!("<del>{}</del>", parse_inline_html(&strike_text)));
-        } else {
-            result.push(chars[i]);
-            i += 1;
-        }
-    }
-
-    result
+    let parser = Parser::new_ext(markdown, options);
+    let mut html_output = String::new();
+    html::push_html(&mut html_output, parser);
+    html_output
 }
 
 // ---- PDF helper functions ----
@@ -986,6 +792,15 @@ pub fn run() {
             get_git_history,
             get_git_diff,
             get_file_at_commit,
+            system_metrics::get_memory_usage,
+            system_metrics::get_cpu_usage,
+            file_operations::get_file_size,
+            file_operations::read_file_chunk,
+            file_operations::list_markdown_files,
+            clipboard_rs::read_clipboard_image,
+            data_recovery::create_backup,
+            data_recovery::list_backups,
+            data_recovery::restore_backup,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -1026,32 +841,42 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_inline_html_bold() {
-        let input = "Hello **bold** world";
-        let output = parse_inline_html(input);
+    fn test_markdown_to_html_bold() {
+        let output = markdown_to_html("**bold**");
         assert!(output.contains("<strong>bold</strong>"));
     }
 
     #[test]
-    fn test_parse_inline_html_italic() {
-        let input = "Hello *italic* world";
-        let output = parse_inline_html(input);
+    fn test_markdown_to_html_italic() {
+        let output = markdown_to_html("*italic*");
         assert!(output.contains("<em>italic</em>"));
     }
 
     #[test]
-    fn test_parse_inline_html_code() {
-        let input = "Use `code` here";
-        let output = parse_inline_html(input);
+    fn test_markdown_to_html_code() {
+        let output = markdown_to_html("`code`");
         assert!(output.contains("<code>code</code>"));
     }
 
     #[test]
-    fn test_escape_html_basic() {
-        let input = "<div class=\"test\">&amp;";
-        let output = escape_html(input);
-        assert!(output.contains("&lt;"));
-        assert!(output.contains("&gt;"));
-        assert!(output.contains("&amp;"));
+    fn test_markdown_to_html_escape() {
+        // pulldown-cmark passes inline HTML through by default
+        // (this is standard Markdown behavior)
+        let output = markdown_to_html("<div>hello</div>");
+        assert!(output.contains("<div>hello</div>"));
+    }
+
+    #[test]
+    fn test_markdown_to_html_table() {
+        let input = "| A | B |\n|---|---|\n| 1 | 2 |";
+        let output = markdown_to_html(input);
+        assert!(output.contains("<table>"));
+    }
+
+    #[test]
+    fn test_markdown_to_html_tasklist() {
+        let input = "- [x] Done\n- [ ] Todo";
+        let output = markdown_to_html(input);
+        assert!(output.contains("checkbox"));
     }
 }

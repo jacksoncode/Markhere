@@ -94,11 +94,16 @@ describe('FileService + fileStore interaction', () => {
     mockedOpen.mockResolvedValue('/home/user/notes.md');
 
     const mockedInvoke = vi.mocked(invoke);
-    mockedInvoke.mockResolvedValue('# Hello World');
+    mockedInvoke.mockImplementation(async (cmd: string) => {
+      if (cmd === 'get_file_size') return 0;
+      if (cmd === 'read_file') return '# Hello World';
+      return undefined;
+    });
 
     const result = await FileService.openFile();
 
     expect(mockedOpen).toHaveBeenCalledOnce();
+    expect(mockedInvoke).toHaveBeenCalledWith('get_file_size', { path: '/home/user/notes.md' });
     expect(mockedInvoke).toHaveBeenCalledWith('read_file', { path: '/home/user/notes.md' });
     expect(result).toEqual({ path: '/home/user/notes.md', content: '# Hello World' });
 
