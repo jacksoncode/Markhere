@@ -174,6 +174,72 @@ export const AI_PROVIDERS: AIProvider[] = [
     ],
     features: { streaming: true, tools: false, vision: true },
   },
+  // ── International Providers ──
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    baseUrl: 'https://api.openai.com/v1',
+    apiKeyPrefix: 'sk-',
+    models: [
+      { id: 'gpt-4o', name: 'GPT-4o', maxTokens: 128000, pricing: { input: 0.0025, output: 0.01 }, capabilities: ['chat','streaming','tools','vision'] },
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', maxTokens: 128000, pricing: { input: 0.00015, output: 0.0006 }, capabilities: ['chat','streaming'] },
+    ],
+    features: { streaming: true, tools: true, vision: true },
+  },
+  {
+    id: 'anthropic',
+    name: 'Anthropic',
+    baseUrl: 'https://api.anthropic.com/v1',
+    apiKeyPrefix: 'sk-ant-',
+    models: [
+      { id: 'claude-4-opus', name: 'Claude 4 Opus', maxTokens: 200000, pricing: { input: 0.015, output: 0.075 }, capabilities: ['chat','streaming','tools','vision'] },
+      { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', maxTokens: 200000, pricing: { input: 0.003, output: 0.015 }, capabilities: ['chat','streaming','tools','vision'] },
+      { id: 'claude-4-haiku', name: 'Claude 4 Haiku', maxTokens: 200000, pricing: { input: 0.0008, output: 0.004 }, capabilities: ['chat','streaming'] },
+    ],
+    features: { streaming: true, tools: true, vision: true },
+  },
+  {
+    id: 'google',
+    name: 'Google Gemini',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+    apiKeyPrefix: '',
+    models: [
+      { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', maxTokens: 1048576, pricing: { input: 0.00125, output: 0.01 }, capabilities: ['chat','streaming','tools','vision'] },
+      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', maxTokens: 1048576, pricing: { input: 0.000075, output: 0.0003 }, capabilities: ['chat','streaming','tools'] },
+    ],
+    features: { streaming: true, tools: true, vision: true },
+  },
+  {
+    id: 'mistral',
+    name: 'Mistral',
+    baseUrl: 'https://api.mistral.ai/v1',
+    apiKeyPrefix: '',
+    models: [
+      { id: 'mistral-large', name: 'Mistral Large', maxTokens: 128000, pricing: { input: 0.004, output: 0.012 }, capabilities: ['chat','streaming','tools'] },
+      { id: 'mistral-small', name: 'Mistral Small', maxTokens: 32768, pricing: { input: 0.001, output: 0.003 }, capabilities: ['chat','streaming'] },
+    ],
+    features: { streaming: true, tools: true, vision: false },
+  },
+  {
+    id: 'xai',
+    name: 'xAI (Grok)',
+    baseUrl: 'https://api.x.ai/v1',
+    apiKeyPrefix: '',
+    models: [
+      { id: 'grok-3', name: 'Grok 3', maxTokens: 131072, pricing: { input: 0.003, output: 0.015 }, capabilities: ['chat','streaming','tools'] },
+    ],
+    features: { streaming: true, tools: false, vision: false },
+  },
+  {
+    id: 'cohere',
+    name: 'Cohere',
+    baseUrl: 'https://api.cohere.ai/v1',
+    apiKeyPrefix: '',
+    models: [
+      { id: 'command-r-plus', name: 'Command R+', maxTokens: 128000, pricing: { input: 0.003, output: 0.015 }, capabilities: ['chat','streaming'] },
+    ],
+    features: { streaming: true, tools: false, vision: false },
+  },
 ];
 
 export async function fetchModelsFromProvider(providerId: string, apiKey: string): Promise<AIModel[]> {

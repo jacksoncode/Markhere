@@ -365,12 +365,85 @@ export const themes = {
   githubLight: {
     name: 'GitHub Light',
     colors: {
-      bg: '#FFFFFF',
-      text: '#24292E',
-      border: '#E1E4E8',
-      primary: '#0366D6',
-      codeBg: '#F6F8FA',
-      hoverBg: '#F3F4F6',
+      bg: '#FFFFFF', text: '#24292E', border: '#E1E4E8',
+      primary: '#0366D6', codeBg: '#F6F8FA', hoverBg: '#F3F4F6',
+    },
+  },
+  rosePine: {
+    name: 'Rosé Pine',
+    colors: {
+      bg: '#191724', text: '#E0DEF4', border: '#26233A',
+      primary: '#EB6F92', codeBg: '#1F1D2E', hoverBg: '#26233A',
+    },
+  },
+  catppuccin: {
+    name: 'Catppuccin Mocha',
+    colors: {
+      bg: '#1E1E2E', text: '#CDD6F4', border: '#313244',
+      primary: '#CBA6F7', codeBg: '#181825', hoverBg: '#313244',
+    },
+  },
+  everforest: {
+    name: 'Everforest',
+    colors: {
+      bg: '#2D353B', text: '#D3C6AA', border: '#475258',
+      primary: '#A7C080', codeBg: '#343F44', hoverBg: '#3D494F',
+    },
+  },
+  tokyoNight: {
+    name: 'Tokyo Night',
+    colors: {
+      bg: '#1A1B26', text: '#C0CAF5', border: '#292E42',
+      primary: '#7AA2F7', codeBg: '#16161E', hoverBg: '#292E42',
+    },
+  },
+  cyberpunk: {
+    name: 'Cyberpunk',
+    colors: {
+      bg: '#0D0221', text: '#00FF41', border: '#FF00FF',
+      primary: '#00FFFF', codeBg: '#12002E', hoverBg: '#1A0040',
+    },
+  },
+  lavender: {
+    name: 'Lavender Dream',
+    colors: {
+      bg: '#1A1B41', text: '#E4D9FF', border: '#3A3B6B',
+      primary: '#9D8DF1', codeBg: '#23245A', hoverBg: '#2E2F6E',
+    },
+  },
+  mint: {
+    name: 'Mint Fresh',
+    colors: {
+      bg: '#F0FFF4', text: '#1A365D', border: '#C6F6D5',
+      primary: '#38A169', codeBg: '#E6FFED', hoverBg: '#D4F5DF',
+    },
+  },
+  oceanBreeze: {
+    name: 'Ocean Breeze',
+    colors: {
+      bg: '#E0F7FA', text: '#004D40', border: '#B2DFDB',
+      primary: '#0097A7', codeBg: '#F1FAFC', hoverBg: '#CDECF0',
+    },
+  },
+  bloodMoon: {
+    name: 'Blood Moon',
+    colors: {
+      bg: '#1A0A0A', text: '#E8C4B8', border: '#4A1515',
+      primary: '#C62828', codeBg: '#2D0A0A', hoverBg: '#3D1010',
+    },
+  },
+  midnightGold: {
+    name: 'Midnight Gold',
+    colors: {
+      bg: '#0D1117', text: '#F0D78C', border: '#30363D',
+      primary: '#D4A017', codeBg: '#161B22', hoverBg: '#1C2128',
+    },
+  },
+  arcticFrost: {
+    name: 'Arctic Frost',
+    colors: {
+      bg: '#F0F4F8', text: '#2D3748', border: '#CBD5E0',
+      primary: '#4A90D9', codeBg: '#EDF2F7', hoverBg: '#E2E8F0',
     },
   },
 };

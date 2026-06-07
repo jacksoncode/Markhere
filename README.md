@@ -12,7 +12,7 @@
 
 *Write beautifully. Export anywhere. Collaborate seamlessly.*
 
-**🏠 [Official Website](https://jacksoncode.github.io/Markhere) | [English](https://github.com/jacksoncode/Markhere/blob/main/README.md) | [中文文档](https://github.com/jacksoncode/Markhere/blob/main/README_CN.md)**
+**🏠 [Official Website](https://jacksoncode.github.io/Markhere) | English | [中文文档](README_CN.md)**
 
 </div>
 
