@@ -13,8 +13,9 @@ import type { DirEntry } from '@tauri-apps/plugin-fs';
 import { useNotificationStore } from '../Notification/Notification';
 import { BookmarkList } from '../Bookmarks/BookmarkList';
 import './Sidebar-New.css';
+import { TagPanel } from './TagPanel';
 
-type SidebarTab = 'files' | 'outline' | 'bookmarks' | 'database' | 'dataview' | 'canvas';
+type SidebarTab = 'files' | 'outline' | 'bookmarks' | 'tags' | 'database' | 'dataview' | 'canvas';
 
 function formatRelativeTime(timestamp: number): string {
   const diffMs = Date.now() - timestamp;
@@ -76,7 +77,7 @@ function findSectionEnd(editor: Editor, headingPos: number, level: number): numb
   return end;
 }
 
-const TAB_ORDER: SidebarTab[] = ['files', 'outline', 'bookmarks', 'database', 'dataview', 'canvas'];
+const TAB_ORDER: SidebarTab[] = ['files', 'outline', 'tags', 'bookmarks', 'database', 'dataview', 'canvas'];
 const DatabasePanelLazy = lazy(() => import('../Database/DatabasePanel').then(m => ({ default: m.DatabasePanel })));
 const DataviewPanelLazy = lazy(() => import('../Dataview/DataviewPanel').then(m => ({ default: m.DataviewPanel })));
 const CanvasBoardLazy = lazy(() => import('../Canvas/CanvasBoard').then(m => ({ default: m.CanvasBoard })));
@@ -419,6 +420,7 @@ export function SidebarNew() {
     { key: 'files', label: t('sidebar.files') },
     { key: 'outline', label: t('sidebar.outline') },
     { key: 'bookmarks', label: t('sidebar.bookmarks') },
+    { key: 'tags', label: '# Tags' },
     { key: 'database', label: '🗄 DB' },
     { key: 'dataview', label: '🔍 Query' },
     { key: 'canvas', label: '🎨 Canvas' },
@@ -767,6 +769,8 @@ export function SidebarNew() {
         return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><DatabasePanelLazy /></Suspense>;
       case 'dataview':
         return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><DataviewPanelLazy /></Suspense>;
+      case 'tags':
+        return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><TagPanel /></Suspense>;
       case 'canvas':
         return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><CanvasBoardLazy /></Suspense>;
       case 'files':

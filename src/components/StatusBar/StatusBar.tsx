@@ -4,6 +4,7 @@ import { useEditorState } from '../../store/editorStore';
 import { useFileStore } from '../../store/fileStore';
 import { useUIState } from '../../store/uiStore';
 import { useTranslation } from '../../i18n';
+import { SelectionWordCount } from '../Editor/SelectionWordCount';
 import './StatusBar.css';
 
 /** Calculate line and column from cursor's ProseMirror position. */
@@ -71,6 +72,7 @@ export function StatusBar() {
     <div className="status-bar" role="status" aria-live="polite" aria-atomic="true">
       {/* Left: document statistics */}
       <div className="status-bar-left">
+        <SelectionWordCount editor={editorInstance} />
         <span className="status-bar-item" title={t('statusBar.wordCountTitle')} aria-label={t('statusBar.words', undefined, { count: words })}>
           {t('statusBar.words', undefined, { count: words })}
         </span>

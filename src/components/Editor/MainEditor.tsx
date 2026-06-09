@@ -28,8 +28,14 @@ import { saveWorker } from '../../workers/SaveWorker';
 import { useVirtualScroll } from '../../services/virtualScroll';
 import { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { SlashMenu } from './SlashMenu';
+import { AIInlineMenu } from './AIInlineMenu';
+import { PropertiesEditor } from './PropertiesEditor';
+import { SlashCommand } from '../../extensions/SlashCommand';
+import { ColumnLayout, Column } from '../../extensions/ColumnLayout';
 import './Editor.css';
 import '../../styles/extensions.css';
+import '../../styles/callout.css';
 
 // ---- File-type helpers for drag-and-drop ----
 
@@ -148,6 +154,9 @@ export function MainEditor() {
       CodeBlockHighlight,
       FootnoteExtension,
       AutocompleteExtension,
+      SlashCommand,
+      ColumnLayout,
+      Column,
     ],
     content: '',
     onUpdate: ({ editor }) => {
@@ -557,7 +566,10 @@ export function MainEditor() {
           </div>
         </div>
       )}
+      <PropertiesEditor editor={editor} filePath={currentPath} />
       <EditorContent editor={editor} />
+      <SlashMenu editor={editor} />
+      <AIInlineMenu editor={editor} />
       <TableOperations />
       {/* Remote collaborator cursor indicators */}
       {cursorEls.map((c) => (
