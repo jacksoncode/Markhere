@@ -3,13 +3,11 @@ use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 fn backup_dir() -> PathBuf {
-    // Use home dir + .markhere/backups (works on all platforms without extra deps)
     #[cfg(target_os = "windows")]
-    let base = std::env::var("USERPROFILE").unwrap_or_else(|_| ".".into());
+    let home = std::env::var("USERPROFILE").unwrap_or_else(|_| String::from("."));
     #[cfg(not(target_os = "windows"))]
-    let base = std::env::var("HOME").unwrap_or_else(|_| ".".into());
-
-    Path::new(&base).join(".markhere").join("backups")
+    let home = std::env::var("HOME").unwrap_or_else(|_| String::from("."));
+    Path::new(&home).join(".markhere").join("backups")
 }
 
 /// 备份文件到 temp 目录，返回备份路径
