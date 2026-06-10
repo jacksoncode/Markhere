@@ -30,7 +30,7 @@ git2 = "0.18"
 reqwest = { version = "0.11", features = [] }
 sysinfo = "0.30"
 pulldown-cmark = { version = "0.12", default-features = false, features = ["html"] }
-image = { version = "0.25", default-features = false, features = ["png"] }
+image = "0.25"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = { version = "2", features = ["rustls-tls"] }
