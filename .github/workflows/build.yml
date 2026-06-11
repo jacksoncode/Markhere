@@ -57,6 +57,9 @@ jobs:
         run: npx vitest run
 
       - name: Build Tauri app
+        env:
+          CARGO_BUILD_JOBS: ${{ matrix.os == 'windows-latest' && '1' || '4' }}
+          CARGO_NET_RETRY: '5'
         run: npx tauri build --target ${{ matrix.target }}
 
       # ---- Plan A: Windows smoke test (launch binary, verify 20s stability) ----

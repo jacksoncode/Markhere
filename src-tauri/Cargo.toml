@@ -30,7 +30,7 @@ git2 = "0.18"
 reqwest = { version = "0.11", features = [] }
 sysinfo = "0.30"
 pulldown-cmark = { version = "0.12", default-features = false, features = ["html"] }
-image = "0.25"
+image = { version = "0.25", default-features = false, features = ["png"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = { version = "2", features = ["rustls-tls"] }
@@ -45,6 +45,9 @@ codegen-units = 1
 lto = "thin"
 opt-level = "s"
 strip = true
+
+# Limit parallelism on CI to avoid OOM on Windows runners (7GB limit)
+# Set CARGO_BUILD_JOBS=2 in CI environment for Windows builds
 
 # ── Tauri Mobile (iOS / Android) ──
 # Build target: cargo tauri android init / cargo tauri ios init
