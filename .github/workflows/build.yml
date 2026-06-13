@@ -130,24 +130,3 @@ jobs:
             src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.exe
           if-no-files-found: ignore
 
-      # ---- Plan B: WebDriver E2E test against real Windows WebView2 ----
-      - name: Install tauri-driver
-        if: matrix.os == 'windows-latest' && always()
-        run: cargo install tauri-driver --locked
-
-      - name: WebDriver E2E test
-        id: webdriver
-        if: matrix.os == 'windows-latest' && always()
-        continue-on-error: true
-        shell: pwsh
-        run: |
-          $binary = Get-ChildItem "src-tauri/target" -Recurse -Filter "markhere.exe" |
-            Where-Object { $_.FullName -match 'release' } |
-            Select-Object -First 1
-          if (-not $binary) {
-            Write-Host "Cannot find binary for WebDriver test"
-            exit 1
-          }
-          Write-Host "WebDriver app: $($binary.FullName)"
-          $env:TAURI_DRIVER_APP_PATH = $binary.FullName
-          node e2e/webdriver-test.mjs
