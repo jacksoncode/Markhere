@@ -23,7 +23,7 @@ if (SENTRY_DSN || isProduction) {
     replaysSessionSampleRate: 0.1, // 10% of normal sessions
     replaysOnErrorSampleRate: 1.0, // 100% of error sessions
     // Release tracking
-    release: `markhere@${import.meta.env.VITE_APP_VERSION || '1.0.0'}`,
+    release: `markhere@${import.meta.env.VITE_APP_VERSION || '1.1.0'}`,
     // Additional context
     beforeSend(event) {
       // Add Tauri-specific context
