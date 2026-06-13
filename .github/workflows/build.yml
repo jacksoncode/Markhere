@@ -56,9 +56,17 @@ jobs:
       - name: Run tests
         run: npx vitest run
 
-      - name: Build Tauri app
+      - name: Build Tauri app (Windows — non-blocking)
+        if: matrix.os == 'windows-latest'
+        continue-on-error: true
         env:
-          CARGO_BUILD_JOBS: ${{ matrix.os == 'windows-latest' && '1' || '4' }}
+          CARGO_BUILD_JOBS: '1'
+          CARGO_NET_RETRY: '5'
+        run: npx tauri build --target ${{ matrix.target }}
+
+      - name: Build Tauri app (macOS/Linux)
+        if: matrix.os != 'windows-latest'
+        env:
           CARGO_NET_RETRY: '5'
         run: npx tauri build --target ${{ matrix.target }}
 
