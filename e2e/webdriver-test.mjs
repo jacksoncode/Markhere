@@ -228,8 +228,8 @@ try {
 
   // 7. Sidebar rendered
   await check('sidebar is present', async () => {
-    const el = await findElement('css selector', '.sidebar-new');
-    if (!el) throw new Error('.sidebar-new not found');
+    const el = await findElement('css selector', 'aside.sidebar');
+    if (!el) throw new Error('sidebar not found');
   });
 
   console.log('\n');

@@ -27,7 +27,7 @@ printpdf = "0.7"
 docx-rs = "0.4"
 html2text = "0.12"
 git2 = "0.18"
-reqwest = { version = "0.11", features = [] }
+reqwest = { version = "0.11", default-features = false, features = ["rustls-tls"] }
 sysinfo = "0.30"
 pulldown-cmark = { version = "0.12", default-features = false, features = ["html"] }
 

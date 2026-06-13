@@ -42,8 +42,8 @@
       "endpoints": [
         "https://github.com/jacksoncode/Markhere/releases/latest/download/latest.json"
       ],
-      "pubkey": "",
-      "_pubkey_note": "REQUIRED BEFORE RELEASE: run `npx tauri signer generate --password YOUR_SECRET` and paste the public key here. Without this, auto-update will not work.",
+      "pubkey": "REPLACE_WITH_GENERATED_PUBKEY",
+      "_pubkey_note": "Generate with: npx tauri signer generate --password YOUR_SECRET\n          Then: export TAURI_PRIVATE_KEY=your_private_key  (for release builds)\n          See: https://tauri.app/develop/auto-updater/sign",
       "windows": {
         "installMode": "passive"
       }
