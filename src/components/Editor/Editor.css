@@ -2,7 +2,7 @@
   flex: 1;
   min-height: 0;
   display: flex;
-  position: relative;
+  flex-direction: column;
   overflow: auto;
   padding: 0;
   background: var(--color-bg);
@@ -10,30 +10,34 @@
   scrollbar-width: none;
 }
 
-/* Make sure the Tiptap editor DOM fills the wrapper */
+/* Tiptap EditorContent wrapper — must fill the editor-wrapper */
+.editor-wrapper > div {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Inner ProseMirror — the actual editable area */
 .editor-wrapper .ProseMirror {
   flex: 1;
-  min-height: 100%;
+  min-height: 0;
   outline: none;
+  padding: 64px 96px;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.editor-wrapper::-webkit-scrollbar {
-  display: none;
-}
-
-.editor-wrapper::-webkit-scrollbar-thumb {
-  display: none;
-}
-
-.editor-wrapper::-webkit-scrollbar-track {
-  display: none;
-}
+.editor-wrapper::-webkit-scrollbar { display: none; }
+.editor-wrapper::-webkit-scrollbar-thumb { display: none; }
+.editor-wrapper::-webkit-scrollbar-track { display: none; }
 
 .editor-content {
   min-height: 100%;
   width: 100%;
   margin: 0;
-  padding: 64px 96px;
+  padding: 0;
   background: var(--color-bg);
   outline: none;
   border: none;

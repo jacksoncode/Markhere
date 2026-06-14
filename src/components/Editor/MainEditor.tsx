@@ -566,8 +566,8 @@ export function MainEditor() {
           </div>
         </div>
       )}
-      <PropertiesEditor editor={editor} filePath={currentPath} />
       <EditorContent editor={editor} />
+      <PropertiesEditor editor={editor} filePath={currentPath} />
       <SlashMenu editor={editor} />
       <AIInlineMenu editor={editor} />
       <TableOperations />
