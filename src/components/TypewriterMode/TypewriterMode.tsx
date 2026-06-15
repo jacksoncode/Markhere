@@ -35,9 +35,11 @@ export function TypewriterMode() {
   return (
     <>
       <div className="typewriter-center-indicator" />
-      <div 
+      {/* Invisible scroll-target overlay — must NOT take flex space from the real editor */}
+      <div
         ref={editorRef}
-        className={`editor-wrapper ${typewriterMode ? 'typewriter-mode' : ''}`}
+        className={typewriterMode ? 'typewriter-overlay' : ''}
+        aria-hidden="true"
       />
     </>
   );

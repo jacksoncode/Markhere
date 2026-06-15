@@ -2,52 +2,90 @@
 .editor-wrapper {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   padding: 0;
   background: var(--color-bg);
   transition: background-color var(--transition-slow);
+}
+
+/* Tiptap wrapper div — the direct child of editor-wrapper.
+   Must flex-grow to fill the wrapper, and scroll internally
+   when content exceeds the viewport. */
+.editor-wrapper > div:first-of-type {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: none;
 }
 
-.editor-wrapper::-webkit-scrollbar { display: none; }
-.editor-wrapper::-webkit-scrollbar-thumb { display: none; }
-.editor-wrapper::-webkit-scrollbar-track { display: none; }
+.editor-wrapper > div:first-of-type::-webkit-scrollbar { display: none; }
+.editor-wrapper > div:first-of-type::-webkit-scrollbar-thumb { display: none; }
+.editor-wrapper > div:first-of-type::-webkit-scrollbar-track { display: none; }
 
-/* EditorContent outer div → must fill wrapper so ProseMirror inherits height */
-.editor-wrapper > div:first-of-type {
-  min-height: 100%;
-}
-
-/* EditorContent (Tiptap) — fill wrapper */
-.editor-content {
+/* ProseMirror — the actual editable area (editor.view.dom).
+   min-height: 100% ensures the typing surface fills the wrapper
+   even when content is shorter than the viewport. */
+.editor-wrapper .ProseMirror {
   min-height: 100%;
   width: 100%;
   margin: 0;
   padding: 48px 72px;
-  background: var(--color-bg);
   outline: none;
   border: none;
   box-sizing: border-box;
+  line-height: 1.85;
+  color: var(--color-text);
+  background: var(--color-bg);
 }
 
-[data-theme="dark"] .editor-content { background: var(--color-bg); }
-.editor-content:focus { outline: none; }
+/* Editor-content class (also on ProseMirror via editorProps.attributes) */
+.editor-content {
+  /* inherits from .ProseMirror above; kept for specificity */
+}
 
-/* Wider on large screens */;
+[data-theme="dark"] .editor-wrapper .ProseMirror {
+  background: var(--color-bg);
+}
+
+.editor-wrapper .ProseMirror:focus { outline: none; }
+
+/* Wider on large screens */
 @media (min-width: 1200px) {
-  .editor-content { padding: 48px 120px; }
+  .editor-wrapper .ProseMirror { padding: 48px 120px; }
 }
 @media (max-width: 768px) {
-  .editor-content { padding: 32px 24px; }
+  .editor-wrapper .ProseMirror { padding: 32px 24px; }
 }
 @media (max-width: 480px) {
-  .editor-content { padding: 20px 16px; }
+  .editor-wrapper .ProseMirror { padding: 20px 16px; }
 }
 
-/* ProseMirror — the actual editable area */
-.editor-wrapper .ProseMirror {
-  min-height: 100%;
-  outline: none;
+/* ─── Typography inside ProseMirror ─── */
+.editor-wrapper .ProseMirror h1,
+.editor-wrapper .ProseMirror h2,
+.editor-wrapper .ProseMirror h3,
+.editor-wrapper .ProseMirror h4,
+.editor-wrapper .ProseMirror h5,
+.editor-wrapper .ProseMirror h6 {
+  line-height: 1.35;
+  margin-top: 1.6em;
+  margin-bottom: 0.5em;
+}
+
+.editor-wrapper .ProseMirror p {
+  margin-top: 0;
+  margin-bottom: 0.75em;
+}
+
+.editor-wrapper .ProseMirror li {
+  margin-bottom: 0.3em;
+}
+
+.editor-wrapper .ProseMirror blockquote {
+  line-height: 1.7;
 }
 
 /* ─── Virtual scrolling ─── */
@@ -63,11 +101,11 @@
 }
 
 /* ─── Typography ─── */
-.prose { color: var(--color-text); line-height: 1.7; }
-.prose h1, .prose h2, .prose h3, .prose h4 {
-  color: var(--color-text); margin-top: 1.5em; margin-bottom: 0.5em;
+.prose { color: var(--color-text); line-height: 1.85; }
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: var(--color-text); margin-top: 1.6em; margin-bottom: 0.5em; line-height: 1.35;
 }
-.prose p { margin-bottom: 1em; }
+.prose p { margin-bottom: 0.75em; }
 .prose code { background: var(--color-bg-secondary); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
 .prose pre { background: var(--color-bg-secondary); padding: 16px; border-radius: 8px; overflow-x: auto; }
 .prose img { max-width: 100%; border-radius: 8px; }
@@ -80,13 +118,16 @@
 .prose ul[data-type="taskList"] li > div { flex: 1; }
 
 /* ─── Source mode ─── */
-.source-mode-wrapper { display: flex; flex: 1; overflow: hidden; }
+.source-mode-wrapper { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 .source-editor {
-  width: 100%; height: 100%; min-height: 100vh;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
   padding: 48px 72px; font-family: Menlo, Monaco, monospace;
   font-size: 14px; line-height: 1.6;
   background: var(--color-bg); color: var(--color-text);
   border: none; outline: none; resize: none;
+  overflow-y: auto;
 }
 [data-theme="dark"] .source-editor { background: var(--color-bg); }
 .source-editor:focus { outline: none; }
