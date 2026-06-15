@@ -174,6 +174,28 @@ export const AI_PROVIDERS: AIProvider[] = [
     ],
     features: { streaming: true, tools: false, vision: true },
   },
+  {
+    id: 'ollama-ip',
+    name: 'Ollama (远程IP)',
+    baseUrl: 'http://localhost:11434/v1',
+    apiKeyPrefix: '',
+    models: [
+      { id: 'llama3.1', name: 'Llama 3.1', maxTokens: 131072, pricing: { input: 0, output: 0 }, capabilities: ['chat', 'streaming'] },
+      { id: 'qwen2.5', name: 'Qwen 2.5', maxTokens: 32768, pricing: { input: 0, output: 0 }, capabilities: ['chat', 'streaming'] },
+      { id: 'deepseek-r1', name: 'DeepSeek R1', maxTokens: 32768, pricing: { input: 0, output: 0 }, capabilities: ['chat', 'streaming'] },
+    ],
+    features: { streaming: true, tools: false, vision: true },
+  },
+  {
+    id: 'vllm',
+    name: 'vLLM',
+    baseUrl: 'http://localhost:8000/v1',
+    apiKeyPrefix: '',
+    models: [
+      { id: 'default', name: 'vLLM Model', maxTokens: 32768, pricing: { input: 0, output: 0 }, capabilities: ['chat', 'streaming'] },
+    ],
+    features: { streaming: true, tools: false, vision: false },
+  },
   // ── International Providers ──
   {
     id: 'openai',

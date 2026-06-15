@@ -40,8 +40,8 @@ export function PropertiesEditor({ editor, filePath }: { editor: Editor | null; 
   };
 
   return (
-    <div className="properties-editor" style={{ borderBottom: '1px solid var(--color-border)', padding: '8px 16px', fontSize: 13 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: visible ? 8 : 0 }}>
+    <div className="properties-editor" style={{ position: 'fixed', bottom: 24, left: 0, right: 0, background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', padding: '6px 16px', fontSize: 13, zIndex: 500, maxHeight: visible ? '40vh' : 'auto', overflowY: 'auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: visible ? 6 : 0 }}>
         <button onClick={() => setVisible(!visible)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 12 }}>
           {visible ? '▾ Properties' : '▸ Properties'} ({keys.length + 2})
         </button>

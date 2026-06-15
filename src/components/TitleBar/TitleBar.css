@@ -94,13 +94,20 @@
   top: 100%;
   left: 0;
   min-width: 180px;
-  background: var(--color-bg-primary);
+  background: var(--color-bg-primary, #fff);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 10000;
   padding: 4px 0;
   margin-top: 4px;
+  opacity: 1;
+  backdrop-filter: none;
+}
+
+[data-theme="dark"] .dropdown-menu {
+  background: #1e1e2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="dark"] .dropdown-menu {

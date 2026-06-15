@@ -147,6 +147,9 @@ export function TitleBar() {
       });
       if (selected) {
         const content = await invoke<string>('read_file', { path: selected });
+        const fileName = (selected as string).split('/').pop() || 'Untitled';
+        // Open as new tab instead of replacing current
+        useTabsStore.getState().openTab(selected as string, fileName, content);
         editorInstance?.commands.setContent(content);
         setCurrentPath(selected as string);
         setSavedContent(content);
@@ -157,11 +160,13 @@ export function TitleBar() {
       notify('error', 'Failed to open file');
     }
   };
-  
+
   const handleOpenRecent = async (path: string) => {
     setActiveMenu(null);
     try {
       const content = await invoke<string>('read_file', { path });
+      const fileName = path.split('/').pop() || 'Untitled';
+      useTabsStore.getState().openTab(path, fileName, content);
       editorInstance?.commands.setContent(content);
       setCurrentPath(path);
       setSavedContent(content);
