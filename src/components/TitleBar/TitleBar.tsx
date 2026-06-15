@@ -7,6 +7,8 @@ import { useEditorState } from '../../store/editorStore';
 import { useUIState } from '../../store/uiStore';
 import { useTabsStore } from '../../store/tabsStore';
 import { useAutoSaveStore } from '../../store/autoSaveStore';
+import { useThemeStore } from '../../store/themeStore';
+import { themes } from '../../store/themes';
 import { useTranslation } from '../../i18n';
 import { useNotificationStore } from '../Notification/Notification';
 import { ShortcutSettings } from '../ShortcutSettings';
@@ -32,6 +34,7 @@ export function TitleBar() {
     wordGoalEnabled, toggleWordGoal 
   } = useUIState();
   const notify = useNotificationStore((s) => s.notify);
+  const { currentTheme, setTheme } = useThemeStore();
 
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [showShortcutSettings, setShowShortcutSettings] = useState(false);
@@ -1211,16 +1214,16 @@ tags: []
               
               <div className="menu-item submenu-trigger">
                 <span>{t('settings.theme')}</span>
-                <div className="submenu">
-                  <div className="menu-item" onClick={() => { setActiveMenu(null); document.documentElement.setAttribute('data-theme', 'light'); }}>
-                    <span>{t('view.themeLight')}</span>
-                  </div>
-                  <div className="menu-item" onClick={() => { setActiveMenu(null); document.documentElement.setAttribute('data-theme', 'dark'); }}>
-                    <span>{t('view.themeDark')}</span>
-                  </div>
-                  <div className="menu-item" onClick={() => { setActiveMenu(null); document.documentElement.setAttribute('data-theme', 'sepia'); }}>
-                    <span>{t('view.themeSepia')}</span>
-                  </div>
+                <div className="submenu theme-submenu" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                  {Object.entries(themes).map(([key, theme]) => (
+                    <div
+                      key={key}
+                      className="menu-item"
+                      onClick={() => { setActiveMenu(null); setTheme(key as any); }}
+                    >
+                      <span>{currentTheme === key ? `✓ ${theme.name}` : theme.name}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="menu-divider" />

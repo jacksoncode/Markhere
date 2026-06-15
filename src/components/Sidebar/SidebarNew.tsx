@@ -95,8 +95,13 @@ export function SidebarNew() {
   const [isMobile, setIsMobile] = useState(false);
 
   /* ── Browse mode state ── */
-  const [isBrowseMode, setIsBrowseMode] = useState(false);
-  const [browsePath, setBrowsePath] = useState<string | null>(null);
+  const [isBrowseMode, setIsBrowseMode] = useState(() => {
+    const saved = localStorage.getItem('markhere-browse-mode');
+    return saved === 'true';
+  });
+  const [browsePath, setBrowsePath] = useState<string | null>(() => {
+    return localStorage.getItem('markhere-browse-path') || null;
+  });
   const [dirEntries, setDirEntries] = useState<DirEntry[]>([]);
   const [expandedDirs, setExpandedDirs] = useState<Set<string>>(new Set());
   const [dirChildrenCache, setDirChildrenCache] = useState<Map<string, DirEntry[]>>(new Map());
@@ -111,6 +116,16 @@ export function SidebarNew() {
     handler(mq);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  /* ── Restore last-opened folder on mount ── */
+  useEffect(() => {
+    const savedMode = localStorage.getItem('markhere-browse-mode');
+    const savedPath = localStorage.getItem('markhere-browse-path');
+    if (savedMode === 'true' && savedPath) {
+      loadDirectory(savedPath);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ── Lock body scroll when mobile sidebar is open ── */
@@ -174,6 +189,7 @@ export function SidebarNew() {
       });
       setDirEntries(entries);
       setBrowsePath(dirPath);
+      localStorage.setItem('markhere-browse-path', dirPath);
     } catch (err) {
       console.error('Failed to read directory:', err);
       notify('error', `${t('sidebar.browseFolderFailed')}: ${(err as Error).message || String(err)}`);
@@ -191,6 +207,8 @@ export function SidebarNew() {
       });
       if (!selected || typeof selected !== 'string') return;
       setIsBrowseMode(true);
+      localStorage.setItem('markhere-browse-mode', 'true');
+      localStorage.setItem('markhere-browse-path', selected);
       await loadDirectory(selected);
     } catch (err) {
       console.error('Failed to open folder picker:', err);

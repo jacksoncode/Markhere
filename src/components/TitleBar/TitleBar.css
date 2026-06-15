@@ -118,7 +118,7 @@
   top: 100%;
   left: 0;
   min-width: 180px;
-  background: var(--color-bg-primary, #fff);
+  background: var(--color-bg-primary, var(--color-bg, #ffffff));
   border: 1px solid var(--color-border);
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -184,13 +184,14 @@
   left: 100%;
   top: -6px;
   min-width: 160px;
-  background: var(--color-bg-primary);
+  background: var(--color-bg-primary, var(--color-bg));
   border: 1px solid var(--color-border);
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 6px 0;
   display: none;
   z-index: 10001;
+  backdrop-filter: none;
 }
 
 [data-theme="dark"] .menu-item.submenu-trigger .submenu {
