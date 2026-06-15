@@ -26,7 +26,11 @@ function loadRecentFiles(): RecentFile[] {
 }
 
 function saveRecentFiles(files: RecentFile[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(files));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(files));
+  } catch {
+    // localStorage not available or full — non-critical, silently ignore
+  }
 }
 
 export const useRecentFilesStore = create<RecentFilesState>((set) => ({

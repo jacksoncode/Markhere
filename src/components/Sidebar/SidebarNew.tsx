@@ -234,11 +234,15 @@ export function SidebarNew() {
   const handleBrowseFileClick = useCallback(async (filePath: string) => {
     try {
       const content = await invoke<string>('read_file', { path: filePath });
+      // File read succeeded — load into editor
       editorInstance?.commands.setContent(content);
       setCurrentPath(filePath);
       setSavedContent(content);
-      addFile(filePath, filePath.split('/').pop() || 'Untitled');
-      notify('success', `${t('sidebar.openFileSuccess')}: ${filePath.split('/').pop()}`);
+      // Post-open bookkeeping (failure here shouldn't claim the file didn't open)
+      try {
+        addFile(filePath, filePath.split('/').pop() || 'Untitled');
+        notify('success', `${t('sidebar.openFileSuccess')}: ${filePath.split('/').pop()}`);
+      } catch { /* non-critical */ }
       closeOnMobile();
     } catch (err) {
       console.error('Failed to open file:', err);
@@ -386,11 +390,15 @@ export function SidebarNew() {
       });
       if (!selected || typeof selected !== 'string') return;
       const content = await invoke<string>('read_file', { path: selected });
+      // File read succeeded — load into editor
       editorInstance?.commands.setContent(content);
       setCurrentPath(selected);
       setSavedContent(content);
-      addFile(selected, selected.split('/').pop() || 'Untitled');
-      notify('success', `${t('sidebar.openFileSuccess')}: ${selected.split('/').pop()}`);
+      // Post-open bookkeeping (failure here shouldn't claim the file didn't open)
+      try {
+        addFile(selected, selected.split('/').pop() || 'Untitled');
+        notify('success', `${t('sidebar.openFileSuccess')}: ${selected.split('/').pop()}`);
+      } catch { /* non-critical */ }
       closeOnMobile();
     } catch (err) {
       console.error('Failed to open file:', err);
@@ -401,10 +409,14 @@ export function SidebarNew() {
   const handleRecentFileClick = async (path: string) => {
     try {
       const content = await invoke<string>('read_file', { path });
+      // File read succeeded — load into editor
       editorInstance?.commands.setContent(content);
       setCurrentPath(path);
       setSavedContent(content);
-      addFile(path, path.split('/').pop() || 'Untitled');
+      // Post-open bookkeeping (failure here shouldn't claim the file didn't open)
+      try {
+        addFile(path, path.split('/').pop() || 'Untitled');
+      } catch { /* non-critical */ }
       closeOnMobile();
     } catch (err) {
       console.error('Failed to open file:', err);
