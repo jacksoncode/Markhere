@@ -8,7 +8,7 @@ import { useRecentFilesStore } from '../../store/recentFilesStore';
 import { useTranslation } from '../../i18n';
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
-import { readDir, readTextFile } from '@tauri-apps/plugin-fs';
+import { readDir } from '@tauri-apps/plugin-fs';
 import type { DirEntry } from '@tauri-apps/plugin-fs';
 import { useNotificationStore } from '../Notification/Notification';
 import { BookmarkList } from '../Bookmarks/BookmarkList';
@@ -233,7 +233,7 @@ export function SidebarNew() {
 
   const handleBrowseFileClick = useCallback(async (filePath: string) => {
     try {
-      const content = await readTextFile(filePath);
+      const content = await invoke<string>('read_file', { path: filePath });
       editorInstance?.commands.setContent(content);
       setCurrentPath(filePath);
       setSavedContent(content);
