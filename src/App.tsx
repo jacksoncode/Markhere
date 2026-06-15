@@ -132,13 +132,14 @@ function App() {
 
     let unlisten: (() => void) | undefined;
     getWindowApi().then(api => {
-      api.getCurrentWindow().onCloseRequested((event) => {
+      api.getCurrentWindow().onCloseRequested(async (event) => {
+        event.preventDefault();
         if (checkUnsavedChanges()) {
-          event.preventDefault();
           setPendingClose(true);
           setShowUnsavedDialog(true);
+        } else {
+          await closeWindow();
         }
-        // No unsaved changes → window closes naturally (no preventDefault)
       }).then(fn => { unlisten = fn; })
       .catch(() => {}); // Tauri not available — will use beforeunload
     }).catch(() => {});
