@@ -67,7 +67,7 @@ function App() {
 
   const closeWindow = async () => {
     const api = await getWindowApi();
-    api.getCurrentWindow().close();
+    await api.getCurrentWindow().close();
   };
 
   const handleSaveBeforeClose = async () => {
@@ -125,7 +125,7 @@ function App() {
         setPendingClose(true);
         setShowUnsavedDialog(true);
       } else {
-        closeWindow();
+        closeWindow().catch((err) => console.error('onCustomClose closeWindow failed:', err));
       }
     };
     window.addEventListener('markhere:close-requested', onCustomClose);
@@ -134,15 +134,21 @@ function App() {
     getWindowApi().then(api => {
       api.getCurrentWindow().onCloseRequested(async (event) => {
         event.preventDefault();
-        if (checkUnsavedChanges()) {
-          setPendingClose(true);
-          setShowUnsavedDialog(true);
-        } else {
-          await closeWindow();
+        try {
+          if (checkUnsavedChanges()) {
+            setPendingClose(true);
+            setShowUnsavedDialog(true);
+          } else {
+            await closeWindow();
+          }
+        } catch (err) {
+          console.error('onCloseRequested handler failed:', err);
+          // Force close as last resort
+          try { await closeWindow(); } catch { /* truly stuck */ }
         }
       }).then(fn => { unlisten = fn; })
-      .catch(() => {}); // Tauri not available — will use beforeunload
-    }).catch(() => {});
+      .catch((err) => console.error('onCloseRequested registration failed:', err));
+    }).catch((err) => console.error('getWindowApi failed:', err));
 
     return () => {
       window.removeEventListener('markhere:close-requested', onCustomClose);

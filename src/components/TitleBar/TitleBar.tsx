@@ -6,6 +6,7 @@ import { useFileStore } from '../../store/fileStore';
 import { useEditorState } from '../../store/editorStore';
 import { useUIState } from '../../store/uiStore';
 import { useTabsStore } from '../../store/tabsStore';
+import { useAutoSaveStore } from '../../store/autoSaveStore';
 import { useTranslation } from '../../i18n';
 import { useNotificationStore } from '../Notification/Notification';
 import { ShortcutSettings } from '../ShortcutSettings';
@@ -561,10 +562,27 @@ ${html}
     }
   };
 
-  const handleCloseWindow = () => {
+  const handleCloseWindow = async () => {
     setActiveMenu(null);
-    // Delegate to App.tsx which handles unsaved dialog + actual close
-    window.dispatchEvent(new CustomEvent('markhere:close-requested'));
+    try {
+      // Check for unsaved changes
+      const { hasUnsavedChanges } = useAutoSaveStore.getState();
+      const text = editorInstance?.getText() || '';
+      if (hasUnsavedChanges && text.trim().length > 0) {
+        // Delegate to App.tsx dialog flow
+        window.dispatchEvent(new CustomEvent('markhere:close-requested'));
+        return;
+      }
+      // No unsaved changes — close directly via Tauri API
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      await getCurrentWindow().close();
+    } catch (err) {
+      console.error('Close window failed:', err);
+      // Fallback: dispatch event to App.tsx
+      try {
+        window.dispatchEvent(new CustomEvent('markhere:close-requested'));
+      } catch { /* last resort failed */ }
+    }
   };
 
   const handleIncreaseHeading = () => {
