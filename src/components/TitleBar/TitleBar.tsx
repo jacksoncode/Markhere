@@ -151,7 +151,9 @@ export function TitleBar() {
         const fileName = (selected as string).split('/').pop() || 'Untitled';
         // Open as new tab instead of replacing current
         useTabsStore.getState().openTab(selected as string, fileName, content);
-        editorInstance?.commands.setContent(content);
+        // setContent may throw NodeViewWrapper for content with rich nodes
+        try { editorInstance?.commands.setContent(content); }
+        catch (nvErr) { console.warn('setContent NodeView (non-fatal):', nvErr); }
         setCurrentPath(selected as string);
         setSavedContent(content);
         addToRecentFiles(selected as string);
@@ -168,7 +170,9 @@ export function TitleBar() {
       const content = await invoke<string>('read_file', { path });
       const fileName = path.split('/').pop() || 'Untitled';
       useTabsStore.getState().openTab(path, fileName, content);
-      editorInstance?.commands.setContent(content);
+      // setContent may throw NodeViewWrapper for content with rich nodes
+      try { editorInstance?.commands.setContent(content); }
+      catch (nvErr) { console.warn('setContent NodeView (non-fatal):', nvErr); }
       setCurrentPath(path);
       setSavedContent(content);
       addToRecentFiles(path);

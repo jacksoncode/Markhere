@@ -234,11 +234,16 @@ export function SidebarNew() {
   const handleBrowseFileClick = useCallback(async (filePath: string) => {
     try {
       const content = await invoke<string>('read_file', { path: filePath });
-      // File read succeeded — load into editor
-      editorInstance?.commands.setContent(content);
+      // Load into editor — setContent may throw NodeViewWrapper when content
+      // contains nodes (images, mermaid, wiki-links) whose React renderer
+      // is not yet ready, but the content usually loads correctly nonetheless.
+      try {
+        editorInstance?.commands.setContent(content);
+      } catch (nodeViewErr) {
+        console.warn('setContent NodeView warning (non-fatal):', nodeViewErr);
+      }
       setCurrentPath(filePath);
       setSavedContent(content);
-      // Post-open bookkeeping (failure here shouldn't claim the file didn't open)
       try {
         addFile(filePath, filePath.split('/').pop() || 'Untitled');
         notify('success', `${t('sidebar.openFileSuccess')}: ${filePath.split('/').pop()}`);
@@ -390,11 +395,16 @@ export function SidebarNew() {
       });
       if (!selected || typeof selected !== 'string') return;
       const content = await invoke<string>('read_file', { path: selected });
-      // File read succeeded — load into editor
-      editorInstance?.commands.setContent(content);
+      // setContent may throw NodeViewWrapper when content contains nodes
+      // (images/mermaid/wiki-links) whose React renderers aren't ready yet.
+      // The content still loads — catch this gracefully.
+      try {
+        editorInstance?.commands.setContent(content);
+      } catch (nodeViewErr) {
+        console.warn('setContent NodeView warning (non-fatal):', nodeViewErr);
+      }
       setCurrentPath(selected);
       setSavedContent(content);
-      // Post-open bookkeeping (failure here shouldn't claim the file didn't open)
       try {
         addFile(selected, selected.split('/').pop() || 'Untitled');
         notify('success', `${t('sidebar.openFileSuccess')}: ${selected.split('/').pop()}`);
@@ -409,11 +419,16 @@ export function SidebarNew() {
   const handleRecentFileClick = async (path: string) => {
     try {
       const content = await invoke<string>('read_file', { path });
-      // File read succeeded — load into editor
-      editorInstance?.commands.setContent(content);
+      // setContent may throw NodeViewWrapper when content contains nodes
+      // (images/mermaid/wiki-links) whose React renderers aren't ready yet.
+      // The content still loads — catch this gracefully.
+      try {
+        editorInstance?.commands.setContent(content);
+      } catch (nodeViewErr) {
+        console.warn('setContent NodeView warning (non-fatal):', nodeViewErr);
+      }
       setCurrentPath(path);
       setSavedContent(content);
-      // Post-open bookkeeping (failure here shouldn't claim the file didn't open)
       try {
         addFile(path, path.split('/').pop() || 'Untitled');
       } catch { /* non-critical */ }
