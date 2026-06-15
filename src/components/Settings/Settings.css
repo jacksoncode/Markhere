@@ -41,7 +41,7 @@
 }
 
 .settings-header h2 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--color-text-main);
 }
@@ -71,12 +71,12 @@
 }
 
 .settings-tab {
-  padding: 12px 16px;
+  padding: 12px 18px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -110,22 +110,22 @@
 }
 
 .settings-section h3 {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--color-text-main);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--color-border);
 }
 
 .settings-option {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .settings-desc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-secondary);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .settings-select {
@@ -135,7 +135,7 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   color: var(--color-text-main);
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -156,7 +156,7 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   color: var(--color-text-main);
-  font-size: 14px;
+  font-size: 15px;
   transition: all 0.2s ease;
 }
 
@@ -171,7 +171,7 @@
 
 .settings-unit {
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 15px;
   margin-left: 8px;
 }
 
@@ -188,7 +188,7 @@
 
 .settings-label span {
   color: var(--color-text-main);
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .settings-checkbox {
@@ -208,7 +208,7 @@
 
 .settings-checkbox span {
   color: var(--color-text-main);
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .theme-selector {
@@ -227,7 +227,7 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-main);
 }
 
@@ -268,16 +268,16 @@
   border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 14px;
 }
 
 .settings-cancel {
-  padding: 10px 20px;
+  padding: 12px 22px;
   background: transparent;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   color: var(--color-text-main);
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -287,12 +287,12 @@
 }
 
 .settings-save {
-  padding: 10px 24px;
+  padding: 12px 24px;
   background: var(--color-primary);
   border: none;
   border-radius: 8px;
   color: white;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   transition: all 0.2s ease;
 }

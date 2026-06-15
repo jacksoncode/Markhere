@@ -3,14 +3,14 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 24px;
+  height: 28px;
   background: var(--color-bg-secondary);
   border-top: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-tertiary);
   z-index: 1000;
   transition: all var(--transition-normal);
@@ -18,29 +18,29 @@
 
 .focus-mode-active .status-bar {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(28px);
   pointer-events: none;
 }
 
 .status-bar-left {
   display: flex;
-  gap: 16px;
+  gap: 18px;
 }
 
 .status-bar-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 .status-bar-right {
   display: flex;
-  gap: 16px;
+  gap: 18px;
 }
 
 .status-bar-separator {
   width: 1px;
-  height: 12px;
+  height: 14px;
   background: var(--color-divider);
 }
 
@@ -49,8 +49,8 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 16px;
-  font-size: 12px;
+  gap: 18px;
+  font-size: 13px;
   color: var(--color-text-tertiary);
 }
 
@@ -66,14 +66,14 @@
 }
 
 .status-bar-mode-btn {
-  padding: 2px 6px;
+  padding: 3px 8px;
   border: none;
   background: transparent;
   color: var(--color-text-tertiary);
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   border-radius: 3px;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .status-bar-mode-btn:hover {

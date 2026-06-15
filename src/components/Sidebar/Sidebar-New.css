@@ -44,13 +44,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-bg-primary);
 }
 
 .sidebar-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--color-text-main);
 }
@@ -81,7 +81,7 @@
 
 .file-tree-header {
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-text-tertiary);
   display: flex;
@@ -116,7 +116,7 @@
 .file-tree-item {
   display: flex;
   align-items: center;
-  padding: 6px 16px;
+  padding: 8px 16px;
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -141,14 +141,14 @@
 }
 
 .file-tree-name {
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .sidebar-footer {
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-top: 1px solid var(--color-border);
   background: var(--color-bg-primary);
 }
@@ -157,13 +157,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px;
+  padding: 10px;
   background: transparent;
   border: none;
   color: var(--color-text-secondary);
   cursor: pointer;
   width: 100%;
   border-radius: var(--radius-sm);
+  font-size: 14px;
 }
 
 .sidebar-footer-btn:hover {
@@ -185,7 +186,7 @@
   border-bottom: 2px solid transparent;
   color: var(--color-text-tertiary);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   transition: all var(--transition-fast);
   text-align: center;
@@ -204,7 +205,7 @@
 
 .file-tree-current-header {
   padding: 4px 16px 2px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--color-text-tertiary);
   text-transform: uppercase;
@@ -212,7 +213,7 @@
 }
 
 .file-tree-time {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-text-tertiary);
   margin-left: auto;
   flex-shrink: 0;
@@ -228,7 +229,7 @@
 .file-tree-empty {
   padding: 24px 16px;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-tertiary);
 }
 
@@ -240,7 +241,7 @@
 
 .outline-hint {
   padding: 6px 16px 4px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-text-tertiary);
   user-select: none;
 }
@@ -251,7 +252,7 @@
   justify-content: center;
   padding: 48px 16px;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text-tertiary);
 }
 
@@ -265,7 +266,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px 6px 8px;
+  padding: 8px 16px 8px 8px;
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: background var(--transition-fast);
@@ -296,11 +297,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;
-  height: 18px;
-  padding: 0 5px;
+  min-width: 28px;
+  height: 20px;
+  padding: 0 6px;
   border-radius: 3px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1;
   flex-shrink: 0;
@@ -316,15 +317,15 @@
 
 .outline-text {
   flex: 1;
-  font-size: 13px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.45;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .outline-line-number {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-text-tertiary);
   flex-shrink: 0;
   opacity: 0;
@@ -340,13 +341,13 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 16px;
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--color-border);
   color: var(--color-text-secondary);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   transition: all var(--transition-fast);
   text-align: left;
 }
@@ -368,13 +369,13 @@
 
 .sidebar-bookmark-panel .bookmark-header {
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-text-tertiary);
 }
 
 .sidebar-bookmark-panel .bookmark-item {
-  padding: 6px 16px;
+  padding: 8px 16px;
   cursor: pointer;
 }
 
@@ -390,6 +391,7 @@
   padding: 24px 16px;
   text-align: center;
   color: var(--color-text-tertiary);
+  font-size: 14px;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -530,7 +532,7 @@
 }
 
 .browse-breadcrumb-path {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text-secondary);
   white-space: nowrap;
@@ -556,7 +558,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 0;
+  padding: 5px 0;
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: background var(--transition-fast);
@@ -618,7 +620,7 @@
 
 /* Tree entry name */
 .browse-tree-name {
-  font-size: 13px;
+  font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -627,7 +629,7 @@
 /* Empty directory placeholder */
 .browse-tree-empty {
   padding: 8px 16px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-tertiary);
   font-style: italic;
 }

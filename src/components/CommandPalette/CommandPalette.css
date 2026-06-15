@@ -50,7 +50,7 @@
 }
 
 .shortcut-hint {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-secondary);
   padding: 4px 8px;
   background: var(--color-bg-secondary);
@@ -69,7 +69,7 @@
   justify-content: center;
   padding: 40px;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .command-group {
@@ -77,16 +77,16 @@
 }
 
 .command-group-header {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-secondary);
-  padding: 4px 12px;
+  padding: 6px 12px;
   font-weight: 600;
 }
 
 .command-item {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px 12px;
   border-radius: 6px;
   cursor: pointer;
 }
@@ -114,12 +114,12 @@
 }
 
 .command-name {
-  font-size: 14px;
+  font-size: 15px;
   flex: 1;
 }
 
 .command-shortcut {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-secondary);
   font-family: monospace;
 }
@@ -129,7 +129,7 @@
 }
 
 .command-palette-footer {
-  padding: 8px 20px;
+  padding: 10px 20px;
   border-top: 1px solid var(--color-border);
   background: var(--color-bg-secondary);
   border-radius: 0 0 12px 12px;
@@ -137,7 +137,7 @@
 
 .footer-hint {
   display: flex;
-  gap: 16px;
-  font-size: 12px;
+  gap: 18px;
+  font-size: 13px;
   color: var(--color-text-secondary);
 }

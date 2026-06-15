@@ -37,14 +37,14 @@
 }
 
 .recovery-header h2 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--color-text);
   margin: 0 0 8px 0;
 }
 
 .recovery-info {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--color-text-secondary);
   margin: 0;
 }
@@ -64,7 +64,7 @@
 
 .recovery-preview pre {
   font-family: 'Menlo', 'Monaco', monospace;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-text);
   margin: 0;
   white-space: pre-wrap;
@@ -72,21 +72,21 @@
 }
 
 .recovery-stats {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-secondary);
   margin: 8px 0 0 0;
 }
 
 .recovery-actions {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: flex-end;
 }
 
 .recovery-btn {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;

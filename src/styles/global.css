@@ -8,8 +8,8 @@
   --color-text-secondary: #64748b;
   --color-border: #e2e8f0;
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-size-base: 16px;
-  --spacing-unit: 8px;
+  --font-size-base: 17px;
+  --spacing-unit: 9px;
 }
 
 [data-theme='dark'] {

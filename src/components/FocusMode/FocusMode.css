@@ -43,7 +43,7 @@
   border: none;
   border-radius: var(--radius-md);
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
   opacity: 0;
   transition: opacity var(--transition-fast);

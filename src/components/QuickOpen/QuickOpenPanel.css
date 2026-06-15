@@ -65,14 +65,14 @@
   padding: 20px;
   text-align: center;
   color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .quick-open-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 14px;
+  padding: 12px 14px;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.1s;
@@ -88,18 +88,18 @@
 }
 
 .quick-open-icon {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .quick-open-name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--color-text-primary);
   flex: 1;
 }
 
 .quick-open-path {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-text-secondary);
   max-width: 300px;
   overflow: hidden;
@@ -107,7 +107,7 @@
 }
 
 .quick-open-footer {
-  padding: 8px 16px;
+  padding: 10px 16px;
   border-top: 1px solid var(--color-border);
   background: var(--color-bg-secondary);
   border-radius: 0 0 12px 12px;
@@ -115,16 +115,16 @@
 
 .quick-open-hint {
   display: flex;
-  gap: 12px;
-  font-size: 12px;
+  gap: 14px;
+  font-size: 13px;
   color: var(--color-text-secondary);
 }
 
 .quick-open-hint kbd {
   background: var(--color-bg-primary);
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
   font-family: inherit;
-  font-size: 11px;
+  font-size: 12px;
   border: 1px solid var(--color-border);
 }

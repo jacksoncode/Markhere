@@ -2,39 +2,43 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
+  padding: 10px 18px;
   background: var(--color-bg-secondary);
   border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
 }
 
 .file-info {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
 .file-name {
   font-weight: 600;
+  font-size: 14px;
   color: var(--color-text);
 }
 
 .dirty-indicator {
   color: var(--color-primary);
   font-weight: bold;
+  font-size: 14px;
 }
 
 .menu-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .menu-actions button {
-  padding: 6px 12px;
+  padding: 8px 14px;
   background: transparent;
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: 5px;
   color: var(--color-text-secondary);
   cursor: pointer;
+  font-size: 14px;
 }
 
 .menu-actions button:hover {

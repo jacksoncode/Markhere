@@ -1,19 +1,19 @@
 .welcome-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; }
 .welcome-dialog { background: var(--bg-primary); border-radius: 12px; padding: 32px; min-width: 400px; max-width: 500px; position: relative; box-shadow: 0 12px 48px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.welcome-close { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-secondary); }
+.welcome-close { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-secondary); }
 .welcome-step { text-align: center; }
-.welcome-step h1 { margin: 0 0 8px; font-size: 22px; }
-.welcome-step p { color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
-.welcome-actions { display: flex; gap: 8px; justify-content: center; }
-.welcome-actions button { padding: 8px 24px; border-radius: 6px; background: var(--color-primary); color: #fff; border: none; cursor: pointer; font-size: 14px; }
+.welcome-step h1 { margin: 0 0 8px; font-size: 24px; }
+.welcome-step p { color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; font-size: 15px; }
+.welcome-actions { display: flex; gap: 10px; justify-content: center; }
+.welcome-actions button { padding: 10px 28px; border-radius: 6px; background: var(--color-primary); color: #fff; border: none; cursor: pointer; font-size: 15px; }
 .btn-secondary { background: var(--bg-secondary) !important; color: var(--text-primary) !important; border: 1px solid var(--border-primary) !important; }
 .mt { margin-top: 16px; display: block; width: 100%; }
-.welcome-dots { display: flex; justify-content: center; gap: 6px; margin-top: 16px; }
+.welcome-dots { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-primary); transition: 0.2s; }
 .dot.active { background: var(--color-primary); width: 20px; border-radius: 4px; }
 .welcome-templates { text-align: center; }
-.welcome-templates h2 { margin-bottom: 16px; }
-.tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
-.tpl-card { display: flex; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--border-primary); border-radius: 6px; background: var(--bg-secondary); cursor: pointer; font-size: 14px; }
+.welcome-templates h2 { margin-bottom: 16px; font-size: 16px; }
+.tpl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.tpl-card { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--border-primary); border-radius: 6px; background: var(--bg-secondary); cursor: pointer; font-size: 15px; }
 .tpl-card:hover { border-color: var(--color-primary); }

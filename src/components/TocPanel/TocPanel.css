@@ -43,19 +43,19 @@
 }
 
 .toc-panel-header h2 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--color-text-primary);
 }
 
 .toc-panel-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .toc-insert-btn {
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: 8px 14px;
+  font-size: 14px;
   font-weight: 500;
   border: none;
   border-radius: 6px;
