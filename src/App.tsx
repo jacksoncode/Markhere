@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { EditorProvider } from './components/Editor/EditorProvider';
 import { MainEditor } from './components/Editor/MainEditor';
 import { SidebarNew } from './components/Sidebar/SidebarNew';
@@ -56,25 +56,34 @@ function App() {
   const [showQuickOpen, setShowQuickOpen] = useState(false);
   const [showTocPanel, setShowTocPanel] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [pendingClose, setPendingClose] = useState(false);
+  const setPendingClose = useState(false)[1]; // only the setter is used; read via pendingCloseRef
+
+  // Stable refs so the close-guard useEffect ([],[]) closure always has fresh values
+  const closeWindowRef = useRef<() => Promise<void>>(() => Promise.resolve());
+  const checkUnsavedRef = useRef<() => boolean>(() => false);
+  const pendingCloseRef = useRef(false);
 
   const checkUnsavedChanges = () => {
     const { hasUnsavedChanges } = useAutoSaveStore.getState();
-    // Only flag as dirty if there's actual content worth saving
-    const text = editorInstance?.getText() || '';
+    const ei = useEditorState.getState().editorInstance;
+    const text = ei?.getText() || '';
     return hasUnsavedChanges && text.trim().length > 0;
   };
+  checkUnsavedRef.current = checkUnsavedChanges;
 
   const closeWindow = async () => {
     const api = await getWindowApi();
     await api.getCurrentWindow().close();
   };
+  closeWindowRef.current = closeWindow;
 
   const handleSaveBeforeClose = async () => {
-    if (editorInstance) {
-      const markdown = (editorInstance.storage as any)?.markdown?.getMarkdown?.() || '';
-      if (currentPath) {
-        await FileService.saveFile(currentPath, markdown);
+    const ei = useEditorState.getState().editorInstance;
+    if (ei) {
+      const markdown = (ei.storage as any)?.markdown?.getMarkdown?.() || '';
+      const cp = useFileStore.getState().currentPath;
+      if (cp) {
+        await FileService.saveFile(cp, markdown);
         setSavedContent(markdown);
         useAutoSaveStore.getState().markSaved();
       } else {
@@ -87,13 +96,15 @@ function App() {
       }
     }
     setShowUnsavedDialog(false);
-    if (pendingClose) closeWindow();
+    if (pendingCloseRef.current) closeWindowRef.current().catch(console.error);
+    pendingCloseRef.current = false;
   };
 
   const handleDiscardChanges = () => {
     useAutoSaveStore.getState().clearBackup();
     setShowUnsavedDialog(false);
-    if (pendingClose) closeWindow();
+    if (pendingCloseRef.current) closeWindowRef.current().catch(console.error);
+    pendingCloseRef.current = false;
   };
 
   const handleCancelClose = () => { setShowUnsavedDialog(false); setPendingClose(false); };
@@ -117,35 +128,34 @@ function App() {
     return () => window.removeEventListener('beforeunload', h);
   }, []);
 
-  // ---- Close guard (macOS traffic light + Cmd+W + custom close button) ----
+  // ---- Close guard (OS-native close button  + Cmd+W + custom close button) ----
   useEffect(() => {
-    // Listen for custom close events from TitleBar
+    // Custom close event from TitleBar → must close via Tauri API
     const onCustomClose = () => {
-      if (checkUnsavedChanges()) {
+      if (checkUnsavedRef.current()) {
+        pendingCloseRef.current = true;
         setPendingClose(true);
         setShowUnsavedDialog(true);
       } else {
-        closeWindow().catch((err) => console.error('onCustomClose closeWindow failed:', err));
+        closeWindowRef.current().catch(console.error);
       }
     };
     window.addEventListener('markhere:close-requested', onCustomClose);
 
     let unlisten: (() => void) | undefined;
     getWindowApi().then(api => {
-      api.getCurrentWindow().onCloseRequested(async (event) => {
-        event.preventDefault();
-        try {
-          if (checkUnsavedChanges()) {
-            setPendingClose(true);
-            setShowUnsavedDialog(true);
-          } else {
-            await closeWindow();
-          }
-        } catch (err) {
-          console.error('onCloseRequested handler failed:', err);
-          // Force close as last resort
-          try { await closeWindow(); } catch { /* truly stuck */ }
+      const currentWindow = api.getCurrentWindow();
+      currentWindow.onCloseRequested((event) => {
+        if (checkUnsavedRef.current()) {
+          // Unsaved work — prevent OS from closing, show save dialog instead
+          event.preventDefault();
+          pendingCloseRef.current = true;
+          setPendingClose(true);
+          setShowUnsavedDialog(true);
         }
+        // No unsaved changes → DON'T call preventDefault().
+        // The OS / Tauri runtime handles the close natively.
+        // This is the most reliable path on all platforms.
       }).then(fn => { unlisten = fn; })
       .catch((err) => console.error('onCloseRequested registration failed:', err));
     }).catch((err) => console.error('getWindowApi failed:', err));
