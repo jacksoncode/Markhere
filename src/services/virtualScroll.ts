@@ -93,7 +93,8 @@ export function useVirtualScroll(
   useEffect(() => {
     if (!editor || editor.isDestroyed || !config.enabled) return;
 
-    const container = scrollContainerRef.current ?? editor.view.dom.parentElement;
+    let container: HTMLElement | null = null;
+    try { container = scrollContainerRef.current ?? editor.view.dom.parentElement; } catch { return; }
     if (!container) return;
 
     let rafId = 0;
@@ -102,6 +103,7 @@ export function useVirtualScroll(
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
         if (editor.isDestroyed) return;
+        try { editor.view; } catch { return; }
 
         const chunks = chunksRef.current;
         if (chunks.length === 0) return;

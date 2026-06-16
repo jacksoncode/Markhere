@@ -417,7 +417,8 @@ export function MainEditor() {
   useEffect(() => {
     if (!editor || editor.isDestroyed) return;
 
-    const editorDom = editor.view.dom;
+    let editorDom: HTMLElement;
+    try { editorDom = editor.view.dom; } catch { return; }
 
     const handleLinkClick = (e: MouseEvent) => {
       const anchor = (e.target as Element).closest('a');
@@ -482,6 +483,10 @@ export function MainEditor() {
   useEffect(() => {
     if (!editor || editor.isDestroyed) return;
 
+    // editor.view.dom may throw "editor view is not available" during first mount
+    let editorRect: DOMRect;
+    try { editorRect = editor.view.dom.getBoundingClientRect(); } catch { return; }
+
     const remotes = collaborators.filter((c) => {
       // Exclude ourselves: our own cursor is in the panel, not the overlay
       const ownId = useCollaborationStore.getState().provider?.awareness?.clientID?.toString();
@@ -492,7 +497,6 @@ export function MainEditor() {
       const pos = c.cursor!.from;
       try {
         const coords = editor.view.coordsAtPos(pos);
-        const editorRect = editor.view.dom.getBoundingClientRect();
         return {
           id: c.id,
           name: c.name,
@@ -501,7 +505,6 @@ export function MainEditor() {
           left: coords.left - editorRect.left,
         };
       } catch {
-        // Position may be out of range – skip this cursor
         return null;
       }
     }).filter(Boolean) as Array<{

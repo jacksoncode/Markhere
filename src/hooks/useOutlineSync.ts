@@ -5,7 +5,8 @@ export function useOutlineSync(editor: Editor | null, onActiveIdChange: (id: str
   useEffect(() => {
     if (!editor || editor.isDestroyed) return;
 
-    const scroller = editor.view.dom.parentElement;
+    let scroller: HTMLElement;
+    try { scroller = editor.view.dom.parentElement as HTMLElement; } catch { return; }
     if (!scroller) return;
 
     let raf = 0;

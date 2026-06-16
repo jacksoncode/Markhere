@@ -123,7 +123,8 @@ function findTableElement(editor: Editor): HTMLElement | null {
   if (tableDepth < 0) return null;
 
   const tablePos = $anchor.start(tableDepth);
-  const maybeNode = editor.view.nodeDOM(tablePos);
+  let maybeNode: unknown = null;
+  try { maybeNode = editor.view.nodeDOM(tablePos); } catch { return null; }
 
   if (maybeNode instanceof HTMLElement) return maybeNode;
   if (maybeNode && typeof maybeNode === 'object' && 'node' in maybeNode) {
@@ -188,7 +189,8 @@ export function TableOperations() {
     }
 
     const tableEl = findTableElement(editor);
-    const editorWrapper = editor.view.dom.parentElement;
+    let editorWrapper: HTMLElement | null = null;
+    try { editorWrapper = editor.view.dom.parentElement; } catch { setVisible(false); return; }
     if (!tableEl || !editorWrapper) {
       setVisible(false);
       return;
@@ -242,7 +244,8 @@ export function TableOperations() {
 
   /* ---- Scroll sync ---- */
   useEffect(() => {
-    const wrapper = editor?.view.dom.parentElement;
+    let wrapper: HTMLElement | null = null;
+    try { wrapper = editor?.view.dom.parentElement ?? null; } catch { return; }
     if (!wrapper) return;
 
     wrapper.addEventListener('scroll', updatePosition, { passive: true });
