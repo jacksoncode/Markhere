@@ -362,13 +362,11 @@ export function MainEditor() {
     }
   };
 
-  if (!editor) {
-    return <div className="editor-loading" aria-busy="true" role="status">Loading editor...</div>;
-  }
+  // ---- Effects that must run before any early return (React hooks rule) ----
 
   useEffect(() => {
     if (!editor) return;
-    
+
     if (sourceMode) {
       const markdown = (editor.storage as any)?.markdown?.getMarkdown?.() || '';
       setSourceContent(markdown);
@@ -381,6 +379,7 @@ export function MainEditor() {
   // After every save attempt (success or failure) the latest content
   // is always persisted to localStorage as a backup.
   useEffect(() => {
+    if (!editor) return;
     saveWorker.setOnAfterSave(async (_error) => {
       const markdown = sourceModeRef.current
         ? sourceContentRef.current
@@ -513,6 +512,11 @@ export function MainEditor() {
 
     setCursorEls(els);
   }, [collaborators, editor]);
+
+  // Early return AFTER all hooks — render loading state while editor mounts
+  if (!editor) {
+    return <div className="editor-loading" aria-busy="true" role="status">Loading editor...</div>;
+  }
 
   const handleSourceChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
