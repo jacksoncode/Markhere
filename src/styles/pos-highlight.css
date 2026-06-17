@@ -1,0 +1,53 @@
+/* ──── POS Highlight Styles (P3-6) ──── */
+
+.pos-tag {
+  cursor: default;
+  transition: opacity 0.2s ease;
+  position: relative;
+}
+
+.pos-tag:hover {
+  opacity: 0.85;
+}
+
+.pos-tag::after {
+  content: attr(data-pos);
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.pos-tag:hover::after {
+  opacity: 1;
+}
+
+/* ──── POS Type Colors ──── */
+
+.pos-n { border-bottom-color: #4CAF50 !important; }   /* 名词 */
+.pos-v { border-bottom-color: #2196F3 !important; }   /* 动词 */
+.pos-a { border-bottom-color: #FF9800 !important; }   /* 形容词 */
+.pos-d { border-bottom-color: #9C27B0 !important; }   /* 副词 */
+.pos-r { border-bottom-color: #00BCD4 !important; }   /* 代词 */
+.pos-p { border-bottom-color: #607D8B !important; }   /* 介词 */
+.pos-c { border-bottom-color: #795548 !important; }   /* 连词 */
+.pos-m { border-bottom-color: #E91E63 !important; }   /* 数词 */
+.pos-q { border-bottom-color: #FF5722 !important; }   /* 量词 */
+.pos-u { border-bottom-color: #9E9E9E !important; }   /* 助词 */
+.pos-x { border-bottom-color: #BDBDBD !important; }   /* 标点 */
+.pos-w { border-bottom-color: #757575 !important; }   /* 其他 */
+.pos-ns { border-bottom-color: #8BC34A !important; }  /* 地名 */
+.pos-nt { border-bottom-color: #3F51B5 !important; }  /* 机构 */
+.pos-nz { border-bottom-color: #009688 !important; }  /* 专名 */
+.pos-nh { border-bottom-color: #CDDC39 !important; }  /* 人名 */
+.pos-nr { border-bottom-color: #FFC107 !important; }  /* 名词短语 */
+.pos-vd { border-bottom-color: #03A9F4 !important; }  /* 动动词 */
+.pos-vn { border-bottom-color: #673AB7 !important; }  /* 名动词 */
+.pos-ad { border-bottom-color: #FF4081 !important; }  /* 形副词 */
+.pos-an { border-bottom-color: #F44336 !important; }  /* 名形容词 */

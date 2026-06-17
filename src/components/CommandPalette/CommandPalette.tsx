@@ -105,13 +105,14 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
   let currentIndex = 0;
 
   return (
-    <div className="command-palette-overlay" onClick={onClose} aria-label="Close command palette">
+    <div className="command-palette-overlay" onClick={onClose} aria-label="Close command palette" data-testid="command-palette-overlay">
       <div
         className="command-palette-modal"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
+        data-testid="command-palette-modal"
       >
         <div className="command-palette-input-wrapper">
           <span className="search-icon" aria-hidden="true">🔍</span>
@@ -129,6 +130,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
             aria-controls="command-palette-listbox"
             aria-activedescendant={filteredCommands[selectedIndex] ? `command-option-${filteredCommands[selectedIndex].id}` : undefined}
             aria-autocomplete="list"
+            data-testid="command-search"
           />
           <span className="shortcut-hint">ESC to close</span>
         </div>
@@ -158,6 +160,7 @@ export function CommandPalette({ isOpen, onClose, commands }: CommandPaletteProp
                       onMouseEnter={() => setSelectedIndex(flatIndexToCommand.findIndex(c => c.id === cmd.id))}
                       role="option"
                       aria-selected={isSelected}
+                      data-testid={`command-${cmd.id}`}
                     >
                       <div className="command-content">
                         {cmd.icon && <span className="command-icon" aria-hidden="true">{cmd.icon}</span>}
@@ -198,7 +201,15 @@ export function useCommands(
   editorCommands: () => void,
   fileCommands: () => void,
   viewCommands: () => void,
-  formatCommands: () => void
+  formatCommands: () => void,
+  coverCommands?: () => void,
+  slideshowCommands?: () => void,
+  posCommands?: () => void,
+  publishCommands?: () => void,
+  mergeCommands?: () => void,
+  commentCommands?: () => void,
+  syncBlockCommands?: () => void,
+  encryptCommands?: () => void
 ): Command[] {
   return useMemo(() => [
     // File Commands
@@ -239,7 +250,7 @@ export function useCommands(
     { id: 'view.toggle-sidebar', name: 'Toggle Sidebar', category: 'View', shortcut: '⌘\\', action: viewCommands, icon: '☰' },
     { id: 'view.focus-mode', name: 'Focus Mode', category: 'View', shortcut: '⌘⇧F', action: viewCommands, icon: '🎯' },
     { id: 'view.typewriter-mode', name: 'Typewriter Mode', category: 'View', shortcut: '⌘⇧T', action: viewCommands, icon: '⌨️' },
-    { id: 'view.source-mode', name: 'Source Mode', category: 'View', shortcut: '⌘/', action: viewCommands, icon: '📝' },
+    { id: 'view.source-mode', name: 'Full Source Mode', category: 'View', shortcut: '⌘⇧/', action: viewCommands, icon: '📝' },
     { id: 'view.dark-mode', name: 'Toggle Dark Mode', category: 'View', action: viewCommands, icon: '🌙' },
     
     // Tools Commands
@@ -251,9 +262,63 @@ export function useCommands(
     { id: 'tools.export-word', name: 'Export Word', category: 'Tools', action: fileCommands, icon: '📝' },
     { id: 'tools.export-html', name: 'Export HTML', category: 'Tools', action: fileCommands, icon: '🌐' },
     
+    // Cover Commands (P3-8)
+    ...(coverCommands ? [
+      { id: 'cover.edit', name: 'Edit Cover', category: 'Cover', action: coverCommands, icon: '🖼️' },
+      { id: 'cover.template', name: 'Cover Templates', category: 'Cover', action: coverCommands, icon: '📋' },
+      { id: 'cover.icon', name: 'Set Page Icon', category: 'Cover', action: coverCommands, icon: '🏷️' },
+    ] : []),
+    
+    // Slideshow Commands (P3-1)
+    ...(slideshowCommands ? [
+      { id: 'slideshow.start', name: 'Start Presentation', category: 'Slideshow', shortcut: '⌘⇧P', action: slideshowCommands, icon: '▶️' },
+      { id: 'slideshow.fullscreen', name: 'Fullscreen Presentation', category: 'Slideshow', action: slideshowCommands, icon: '🖥️' },
+      { id: 'slideshow.exit', name: 'Exit Presentation', category: 'Slideshow', action: slideshowCommands, icon: '⏹️' },
+    ] : []),
+    
+    // POS Commands (P3-6)
+    ...(posCommands ? [
+      { id: 'pos.toggle', name: 'Toggle POS Highlight', category: 'POS', shortcut: '⌘⇧H', action: posCommands, icon: '🏷️' },
+      { id: 'pos.enable', name: 'Enable POS Highlight', category: 'POS', action: posCommands, icon: '✅' },
+      { id: 'pos.disable', name: 'Disable POS Highlight', category: 'POS', action: posCommands, icon: '❌' },
+    ] : []),
+    
+    // Publish Commands (P3-2)
+    ...(publishCommands ? [
+      { id: 'publish', name: 'Publish to Web', category: 'Publish', action: publishCommands, icon: '🌐' },
+      { id: 'publish.github', name: 'Publish to GitHub Pages', category: 'Publish', action: publishCommands, icon: '📦' },
+      { id: 'publish.netlify', name: 'Publish to Netlify', category: 'Publish', action: publishCommands, icon: '⚡' },
+    ] : []),
+    
+    // Merge Commands (P3-7)
+    ...(mergeCommands ? [
+      { id: 'merge', name: 'Merge Documents', category: 'Merge', action: mergeCommands, icon: '📑' },
+      { id: 'merge.simple', name: 'Simple Merge', category: 'Merge', action: mergeCommands, icon: '📄' },
+      { id: 'merge.smart', name: 'Smart Merge', category: 'Merge', action: mergeCommands, icon: '🧠' },
+    ] : []),
+    
+    // Comment Commands (P3-9)
+    ...(commentCommands ? [
+      { id: 'comment.add', name: 'Add Comment', category: 'Comment', action: commentCommands, icon: '💬' },
+      { id: 'comment.panel', name: 'Toggle Comment Panel', category: 'Comment', action: commentCommands, icon: '📋' },
+      { id: 'comment.resolve', name: 'Resolve Thread', category: 'Comment', action: commentCommands, icon: '✓' },
+    ] : []),
+    
+    // Sync Block Commands (P3-10)
+    ...(syncBlockCommands ? [
+      { id: 'sync-block.create', name: 'Create Sync Block', category: 'Sync Block', action: syncBlockCommands, icon: '🔗' },
+      { id: 'sync-block.update', name: 'Update Sync Block', category: 'Sync Block', action: syncBlockCommands, icon: '🔄' },
+    ] : []),
+    
+    // Encrypt Commands (P3-11)
+    ...(encryptCommands ? [
+      { id: 'encrypt.create', name: 'Create Encrypted Note', category: 'Encrypt', action: encryptCommands, icon: '🔒' },
+      { id: 'encrypt.unlock', name: 'Unlock Note', category: 'Encrypt', action: encryptCommands, icon: '🔓' },
+    ] : []),
+    
     // Help Commands
     { id: 'help.shortcuts', name: 'Keyboard Shortcuts', category: 'Help', shortcut: '⌘⇧K', action: viewCommands, icon: '⌨️' },
     { id: 'help.guide', name: 'User Guide', category: 'Help', action: viewCommands, icon: '📖' },
     { id: 'help.about', name: 'About Markhere', category: 'Help', action: viewCommands, icon: 'ℹ️' },
-  ], [editorCommands, fileCommands, viewCommands, formatCommands]);
+  ], [editorCommands, fileCommands, viewCommands, formatCommands, coverCommands, slideshowCommands, posCommands, publishCommands, mergeCommands, commentCommands, syncBlockCommands, encryptCommands]);
 }

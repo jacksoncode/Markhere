@@ -1,0 +1,140 @@
+name: Performance Regression
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 0 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  performance-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run performance tests
+        run: npx playwright test e2e/performance-regression.spec.ts
+        continue-on-error: true
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: performance-results/
+          if-no-files-found: ignore
+
+  bundle-size-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Check bundle sizes
+        shell: bash
+        run: |
+          echo "## Bundle Size Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          
+          MAIN_BUNDLE=$(find dist -name "*.js" -type f | head -1)
+          if [ -n "$MAIN_BUNDLE" ]; then
+            SIZE=$(du -h "$MAIN_BUNDLE" | cut -f1)
+            SIZE_BYTES=$(stat -c%s "$MAIN_BUNDLE" 2>/dev/null || stat -f%z "$MAIN_BUNDLE" 2>/dev/null)
+            echo "- Main bundle: $SIZE ($SIZE_BYTES bytes)" >> "$GITHUB_STEP_SUMMARY"
+            
+            if [ "$SIZE_BYTES" -gt 600000 ]; then
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "⚠️ Warning: Bundle size exceeds 600KB threshold" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+          
+          CSS_BUNDLE=$(find dist -name "*.css" -type f | head -1)
+          if [ -n "$CSS_BUNDLE" ]; then
+            SIZE=$(du -h "$CSS_BUNDLE" | cut -f1)
+            echo "- CSS bundle: $SIZE" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Store bundle size baseline
+        run: |
+          mkdir -p .performance
+          find dist -name "*.js" -type f -exec stat -c%s {} \; 2>/dev/null | head -1 > .performance/bundle-size-baseline.txt || true
+
+      - name: Upload baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-size-baseline
+          path: .performance/
+          if-no-files-found: ignore
+
+  memory-profiling:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Build Tauri app
+        run: npx tauri build
+        continue-on-error: true
+
+      - name: Check binary size
+        shell: bash
+        run: |
+          echo "## Binary Size Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          
+          BINARY=$(find src-tauri/target/release -name "markhere" -type f | head -1)
+          if [ -n "$BINARY" ]; then
+            SIZE=$(du -h "$BINARY" | cut -f1)
+            SIZE_BYTES=$(stat -c%s "$BINARY")
+            echo "- Binary size: $SIZE ($SIZE_BYTES bytes)" >> "$GITHUB_STEP_SUMMARY"
+            
+            if [ "$SIZE_BYTES" -gt 50000000 ]; then
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+              echo "⚠️ Warning: Binary size exceeds 50MB threshold" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          else
+            echo "Binary not found (build may have failed)" >> "$GITHUB_STEP_SUMMARY"
+          fi

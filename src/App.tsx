@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, lazy, Suspense } from 'react';
 import { EditorProvider } from './components/Editor/EditorProvider';
-import { MainEditor } from './components/Editor/MainEditor';
+import { SplitView } from './components/SplitView/SplitView';
 import { SidebarNew } from './components/Sidebar/SidebarNew';
 import { Toolbar } from './components/Toolbar/Toolbar';
 import { TitleBar } from './components/TitleBar/TitleBar';
@@ -20,7 +20,12 @@ import { useUIState } from './store/uiStore';
 import { useAutoSaveStore } from './store/autoSaveStore';
 import { initTheme } from './store/themeStore';
 import { useCommands } from './components/CommandPalette';
+import { CommentService } from './services/CommentService';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useCustomShortcuts } from './hooks/useCustomShortcuts';
+import { UpdateDialog } from './components/UpdateDialog/UpdateDialog';
+import { useExternalFileChange } from './hooks/useExternalFileChange';
+import { FileChangedDialog } from './components/FileChangedDialog/FileChangedDialog';
 import './styles/App.css';
 import './styles/theme.css';
 
@@ -34,6 +39,7 @@ const PomodoroTimer = lazy(() => import('./components/PomodoroTimer').then(m => 
 const WordCountDialog = lazy(() => import('./components/WordCountDialog/WordCountDialog').then(m => ({ default: m.WordCountDialog })));
 const QuickOpenPanel = lazy(() => import('./components/QuickOpen/QuickOpenPanel').then(m => ({ default: m.QuickOpenPanel })));
 const TocPanel = lazy(() => import('./components/TocPanel/TocPanel').then(m => ({ default: m.TocPanel })));
+const ShortcutSettingsLazy = lazy(() => import('./components/ShortcutSettings/ShortcutSettings').then(m => ({ default: m.ShortcutSettings })));
 
 // Hoisted dynamic imports (#12)
 let winApi: typeof import('@tauri-apps/api/window') | null = null;
@@ -43,6 +49,13 @@ const getWindowApi = async () => {
 };
 
 const WelcomeDialogLazy = lazy(() => import('./components/Welcome/WelcomeDialog').then(m => ({ default: m.WelcomeDialog })));
+const CoverEditor = lazy(() => import('./components/Cover/CoverEditor').then(m => ({ default: m.CoverEditor })));
+const SlideshowView = lazy(() => import('./components/Slideshow/SlideshowView').then(m => ({ default: m.SlideshowView })));
+const PublishDialog = lazy(() => import('./components/Publish/PublishDialog').then(m => ({ default: m.PublishDialog })));
+const MergeDialog = lazy(() => import('./components/Merge/MergeDialog').then(m => ({ default: m.MergeDialog })));
+const CommentPanel = lazy(() => import('./components/Comment/CommentPanel').then(m => ({ default: m.CommentPanel })));
+const EncryptionDialog = lazy(() => import('./components/Encryption/EncryptionDialog').then(m => ({ default: m.EncryptionDialog })));
+import './styles/pos-highlight.css';
 
 function App() {
   const { focusMode, pomodoroEnabled, wordGoalEnabled, toggleSidebar, toggleFocusMode, toggleTypewriterMode, toggleSourceMode, togglePomodoro, toggleWordGoal } = useUIState();
@@ -56,12 +69,47 @@ function App() {
   const [showQuickOpen, setShowQuickOpen] = useState(false);
   const [showTocPanel, setShowTocPanel] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const setPendingClose = useState(false)[1]; // only the setter is used; read via pendingCloseRef
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+const [showShortcutSettings, setShowShortcutSettings] = useState(false);
+  const [showCoverEditor, setShowCoverEditor] = useState(false);
+  const [showSlideshow, setShowSlideshow] = useState(false);
+  const [posHighlightEnabled, setPosHighlightEnabled] = useState(false);
+  const [showPublish, setShowPublish] = useState(false);
+  const [showMerge, setShowMerge] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [showEncryption, setShowEncryption] = useState(false);
+  const setPendingClose = useState(false)[1];
+  
+  const commentService = new CommentService(currentPath || 'default');
+  
+  const getContent = () => {
+    const ei = useEditorState.getState().editorInstance;
+    return ei?.getText?.() || '';
+  };
+  
+  const handleAddComment = (text: string) => {
+    commentService.addThread(0, 0, text, 'User');
+  };
+  
+  const handleResolveComment = (threadId: string) => {
+    commentService.resolveThread(threadId);
+  };
+  
+  const handleDeleteComment = (threadId: string) => {
+    commentService.deleteThread(threadId);
+  };
+  
+  const handleMerge = (mergedContent: string) => {
+    editorInstance?.commands.setContent(mergedContent);
+  }; // only the setter is used; read via pendingCloseRef
 
   // Stable refs so the close-guard useEffect ([],[]) closure always has fresh values
   const closeWindowRef = useRef<() => Promise<void>>(() => Promise.resolve());
   const checkUnsavedRef = useRef<() => boolean>(() => false);
   const pendingCloseRef = useRef(false);
+
+  // External file-change detection (reload / keep prompt)
+  const externalChange = useExternalFileChange();
 
   const checkUnsavedChanges = () => {
     const { hasUnsavedChanges } = useAutoSaveStore.getState();
@@ -114,6 +162,19 @@ function App() {
     setShowCommandPalette, setShowQuickOpen, setShowWordCount,
     setPendingClose, setShowUnsavedDialog, setSavedContent,
     checkUnsavedChanges, editorInstance, currentPath,
+  });
+
+  // ---- Custom shortcuts (P2-5) ----
+  useCustomShortcuts({
+    setShowCommandPalette,
+    setShowQuickOpen,
+    setShowWordCount,
+    setShowShortcutSettings,
+    toggleSidebar,
+    toggleFocusMode,
+    toggleTypewriterMode,
+    toggleSourceMode,
+    editorInstance,
   });
 
   // ---- Init & recover ----
@@ -176,8 +237,16 @@ function App() {
   const commands = useCommands(
     () => editorInstance?.commands.clearNodes(),
     () => {},
-    () => { toggleSidebar(); toggleFocusMode(); toggleTypewriterMode(); toggleSourceMode(); togglePomodoro(); toggleWordGoal(); },
+    () => { toggleSidebar(); toggleFocusMode(); toggleTypewriterMode(); toggleSourceMode(); togglePomodoro(); toggleWordGoal(); setShowShortcutSettings(true); },
     () => { editorInstance?.chain().focus().toggleBold().run(); editorInstance?.chain().focus().toggleItalic().run(); },
+    () => setShowCoverEditor(true),
+    () => setShowSlideshow(true),
+    () => setPosHighlightEnabled(!posHighlightEnabled),
+    () => setShowPublish(true),
+    () => setShowMerge(true),
+    () => setShowComments(true),
+    () => {},
+    () => setShowEncryption(true),
   );
 
   return (
@@ -186,10 +255,10 @@ function App() {
       <div className={`app-container app-with-titlebar auto-hide-ui ${focusMode ? 'focus-mode-active' : ''}`}>
         {showWelcome && <Suspense fallback={null}><WelcomeDialogLazy onClose={() => setShowWelcome(false)} /></Suspense>}
         {showRecovery && <RecoveryDialog onRecover={handleRecover} onDiscard={handleDiscard} />}
-        <TitleBar /><AutoHideUI /><SidebarNew />
+        <TitleBar onCheckUpdates={() => setShowUpdateDialog(true)} /><AutoHideUI /><SidebarNew />
         <main id="main-content" className="main-content">
           <TabBar /><Toolbar />
-          <EditorProvider><MainEditor /><TypewriterMode /></EditorProvider>
+          <EditorProvider><SplitView /><TypewriterMode /></EditorProvider>
         </main>
         <StatusBar />
         <Suspense fallback={null}><SearchPanel /></Suspense>
@@ -202,7 +271,16 @@ function App() {
         <Suspense fallback={null}><WordCountDialog isOpen={showWordCount} onClose={() => setShowWordCount(false)} /></Suspense>
         <Suspense fallback={null}><QuickOpenPanel isOpen={showQuickOpen} onClose={() => setShowQuickOpen(false)} /></Suspense>
         <Suspense fallback={null}><TocPanel isOpen={showTocPanel} onClose={() => setShowTocPanel(false)} /></Suspense>
+        <Suspense fallback={null}><CoverEditor isOpen={showCoverEditor} onClose={() => setShowCoverEditor(false)} onApply={() => setShowCoverEditor(false)} /></Suspense>
+        <Suspense fallback={null}><SlideshowView isOpen={showSlideshow} onClose={() => setShowSlideshow(false)} /></Suspense>
+        <Suspense fallback={null}><PublishDialog isOpen={showPublish} onClose={() => setShowPublish(false)} content={getContent()} /></Suspense>
+        <Suspense fallback={null}><MergeDialog isOpen={showMerge} onClose={() => setShowMerge(false)} documents={['Document 1', 'Document 2']} onMerge={handleMerge} /></Suspense>
+        <Suspense fallback={null}><CommentPanel isOpen={showComments} onClose={() => setShowComments(false)} commentService={commentService} onAddComment={handleAddComment} onResolveComment={handleResolveComment} onDeleteComment={handleDeleteComment} /></Suspense>
+        <Suspense fallback={null}><EncryptionDialog isOpen={showEncryption} onClose={() => setShowEncryption(false)} /></Suspense>
         {showUnsavedDialog && <UnsavedChangesDialog onSave={handleSaveBeforeClose} onDiscard={handleDiscardChanges} onCancel={handleCancelClose} />}
+        {externalChange.prompting && <FileChangedDialog onReload={externalChange.reload} onKeep={externalChange.dismiss} />}
+        {showUpdateDialog && <UpdateDialog onClose={() => setShowUpdateDialog(false)} />}
+        <Suspense fallback={null}><ShortcutSettingsLazy isOpen={showShortcutSettings} onClose={() => setShowShortcutSettings(false)} /></Suspense>
         <NotificationContainer />
       </div>
     </ErrorBoundary>
