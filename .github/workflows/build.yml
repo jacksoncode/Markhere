@@ -116,7 +116,12 @@ jobs:
       - name: Build Tauri app
         env:
           CARGO_NET_RETRY: '5'
-        run: npm exec --no -- tauri build --target ${{ matrix.target }} --no-sign
+        shell: bash
+        run: |
+          echo "=== Node version ===" && node --version
+          echo "=== npm version ===" && npm --version
+          echo "=== Tauri CLI location ===" && ls -la node_modules/.bin/tauri || echo "NOT FOUND"
+          echo "=== Running Tauri build ===" && node_modules/.bin/tauri build --target ${{ matrix.target }} --no-sign
 
       # ---- Artifact size tracking ----
       - name: Report artifact sizes
