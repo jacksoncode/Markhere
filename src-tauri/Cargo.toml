@@ -1,6 +1,6 @@
 [package]
 name = "markhere"
-version = "1.1.0"
+version = "1.1.1"
 description = "A modern WYSIWYG Markdown editor"
 authors = ["markhere-team"]
 edition = "2021"
@@ -19,17 +19,18 @@ tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "time", "sync", "io-util"] }
 chrono = "0.4"
 uuid = { version = "1", features = ["v4"] }
 base64 = "0.22"
 printpdf = "0.7"
 docx-rs = "0.4"
 html2text = "0.12"
-git2 = "0.18"
-reqwest = { version = "0.11", default-features = false, features = ["rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
 sysinfo = "0.30"
 pulldown-cmark = { version = "0.12", default-features = false, features = ["html"] }
+notify = "6"
+notify-debouncer-mini = "0.4"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = { version = "2", features = ["rustls-tls"] }
@@ -39,8 +40,8 @@ arboard = "3.4"
 tempfile = "3.8"
 
 [profile.release]
-panic = "unwind"
+panic = "abort"
 codegen-units = 1
-lto = "thin"
+lto = true
 opt-level = "s"
 strip = true
