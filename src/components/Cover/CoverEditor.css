@@ -1,0 +1,359 @@
+/* ──── Cover Editor Styles ──── */
+
+.cover-editor-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.cover-editor-modal {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  width: 600px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.cover-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cover-editor-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.close-btn:hover {
+  background: var(--bg-hover);
+}
+
+.cover-editor-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.cover-editor-content h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+/* Preview Section */
+.cover-preview-section {
+  margin-bottom: 24px;
+}
+
+.cover-preview-container {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  background: var(--bg-secondary);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-preview-empty {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Template Section */
+.cover-template-section {
+  margin-bottom: 24px;
+}
+
+.cover-template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.template-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.template-btn:hover {
+  border-color: var(--accent-color);
+}
+
+.template-btn.active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.template-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.template-name {
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+/* Image Section */
+.cover-image-section {
+  margin-bottom: 24px;
+}
+
+.cover-image-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.cover-image-preview {
+  position: relative;
+  width: 100%;
+}
+
+.cover-image-preview img {
+  width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #f44336;
+}
+
+.select-image-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.select-image-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent-color);
+}
+
+/* Icon Section */
+.cover-icon-section {
+  margin-bottom: 24px;
+}
+
+.cover-icon-controls {
+  position: relative;
+}
+
+.current-icon-btn {
+  width: 64px;
+  height: 64px;
+  font-size: 32px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.current-icon-btn:hover,
+.current-icon-btn.active {
+  border-color: var(--accent-color);
+}
+
+.emoji-picker-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 8px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.emoji-option {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-option:hover {
+  background: var(--bg-hover);
+}
+
+.emoji-option.selected {
+  background: var(--accent-color);
+  color: white;
+}
+
+/* Info Section */
+.cover-info-section {
+  margin-bottom: 24px;
+}
+
+.cover-info-field {
+  margin-bottom: 16px;
+}
+
+.cover-info-field label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.cover-info-field input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.cover-info-field input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.cover-info-field input[type="color"] {
+  width: 48px;
+  height: 32px;
+  padding: 2px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.cover-info-field input[type="color"] + input[type="text"] {
+  width: calc(100% - 60px);
+}
+
+/* Footer */
+.cover-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.cancel-btn:hover {
+  background: var(--bg-hover);
+}
+
+.apply-btn {
+  padding: 10px 20px;
+  background: var(--accent-color);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.apply-btn:hover {
+  opacity: 0.9;
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .cover-editor-modal {
+  background: #1e1e1e;
+}
+
+[data-theme="dark"] .cover-preview-container {
+  background: #252525;
+}
+
+[data-theme="dark"] .template-btn {
+  background: #252525;
+}
+
+[data-theme="dark"] .select-image-btn {
+  background: #252525;
+}
+
+[data-theme="dark"] .current-icon-btn {
+  background: #252525;
+}
+
+[data-theme="dark"] .cover-info-field input[type="text"] {
+  background: #252525;
+}
+
+[data-theme="dark"] .emoji-picker-panel {
+  background: #1e1e1e;
+}

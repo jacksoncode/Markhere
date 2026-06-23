@@ -13,6 +13,8 @@ interface UIState {
   sourceMode: boolean;
   pomodoroEnabled: boolean;
   wordGoalEnabled: boolean;
+  splitViewEnabled: boolean;
+  splitViewDirection: 'horizontal' | 'vertical';
   loadingMessage: string;
   loadingProgress: number;
   errorMessage: string;
@@ -25,6 +27,8 @@ interface UIState {
   setSourceMode: (mode: boolean) => void;
   togglePomodoro: () => void;
   toggleWordGoal: () => void;
+  toggleSplitView: (enabled?: boolean) => void;
+  setSplitViewDirection: (direction: 'horizontal' | 'vertical') => void;
   setLoadingMessage: (message: string) => void;
   setLoadingProgress: (progress: number) => void;
   showError: (message: string) => void;
@@ -42,6 +46,8 @@ export const useUIState = create<UIState>()(
       sourceMode: false,
       pomodoroEnabled: false,
       wordGoalEnabled: false,
+      splitViewEnabled: false,
+      splitViewDirection: 'horizontal',
       loadingMessage: '',
       loadingProgress: 0,
       errorMessage: '',
@@ -53,6 +59,8 @@ export const useUIState = create<UIState>()(
       toggleSourceMode: () => set((state) => ({ sourceMode: !state.sourceMode })),
       setSourceMode: (mode) => set({ sourceMode: mode }),
       togglePomodoro: () => set((state) => ({ pomodoroEnabled: !state.pomodoroEnabled })),
+      toggleSplitView: (enabled) => set((state) => ({ splitViewEnabled: enabled !== undefined ? enabled : !state.splitViewEnabled })),
+      setSplitViewDirection: (direction) => set({ splitViewDirection: direction }),
       toggleWordGoal: () => set((state) => ({ wordGoalEnabled: !state.wordGoalEnabled })),
       setLoadingMessage: (message) => set({ loadingMessage: message }),
       setLoadingProgress: (progress) => set({ loadingProgress: progress }),
@@ -65,6 +73,8 @@ export const useUIState = create<UIState>()(
         pomodoroEnabled: state.pomodoroEnabled,
         wordGoalEnabled: state.wordGoalEnabled,
         sidebarMode: state.sidebarMode,
+        splitViewEnabled: state.splitViewEnabled,
+        splitViewDirection: state.splitViewDirection,
       }),
     }
   )
