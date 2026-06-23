@@ -116,7 +116,7 @@ jobs:
       - name: Build Tauri app
         env:
           CARGO_NET_RETRY: '5'
-        run: npx tauri build --target ${{ matrix.target }} --no-sign
+        run: npm exec --no -- tauri build --target ${{ matrix.target }} --no-sign
 
       # ---- Artifact size tracking ----
       - name: Report artifact sizes
