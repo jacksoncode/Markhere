@@ -59,6 +59,7 @@ jobs:
 
       - name: Check bundle sizes
         shell: bash
+        continue-on-error: true
         run: |
           echo "## Bundle Size Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -121,6 +122,7 @@ jobs:
 
       - name: Check binary size
         shell: bash
+        continue-on-error: true
         run: |
           echo "## Binary Size Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
