@@ -109,7 +109,19 @@ export function TitleBar({ onCheckUpdates }: TitleBarProps) {
   useEffect(() => {
     const saved = localStorage.getItem('markhere-recent-files');
     if (saved) {
-      try { setRecentFiles(JSON.parse(saved)); } catch { /* ignore corrupt data */ }
+      try {
+        const parsed = JSON.parse(saved);
+        // Validate: must be an array of strings (not objects)
+        if (Array.isArray(parsed) && parsed.every(item => typeof item === 'string')) {
+          setRecentFiles(parsed);
+        } else {
+          // Data format is wrong (might be object array from old version)
+          // Clear invalid data
+          console.warn('Invalid recent files format, clearing data');
+          localStorage.removeItem('markhere-recent-files');
+          setRecentFiles([]);
+        }
+      } catch { /* ignore corrupt data */ }
     }
 
     let unlisten: (() => void) | undefined;

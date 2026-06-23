@@ -41,7 +41,14 @@ export function QuickOpenPanel({ isOpen, onClose }: QuickOpenPanelProps) {
     try {
       const recentFilesStr = localStorage.getItem('markhere-recent-files');
       if (recentFilesStr) {
-        setFiles(JSON.parse(recentFilesStr));
+        const parsed = JSON.parse(recentFilesStr);
+        // Validate: must be an array of strings
+        if (Array.isArray(parsed) && parsed.every(item => typeof item === 'string')) {
+          setFiles(parsed);
+        } else {
+          // Invalid format, clear and use empty array
+          setFiles([]);
+        }
       }
     } catch (err) {
       console.error('Load files failed:', err);
