@@ -21,7 +21,11 @@ import { Settings } from '../Settings/Settings';
 import { SearchPanel } from '../Search/SearchPanel';
 import './TitleBar.css';
 
-export function TitleBar() {
+interface TitleBarProps {
+  onCheckUpdates?: () => void;
+}
+
+export function TitleBar({ onCheckUpdates }: TitleBarProps) {
   const { t } = useTranslation();
   const { currentPath, setCurrentPath, setSavedContent } = useFileStore();
   const { editorInstance } = useEditorState();
@@ -792,7 +796,7 @@ tags: []
   
   const handleCheckUpdates = () => {
     setActiveMenu(null);
-    window.open('https://github.com/jacksoncode/Markhere/releases', '_blank');
+    onCheckUpdates?.();
   };
   
   const handleReportIssue = () => {
