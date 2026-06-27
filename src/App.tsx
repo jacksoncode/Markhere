@@ -191,35 +191,39 @@ const [showShortcutSettings, setShowShortcutSettings] = useState(false);
 
   // ---- Close guard (OS-native close button  + Cmd+W + custom close button) ----
   useEffect(() => {
-    // Custom close event from TitleBar → must close via Tauri API
+    console.log('[App] Setting up close handlers');
     const onCustomClose = () => {
+      console.log('[App] markhere:close-requested received');
       if (checkUnsavedRef.current()) {
+        console.log('[App] Has unsaved changes, showing dialog');
         pendingCloseRef.current = true;
         setPendingClose(true);
         setShowUnsavedDialog(true);
       } else {
-        closeWindowRef.current().catch(console.error);
+        console.log('[App] No unsaved changes, calling closeWindow');
+        closeWindowRef.current().catch(err => console.error('[App] closeWindow failed:', err));
       }
     };
     window.addEventListener('markhere:close-requested', onCustomClose);
 
     let unlisten: (() => void) | undefined;
     getWindowApi().then(api => {
+      console.log('[App] Window API loaded, setting up onCloseRequested');
       const currentWindow = api.getCurrentWindow();
       currentWindow.onCloseRequested((event) => {
+        console.log('[App] onCloseRequested triggered, hasUnsaved:', checkUnsavedRef.current());
         if (checkUnsavedRef.current()) {
-          // Unsaved work — prevent OS from closing, show save dialog instead
+          console.log('[App] Preventing close, showing save dialog');
           event.preventDefault();
           pendingCloseRef.current = true;
           setPendingClose(true);
           setShowUnsavedDialog(true);
+        } else {
+          console.log('[App] No unsaved, allowing native close');
         }
-        // No unsaved changes → DON'T call preventDefault().
-        // The OS / Tauri runtime handles the close natively.
-        // This is the most reliable path on all platforms.
-      }).then(fn => { unlisten = fn; })
-      .catch((err) => console.error('onCloseRequested registration failed:', err));
-    }).catch((err) => console.error('getWindowApi failed:', err));
+      }).then(fn => { unlisten = fn; console.log('[App] onCloseRequested registered'); })
+      .catch((err) => console.error('[App] onCloseRequested registration failed:', err));
+    }).catch((err) => console.error('[App] getWindowApi failed:', err));
 
     return () => {
       window.removeEventListener('markhere:close-requested', onCustomClose);

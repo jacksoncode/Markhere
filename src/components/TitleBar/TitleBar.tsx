@@ -587,24 +587,27 @@ ${html}
 
   const handleCloseWindow = async () => {
     setActiveMenu(null);
+    console.log('[CloseWindow] Handler triggered');
     try {
-      // Check for unsaved changes
       const { hasUnsavedChanges } = useAutoSaveStore.getState();
       const text = editorInstance?.getText() || '';
+      console.log('[CloseWindow] hasUnsavedChanges:', hasUnsavedChanges, 'textLength:', text.trim().length);
       if (hasUnsavedChanges && text.trim().length > 0) {
-        // Delegate to App.tsx dialog flow
+        console.log('[CloseWindow] Dispatching markhere:close-requested event');
         window.dispatchEvent(new CustomEvent('markhere:close-requested'));
         return;
       }
-      // No unsaved changes — close directly via Tauri API
+      console.log('[CloseWindow] No unsaved changes, calling Tauri API');
       const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      console.log('[CloseWindow] Import successful, calling close()');
       await getCurrentWindow().close();
+      console.log('[CloseWindow] close() completed');
     } catch (err) {
-      console.error('Close window failed:', err);
-      // Fallback: dispatch event to App.tsx
+      console.error('[CloseWindow] Close window failed:', err);
       try {
+        console.log('[CloseWindow] Fallback: dispatching event');
         window.dispatchEvent(new CustomEvent('markhere:close-requested'));
-      } catch { /* last resort failed */ }
+      } catch (fallbackErr) { console.error('[CloseWindow] Fallback failed:', fallbackErr); }
     }
   };
 
