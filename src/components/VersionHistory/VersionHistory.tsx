@@ -119,7 +119,7 @@ export function VersionHistory({ isOpen, onClose }: VersionHistoryProps) {
               return (
                 <div key={i} className="diff-line unchanged">
                   <span className="diff-linenum">{line.lineNum}</span>
-                  {line.content}
+                  {typeof line.content === 'string' ? line.content : ''}
                 </div>
               );
             }
@@ -151,7 +151,7 @@ export function VersionHistory({ isOpen, onClose }: VersionHistoryProps) {
               return (
                 <div key={i} className="diff-line added">
                   <span className="diff-linenum">{line.lineNum}</span>
-                  + {line.content}
+                  + {typeof line.content === 'string' ? line.content : ''}
                 </div>
               );
             }
@@ -164,7 +164,7 @@ export function VersionHistory({ isOpen, onClose }: VersionHistoryProps) {
               return (
                 <div key={i} className="diff-line removed">
                   <span className="diff-linenum">{line.lineNum}</span>
-                  - {line.content}
+                  - {typeof line.content === 'string' ? line.content : ''}
                 </div>
               );
             }

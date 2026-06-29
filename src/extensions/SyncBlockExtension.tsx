@@ -38,7 +38,7 @@ const SyncBlockView = ({ node, editor }: NodeViewProps) => {
         <span className="sync-icon">↻</span>
       </div>
       <div className="sync-block-content">
-        {node.attrs.content}
+        {typeof node.attrs.content === 'string' ? node.attrs.content : ''}
       </div>
     </NodeViewWrapper>
   );

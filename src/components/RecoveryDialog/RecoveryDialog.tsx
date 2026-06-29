@@ -19,7 +19,7 @@ export function RecoveryDialog({ onRecover, onDiscard }: RecoveryDialogProps) {
     clearBackup();
   };
 
-  if (!content || !lastSaved) {
+  if (!content || typeof content !== 'string' || !lastSaved) {
     return null;
   }
 

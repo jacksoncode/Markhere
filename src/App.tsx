@@ -227,7 +227,10 @@ const [showShortcutSettings, setShowShortcutSettings] = useState(false);
   const handleRecover = () => {
     setShowRecovery(false);
     if (savedPath) setCurrentPath(savedPath);
-    if (editorInstance && content) { editorInstance.commands.setContent(content); setSavedContent(content); }
+    if (editorInstance && content && typeof content === 'string') {
+      editorInstance.commands.setContent(content);
+      setSavedContent(content);
+    }
   };
   const handleDiscard = () => setShowRecovery(false);
 
