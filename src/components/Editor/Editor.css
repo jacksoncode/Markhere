@@ -25,6 +25,16 @@
 .editor-wrapper > div:first-of-type::-webkit-scrollbar-thumb { display: none; }
 .editor-wrapper > div:first-of-type::-webkit-scrollbar-track { display: none; }
 
+/* EditorContent wrapper — the actual scroll container.
+   min-height:0 is required so the flex child doesn't grow to fit
+   content, which would prevent the parent from scrolling. */
+.editor-wysiwyg-container > div:first-of-type {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* ProseMirror — the actual editable area (editor.view.dom).
    min-height: 100% ensures the typing surface fills the wrapper
    even when content is shorter than the viewport. */
