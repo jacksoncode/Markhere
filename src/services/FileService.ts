@@ -1,6 +1,7 @@
 import { safeInvoke } from './ipcWrapper';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { LargeFileService } from './LargeFileService';
+import { FileWatcherService } from './FileWatcherService';
 
 export interface FileResult {
   path: string;
@@ -16,11 +17,14 @@ export class FileService {
 
     if (!path || typeof path !== 'string') return null;
 
-    // 使用 LargeFileService 加载文件，自动检测大文件并按需分块
+    // 使用 LargeFileService 加载文件，自动检测大文件并按需分块。
+    // 文件监听由 useExternalFileChange 根据 currentPath 统一接管。
     return LargeFileService.loadFile(path);
   }
 
   static async saveFile(path: string, content: string): Promise<void> {
+    // Suppress the file-changed echo produced by our own write.
+    FileWatcherService.notifySelfSave();
     await safeInvoke('save_file', { path, content });
   }
 

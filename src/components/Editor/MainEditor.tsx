@@ -13,89 +13,39 @@ import Highlight from '@tiptap/extension-highlight';
 import { TaskList } from '@tiptap/extension-task-list';
 import { TaskItem } from '@tiptap/extension-task-item';
 import { Markdown } from 'tiptap-markdown';
-import { MathExtension, InlineMathExtension, MermaidExtension, CodeBlockHighlight, FootnoteExtension, AutocompleteExtension } from '../../extensions';
-import { open as shellOpen } from '@tauri-apps/plugin-shell';
+import { MathExtension, InlineMathExtension, MermaidExtension, FootnoteExtension, AutocompleteExtension, AutoPairExtension, ParagraphFocusExtension, paragraphFocusPluginKey, BlockDragHandleExtension, DataviewBlock, SearchHighlightExtension, InlineSourceExtension, ToggleBlock, VimKeymapExtension, EmacsKeymapExtension, POSHighlightExtension } from '../../extensions';
+import { CodeBlockToolbar } from '../../extensions/CodeBlockToolbar';
+import { MediaEmbed, MediaAutoEmbed } from '../../extensions/MediaEmbed';
 import { ResizableImageExtension } from '../../extensions/ResizableImage';
 import { TableOperations } from '../TableOperations/TableOperations';
 import { useEditorState } from '../../store/editorStore';
 import { useFileStore } from '../../store/fileStore';
 import { useUIState } from '../../store/uiStore';
 import { useAutoSaveStore } from '../../store/autoSaveStore';
-import { useCollaborationStore } from '../../store/collaborationStore';
-import { useImageStorageStore } from '../../store/imageStorageStore';
+import { useShortcutsStore } from '../../store/shortcutsStore';
 import { FileService } from '../../services/FileService';
 import { saveWorker } from '../../workers/SaveWorker';
 import { useVirtualScroll } from '../../services/virtualScroll';
 import { useState, useEffect, useRef } from 'react';
-import { invoke } from '@tauri-apps/api/core';
 import { SlashMenu } from './SlashMenu';
 import { AIInlineMenu } from './AIInlineMenu';
 import { PropertiesEditor } from './PropertiesEditor';
 import { SlashCommand } from '../../extensions/SlashCommand';
 import { ColumnLayout, Column } from '../../extensions/ColumnLayout';
+import { useEditorDragDrop } from './useEditorDragDrop';
+import { useEditorLinks } from './useEditorLinks';
+import { useEditorCollaboration } from './useEditorCollaboration';
 import './Editor.css';
 import '../../styles/extensions.css';
 import '../../styles/callout.css';
-
-// ---- File-type helpers for drag-and-drop ----
-
-const TEXT_EXTENSIONS = new Set([
-  '.txt', '.json', '.csv', '.xml', '.yml', '.yaml', '.toml', '.ini', '.cfg',
-  '.conf', '.log', '.html', '.css', '.js', '.ts', '.tsx', '.jsx', '.py', '.rb',
-  '.go', '.rs', '.java', '.c', '.cpp', '.h', '.sh', '.bash', '.zsh', '.fish',
-  '.sql', '.r', '.m', '.swift', '.kt', '.scala', '.lua', '.php', '.vue',
-  '.svelte', '.astro', '.graphql', '.gql', '.prisma', '.env', '.gitignore',
-  '.dockerfile', '.cmake',
-]);
-
-const LANG_MAP: Record<string, string> = {
-  'js': 'javascript', 'ts': 'typescript', 'jsx': 'javascript',
-  'tsx': 'typescript', 'py': 'python', 'rb': 'ruby', 'go': 'go',
-  'rs': 'rust', 'java': 'java', 'c': 'c', 'cpp': 'cpp', 'h': 'c',
-  'sh': 'bash', 'bash': 'bash', 'zsh': 'bash', 'fish': 'fish',
-  'json': 'json', 'xml': 'xml', 'html': 'html', 'css': 'css',
-  'yml': 'yaml', 'yaml': 'yaml', 'toml': 'toml', 'sql': 'sql',
-  'swift': 'swift', 'kt': 'kotlin', 'scala': 'scala', 'lua': 'lua',
-  'php': 'php', 'r': 'r', 'vue': 'vue', 'svelte': 'svelte',
-  'md': 'markdown', 'markdown': 'markdown', 'graphql': 'graphql',
-  'gql': 'graphql', 'prisma': 'prisma', 'dockerfile': 'dockerfile',
-};
-
-function isTextFile(file: File): boolean {
-  const ext = '.' + (file.name.split('.').pop()?.toLowerCase() || '');
-  return TEXT_EXTENSIONS.has(ext) || file.type.startsWith('text/');
-}
-
-function getLanguageFromFilename(filename: string): string {
-  const ext = filename.split('.').pop()?.toLowerCase() || '';
-  return LANG_MAP[ext] || 'plaintext';
-}
-
-function isImageFile(file: File): boolean {
-  return file.type.startsWith('image/');
-}
-
-function isMarkdownFile(file: File): boolean {
-  return file.name.endsWith('.md') || file.name.endsWith('.markdown');
-}
-
-/** Generate a URL-friendly slug from heading text, matching the
- *  convention used in ExportService.addHeadingIds so anchor links
- *  like `[text](#heading-name)` resolve consistently. */
-function headingSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/<[^>]+>/g, '')
-    .replace(/[^\w一-鿿-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
 
 export function MainEditor() {
   const { setContent, setEditorInstance } = useEditorState();
   const { currentPath, setSavedContent } = useFileStore();
   const { sourceMode } = useUIState();
+  const focusMode = useUIState((s) => s.focusMode);
   const { saveBackup, markDirty, markSaved } = useAutoSaveStore();
-  const { isConnected, bindEditor, unbindEditor, collaborators } = useCollaborationStore();
+  const editorMode = useShortcutsStore((s) => s.editorMode);
   const [sourceContent, setSourceContent] = useState<string>('');
 
   // Refs keep latest values accessible inside stable callbacks (e.g. SaveWorker hooks)
@@ -106,9 +56,16 @@ export function MainEditor() {
   const sourceModeRef = useRef(sourceMode);
   sourceModeRef.current = sourceMode;
 
-  // Drag-and-drop state
-  const [isDragging, setIsDragging] = useState(false);
-  const dragCounterRef = useRef(0);
+  // Image-paste handler is produced by the drag-drop hook (which needs the
+  // editor instance), but editorProps.handlePaste is defined before the editor
+  // exists. Bridge them through a ref populated after the hook runs.
+  const imagePasteRef = useRef<((file: File) => void) | null>(null);
+
+  // Debounce timer for pushing the (expensive) serialized HTML to the editor
+  // store. Downstream consumers (WordCount, WordGoal, LinkValidator) recompute
+  // on every content change, so coalescing rapid keystrokes avoids needless
+  // serialization + re-renders on large documents.
+  const contentSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -151,18 +108,39 @@ export function MainEditor() {
       MathExtension,
       InlineMathExtension,
       MermaidExtension,
-      CodeBlockHighlight,
+      CodeBlockToolbar,
       FootnoteExtension,
       AutocompleteExtension,
+      AutoPairExtension,
+      ParagraphFocusExtension,
+      BlockDragHandleExtension,
+      DataviewBlock,
+      SearchHighlightExtension,
+      InlineSourceExtension,
+      ToggleBlock,
       SlashCommand,
       ColumnLayout,
       Column,
+      MediaEmbed,
+      MediaAutoEmbed,
+      POSHighlightExtension.configure({ enabled: false }),
+      ...(editorMode === 'vim' ? [VimKeymapExtension.configure({ initialMode: 'insert' })] : []),
+      ...(editorMode === 'emacs' ? [EmacsKeymapExtension.configure({})] : []),
     ],
     content: '',
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      setContent(html);
+      // markDirty is cheap and must be immediate so the UI reflects unsaved
+      // state without delay.
       markDirty();
+
+      // Serializing to HTML on every keystroke is the main main-thread cost on
+      // large documents. Debounce it: only the latest edit within the window
+      // is pushed to the store.
+      if (contentSyncTimerRef.current) clearTimeout(contentSyncTimerRef.current);
+      contentSyncTimerRef.current = setTimeout(() => {
+        if (editor.isDestroyed) return;
+        setContent(editor.getHTML());
+      }, 250);
 
       saveWorker.triggerSave(async () => {
         const markdown = (editor.storage as any)?.markdown?.getMarkdown?.() || '';
@@ -197,7 +175,7 @@ export function MainEditor() {
           if (item.type.startsWith('image/')) {
             const file = item.getAsFile();
             if (file) {
-              handleImagePaste(file);
+              imagePasteRef.current?.(file);
               hasImage = true;
             }
           } else if (item.kind === 'file') {
@@ -249,118 +227,18 @@ export function MainEditor() {
     virtualScrollConfigRef.current,
   );
 
-  const handleImagePaste = (file: File) => {
-    if (!editor) return;
+  // ---- Drag-and-drop + image paste ----
+  const { isDragging, handleDragOver, handleDragLeave, handleWrapperDrop, handleImagePaste } =
+    useEditorDragDrop(editor);
+  // Bridge the image-paste handler back to editorProps.handlePaste (defined
+  // before the editor — and thus this hook — exists).
+  imagePasteRef.current = handleImagePaste;
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64Data = e.target?.result;
-      if (typeof base64Data !== 'string') return;
+  // ---- Anchor link navigation (internal headings + external URLs) ----
+  useEditorLinks(editor);
 
-      // Try uploading to an active external hosting provider first
-      try {
-        const { uploadImage } = useImageStorageStore.getState();
-        const uploadedUrl = await uploadImage(file);
-        if (uploadedUrl) {
-          editor.chain().focus().setImage({ src: uploadedUrl }).run();
-          return;
-        }
-      } catch {
-        // Upload failed, fall through to local save
-        console.warn('Image upload to hosting provider failed, falling back to local save.');
-      }
-
-      const filename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
-
-      try {
-        const savedPath = await invoke<string>('save_image', {
-          imageData: base64Data,
-          filename,
-        });
-        editor.chain().focus().setImage({ src: savedPath }).run();
-      } catch {
-        // Fallback: use base64 data URL directly (e.g. when running outside Tauri)
-        editor.chain().focus().setImage({ src: base64Data }).run();
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Process dropped files based on their type.
-  // - Images: delegated to handleImagePaste (saves to local directory via Tauri).
-  // - Markdown: content is inserted at the cursor position.
-  // - Text files: content is inserted as a syntax-highlighted code block.
-  // - Other files: inserted as a file link reference.
-  const processDroppedFiles = (files: File[]) => {
-    if (!editor) return;
-
-    for (const file of files) {
-      if (isImageFile(file)) {
-        handleImagePaste(file);
-      } else if (isMarkdownFile(file)) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const content = e.target?.result as string;
-          if (content) {
-            editor.chain().focus().insertContent(content).run();
-          }
-        };
-        reader.readAsText(file);
-      } else if (isTextFile(file)) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const content = e.target?.result as string;
-          if (content) {
-            const lang = getLanguageFromFilename(file.name);
-            editor.chain().focus().insertContent({
-              type: 'codeBlock',
-              attrs: { language: lang },
-              content: [{ type: 'text', text: content }],
-            }).run();
-          }
-        };
-        reader.readAsText(file);
-      } else {
-        // Insert a file link for unsupported binary files
-        editor.chain().focus().insertContent(
-          `[${file.name}](file://${file.name})`
-        ).run();
-      }
-    }
-  };
-
-  // ---- Drag-and-drop event handlers on the wrapper div ----
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Only show the drop zone when the user drags files from the OS
-    if (e.dataTransfer.types.includes('Files')) {
-      dragCounterRef.current++;
-      setIsDragging(true);
-    }
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounterRef.current--;
-    if (dragCounterRef.current <= 0) {
-      dragCounterRef.current = 0;
-      setIsDragging(false);
-    }
-  };
-
-  const handleWrapperDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounterRef.current = 0;
-    setIsDragging(false);
-
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      processDroppedFiles(Array.from(files));
-    }
-  };
+  // ---- Collaboration binding + remote cursor positions ----
+  const cursorEls = useEditorCollaboration(editor);
 
   // ---- Effects that must run before any early return (React hooks rule) ----
 
@@ -394,124 +272,30 @@ export function MainEditor() {
     };
   }, [editor, saveBackup]);
 
-  // ---- Collaboration binding ----
-  // When the collaboration store connects, bind the Yjs document to the
-  // Tiptap editor so content changes and cursor positions are synced.
+  // Flush any pending debounced content sync on unmount so the store reflects
+  // the final edit, and clear the timer to avoid a setState after teardown.
   useEffect(() => {
-    if (!editor) return;
+    return () => {
+      if (contentSyncTimerRef.current) {
+        clearTimeout(contentSyncTimerRef.current);
+        contentSyncTimerRef.current = null;
+      }
+    };
+  }, []);
 
-    if (isConnected) {
-      bindEditor(editor);
+  // ---- Paragraph focus refresh ----
+  // Toggling focus mode does not emit an editor transaction, so dispatch a
+  // meta-tagged empty transaction to force the ParagraphFocus plugin to
+  // (re)build or clear its decorations.
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) return;
+    try {
+      const tr = editor.state.tr.setMeta(paragraphFocusPluginKey, true);
+      editor.view.dispatch(tr);
+    } catch {
+      /* view not ready */
     }
-
-    return () => {
-      unbindEditor();
-    };
-  }, [isConnected, editor, bindEditor, unbindEditor]);
-
-  // ---- Anchor link navigation ----
-  // Intercept clicks on anchor elements.  Internal links (`#heading`)
-  // scroll to the matching heading inside the document.  External URLs
-  // are opened in the system browser via Tauri's shell plugin.
-  useEffect(() => {
-    if (!editor || editor.isDestroyed) return;
-
-    let editorDom: HTMLElement;
-    try { editorDom = editor.view.dom; } catch { return; }
-
-    const handleLinkClick = (e: MouseEvent) => {
-      const anchor = (e.target as Element).closest('a');
-      if (!anchor) return;
-
-      const href = anchor.getAttribute('href');
-      if (!href) return;
-
-      // Internal anchor link: find the matching heading and scroll to it
-      if (href.startsWith('#')) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const anchorId = href.slice(1);
-        if (!anchorId) return;
-
-        let found = false;
-        editor.state.doc.descendants((node, pos) => {
-          if (found) return false;
-          if (node.type.name === 'heading') {
-            const slug = headingSlug(node.textContent);
-            if (slug === anchorId) {
-              found = true;
-              editor
-                .chain()
-                .focus()
-                .setTextSelection(pos)
-                .scrollIntoView()
-                .run();
-              return false;
-            }
-          }
-          return true;
-        });
-        return;
-      }
-
-      // External URL — open in the system browser
-      if (href.startsWith('http://') || href.startsWith('https://')) {
-        e.preventDefault();
-        e.stopPropagation();
-        shellOpen(href).catch((err: unknown) => {
-          console.warn('Failed to open link in browser:', err);
-        });
-      }
-      // For other protocols (mailto:, file:, etc.) let the browser handle them
-    };
-
-    editorDom.addEventListener('click', handleLinkClick);
-    return () => {
-      editorDom.removeEventListener('click', handleLinkClick);
-    };
-  }, [editor]);
-
-  // ---- Remote cursor overlay ----
-  // Compute pixel positions for remote collaborator cursors and render
-  // colored caret indicators overlaid on the editor.
-  const [cursorEls, setCursorEls] = useState<Array<{
-    id: string; name: string; color: string; top: number; left: number;
-  }>>([]);
-
-  useEffect(() => {
-    if (!editor || editor.isDestroyed) return;
-
-    // editor.view.dom may throw "editor view is not available" during first mount
-    let editorRect: DOMRect;
-    try { editorRect = editor.view.dom.getBoundingClientRect(); } catch { return; }
-
-    const remotes = collaborators.filter((c) => {
-      // Exclude ourselves: our own cursor is in the panel, not the overlay
-      const ownId = useCollaborationStore.getState().provider?.awareness?.clientID?.toString();
-      return c.cursor && c.id !== ownId;
-    });
-
-    const els = remotes.map((c) => {
-      const pos = c.cursor!.from;
-      try {
-        const coords = editor.view.coordsAtPos(pos);
-        return {
-          id: c.id,
-          name: c.name,
-          color: c.color,
-          top: coords.top - editorRect.top,
-          left: coords.left - editorRect.left,
-        };
-      } catch {
-        return null;
-      }
-    }).filter(Boolean) as Array<{
-      id: string; name: string; color: string; top: number; left: number;
-    }>;
-
-    setCursorEls(els);
-  }, [collaborators, editor]);
+  }, [focusMode, editor]);
 
   // Early return AFTER all hooks — render loading state while editor mounts
   if (!editor) {
@@ -534,9 +318,39 @@ export function MainEditor() {
       });
   };
 
-  if (sourceMode) {
-    return (
-      <div className="editor-wrapper source-mode-wrapper">
+  return (
+    <div
+      ref={scrollContainerRef}
+      className={`editor-wrapper${isDragging ? ' drag-over' : ''}${sourceMode ? ' source-mode-active' : ''}`}
+      data-virtual-scroll={isEnabled ? 'true' : 'false'}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleWrapperDrop}
+      aria-label="Editor workspace"
+    >
+      {/* WYSIWYG editor — hidden in source mode via CSS (keeps editor mounted) */}
+      <div className="editor-wysiwyg-container" aria-hidden={sourceMode} style={sourceMode ? { display: 'none' } : undefined}>
+        {isDragging && (
+          <div className="drop-zone-overlay" role="status" aria-live="assertive">
+            <div className="drop-zone-overlay-content">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <span>Drop images or files here</span>
+            </div>
+          </div>
+        )}
+        <EditorContent editor={editor} />
+        <PropertiesEditor editor={editor} filePath={currentPath} />
+        <SlashMenu editor={editor} />
+        <AIInlineMenu editor={editor} />
+        <TableOperations />
+      </div>
+
+      {/* Source textarea — hidden in WYSIWYG mode */}
+      <div className="editor-source-container" aria-hidden={!sourceMode} style={!sourceMode ? { display: 'none' } : undefined}>
         <textarea
           className="source-editor"
           value={sourceContent}
@@ -548,38 +362,9 @@ export function MainEditor() {
           aria-multiline="true"
         />
       </div>
-    );
-  }
 
-  return (
-    <div
-      ref={scrollContainerRef}
-      className={`editor-wrapper${isDragging ? ' drag-over' : ''}`}
-      data-virtual-scroll={isEnabled ? 'true' : 'false'}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleWrapperDrop}
-      aria-label="Editor workspace"
-    >
-      {isDragging && (
-        <div className="drop-zone-overlay" role="status" aria-live="assertive">
-          <div className="drop-zone-overlay-content">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>
-            <span>Drop images or files here</span>
-          </div>
-        </div>
-      )}
-      <EditorContent editor={editor} />
-      <PropertiesEditor editor={editor} filePath={currentPath} />
-      <SlashMenu editor={editor} />
-      <AIInlineMenu editor={editor} />
-      <TableOperations />
-      {/* Remote collaborator cursor indicators */}
-      {cursorEls.map((c) => (
+      {/* Remote collaborator cursor indicators (only visible in WYSIWYG mode) */}
+      {!sourceMode && cursorEls.map((c) => (
         <div
           key={c.id}
           className="remote-cursor"

@@ -55,8 +55,8 @@
 
 ### 🟢 P2
 
-- [ ] 性能基线 CI（启动 < 1.5s / 包体积 < 3MB 红线）
-- [ ] 写作模板 preset：技术博客 / 邮件 / 简历 / 演讲稿 / 数据报告
+- [x] 性能基线 CI（启动 < 1.5s / 包体积 < 3MB 红线） — performance.yml: gzipped total < 3MB red-line, main chunk < 400KB warning
+- [x] 写作模板 preset：技术博客 / 邮件 / 简历 / 演讲稿 / 数据报告 — 5 templates + writing category
 
 ---
 

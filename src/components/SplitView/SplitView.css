@@ -176,3 +176,160 @@
   border: none;
   border-radius: 0;
 }
+
+/* ─── Resize handle ─── */
+.split-resize-handle {
+  width: 6px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.split-resize-handle:hover {
+  background: var(--color-primary, #3b82f6);
+  opacity: 0.3;
+}
+
+.split-resize-indicator {
+  width: 2px;
+  height: 40px;
+  background: var(--color-border-primary, #e2e8f0);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.split-resize-handle:hover .split-resize-indicator {
+  background: var(--color-primary, #3b82f6);
+}
+
+/* ─── Shortcut hint ─── */
+.split-shortcut-hint {
+  font-size: 11px;
+  color: var(--color-text-tertiary, #94a3b8);
+  padding: 2px 6px;
+  background: var(--color-bg-secondary, #f1f5f9);
+  border-radius: 4px;
+  font-family: var(--font-family-mono, monospace);
+}
+
+/* ─── Vertical split ─── */
+.split-vertical {
+  flex-direction: column;
+}
+
+.split-resize-vertical {
+  width: 100%;
+  height: 6px;
+  cursor: row-resize;
+}
+
+.split-resize-vertical .split-resize-indicator {
+  width: 40px;
+  height: 2px;
+}
+
+/* ─── Secondary editor ─── */
+.split-secondary-editor {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.secondary-editor-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.secondary-editor-header {
+  padding: 8px 12px;
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.secondary-editor-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.secondary-editor-content {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+  font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-color);
+  background: var(--bg-color);
+}
+
+.secondary-editor-line {
+  white-space: pre;
+  min-height: 1.6em;
+}
+
+.split-editor-placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  color: var(--text-muted-color);
+}
+
+.split-editor-hint {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+/* ─── Tab selector ─── */
+.split-tab-selector {
+  padding: 4px 8px;
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.split-tab-selector-large {
+  padding: 12px 16px;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-color);
+  cursor: pointer;
+  min-width: 200px;
+}
+
+/* ─── Direction toggle ─── */
+.split-direction-toggle {
+  padding: 8px 16px;
+  background: var(--hover-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-color);
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.split-direction-toggle:hover {
+  background: var(--active-bg);
+}

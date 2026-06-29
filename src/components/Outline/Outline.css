@@ -53,6 +53,15 @@
   background: var(--hover-bg);
 }
 
+/* Heading currently scrolled into view (driven by useOutlineSync) */
+.outline-item.active {
+  background: var(--accent-color, #3b82f6);
+  color: #fff;
+}
+.outline-item.active .outline-text {
+  font-weight: 600;
+}
+
 .outline-item.level-1 {
   font-weight: 600;
   font-size: 14px;

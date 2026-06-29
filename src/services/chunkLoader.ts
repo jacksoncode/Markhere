@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core';
 import type { Node as PMNode } from '@tiptap/pm/model';
 
 const CHUNK_SIZE = 10000; // 10KB per chunk
@@ -163,9 +164,7 @@ export class ChunkLoader {
   }
 
   private async readFile(path: string): Promise<string> {
-    // This would be implemented with Tauri invoke
-    const { invoke } = await import('@tauri-apps/api/core');
-    return await invoke<string>('read_text_file', { path });
+    return await invoke<string>('read_file', { path });
   }
 
   private async readFileChunk(path: string, start: number, end: number): Promise<string> {

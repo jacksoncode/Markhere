@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useEditorState } from '../../store/editorStore';
+import { useOutlineSync } from '../../hooks/useOutlineSync';
 import './Outline.css';
 
 interface OutlineItem {
@@ -7,12 +8,21 @@ interface OutlineItem {
   level: number;
   text: string;
   position: number;
+  /** Slug matching useOutlineSync's algorithm, used to highlight the
+   *  heading currently in view as the editor scrolls. */
+  slug: string;
 }
 
 export function Outline() {
   const { editorInstance } = useEditorState();
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [activeSlug, setActiveSlug] = useState<string>('');
+
+  // Highlight the heading currently scrolled into view. The hook is a no-op
+  // until an editor instance exists.
+  const onActiveIdChange = useCallback((id: string) => setActiveSlug(id), []);
+  useOutlineSync(editorInstance ?? null, onActiveIdChange);
 
   if (!editorInstance) {
     return <div className="outline-empty">加载中...</div>;
@@ -81,7 +91,7 @@ export function Outline() {
         {outline.map((item, index) => (
           <li
             key={item.id}
-            className={`outline-item level-${item.level} ${draggedIndex === index ? 'dragging' : ''} ${dragOverIndex === index ? 'drag-over' : ''}`}
+            className={`outline-item level-${item.level} ${draggedIndex === index ? 'dragging' : ''} ${dragOverIndex === index ? 'drag-over' : ''} ${activeSlug && item.slug === activeSlug ? 'active' : ''}`}
             onClick={() => scrollToHeading(item.position)}
             draggable
             onDragStart={(e) => handleDragStart(e, index)}
@@ -143,8 +153,11 @@ function extractOutline(html: string): OutlineItem[] {
     const text = match[2].replace(/<[^>]*>/g, '').trim();
     const position = match.index;
     const id = `h_${position}_${text.replace(/\s+/g, '_')}`;
+    // Mirror the slug algorithm in useOutlineSync so scroll-driven highlight
+    // can match against rendered outline items.
+    const slug = text.toLowerCase().replace(/[^\w一-鿿]+/g, '-').replace(/^-+|-+$/g, '');
 
-    outline.push({ id, level, text, position });
+    outline.push({ id, level, text, position, slug });
   }
 
   return outline;

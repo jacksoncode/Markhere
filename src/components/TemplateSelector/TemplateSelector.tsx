@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { documentTemplates, DocumentTemplate, getTemplatesByCategory } from '../../data/templates';
 import { useEditorState } from '../../store/editorStore';
 import { useTranslation } from '../../i18n';
+import { expandTemplateVariables } from '../../services/TemplateVariables';
 import './TemplateSelector.css';
 
 interface TemplateSelectorProps {
@@ -14,13 +15,14 @@ export function TemplateSelector({ isOpen, onClose }: TemplateSelectorProps) {
   const [selectedCategory, setSelectedCategory] = useState<DocumentTemplate['category'] | 'all'>('all');
   const { editorInstance } = useEditorState();
 
-  const categories: DocumentTemplate['category'][] = ['academic', 'personal', 'business', 'creative'];
+  const categories: DocumentTemplate['category'][] = ['academic', 'personal', 'business', 'creative', 'writing'];
 
   const categoryLabels: Record<DocumentTemplate['category'], string> = {
     academic: t('template.academic'),
     personal: t('template.personal'),
     business: t('template.business'),
     creative: t('template.creative'),
+    writing: t('template.writing') || '写作',
   };
 
   const filteredTemplates = selectedCategory === 'all'
@@ -29,7 +31,9 @@ export function TemplateSelector({ isOpen, onClose }: TemplateSelectorProps) {
 
   const handleSelectTemplate = (template: DocumentTemplate) => {
     if (editorInstance) {
-      editorInstance.commands.setContent(template.content);
+      // Expand template date/time variables before inserting
+      const expanded = expandTemplateVariables(template.content);
+      editorInstance.commands.setContent(expanded);
     }
     onClose();
   };

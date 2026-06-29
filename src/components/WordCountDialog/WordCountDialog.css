@@ -143,3 +143,142 @@
   font-size: 12px;
   color: var(--color-text-secondary);
 }
+
+/* Readability score */
+.readability-score-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.readability-score {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.readability-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.readability-unit {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.readability-bar-wrapper {
+  height: 8px;
+  background: var(--color-bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.readability-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.readability-level {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* Sentiment bar */
+.sentiment-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.sentiment-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.sentiment-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.sentiment-positive {
+  background: #6bcb77;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.sentiment-neutral {
+  background: #9ba4b5;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.sentiment-negative {
+  background: #ff6b6b;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.sentiment-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-align: center;
+  text-transform: capitalize;
+}
+
+/* Writing issues */
+.issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.issue-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background: var(--color-bg-secondary);
+  border-radius: 8px;
+  border-left: 3px solid var(--color-warning, #ffd93d);
+}
+
+.issue-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.issue-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.issue-text {
+  font-size: 13px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.issue-suggestion {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

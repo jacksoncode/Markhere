@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { listen } from '@tauri-apps/api/event';
@@ -11,15 +11,15 @@ import { useThemeStore } from '../../store/themeStore';
 import { themes } from '../../store/themes';
 import { useTranslation } from '../../i18n';
 import { useNotificationStore } from '../Notification/Notification';
-import { ShortcutSettings } from '../ShortcutSettings';
 import { TemplateSelector } from '../TemplateSelector';
 import { BookmarkPanel } from '../BookmarkPanel';
 import { ThemeEditor } from '../ThemeEditor';
 import { VersionHistory } from '../VersionHistory';
 import { CollaborationPanel } from '../Collaboration';
 import { Settings } from '../Settings/Settings';
-import { SearchPanel } from '../Search/SearchPanel';
 import './TitleBar.css';
+
+const ShortcutSettingsLazy = lazy(() => import('../ShortcutSettings/ShortcutSettings').then(m => ({ default: m.ShortcutSettings })));
 
 interface TitleBarProps {
   onCheckUpdates?: () => void;
@@ -48,7 +48,6 @@ export function TitleBar({ onCheckUpdates }: TitleBarProps) {
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [showCollaboration, setShowCollaboration] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [recentFiles, setRecentFiles] = useState<string[]>([]);
   const [showAboutDialog, setShowAboutDialog] = useState(false);
@@ -436,15 +435,13 @@ ${html}
     }
   };
   
-  const handleFind = () => {
-    setActiveMenu(null);
-    setShowSearchPanel(true);
-  };
-  
-  const handleReplace = () => {
-    setActiveMenu(null);
-    setShowSearchPanel(true);
-  };
+   const handleFind = () => {
+     setActiveMenu(null);
+   };
+   
+   const handleReplace = () => {
+     setActiveMenu(null);
+   };
   
   const handleHeading = (level: 1 | 2 | 3 | 4 | 5 | 6) => {
     setActiveMenu(null);
@@ -587,25 +584,18 @@ ${html}
 
   const handleCloseWindow = async () => {
     setActiveMenu(null);
-    console.log('[CloseWindow] Handler triggered');
     try {
       const { hasUnsavedChanges } = useAutoSaveStore.getState();
       const text = editorInstance?.getText() || '';
-      console.log('[CloseWindow] hasUnsavedChanges:', hasUnsavedChanges, 'textLength:', text.trim().length);
       if (hasUnsavedChanges && text.trim().length > 0) {
-        console.log('[CloseWindow] Dispatching markhere:close-requested event');
         window.dispatchEvent(new CustomEvent('markhere:close-requested'));
         return;
       }
-      console.log('[CloseWindow] No unsaved changes, calling Tauri API');
       const { getCurrentWindow } = await import('@tauri-apps/api/window');
-      console.log('[CloseWindow] Import successful, calling close()');
       await getCurrentWindow().close();
-      console.log('[CloseWindow] close() completed');
     } catch (err) {
       console.error('[CloseWindow] Close window failed:', err);
       try {
-        console.log('[CloseWindow] Fallback: dispatching event');
         window.dispatchEvent(new CustomEvent('markhere:close-requested'));
       } catch (fallbackErr) { console.error('[CloseWindow] Fallback failed:', fallbackErr); }
     }
@@ -1318,17 +1308,15 @@ tags: []
         ×
       </button>
       
-      <ShortcutSettings isOpen={showShortcutSettings} onClose={() => setShowShortcutSettings(false)} />
-      <TemplateSelector isOpen={showTemplateSelector} onClose={() => setShowTemplateSelector(false)} />
-      <BookmarkPanel isOpen={showBookmarkPanel} onClose={() => setShowBookmarkPanel(false)} />
-      <ThemeEditor isOpen={showThemeEditor} onClose={() => setShowThemeEditor(false)} />
-      <VersionHistory isOpen={showVersionHistory} onClose={() => setShowVersionHistory(false)} />
-      <CollaborationPanel isOpen={showCollaboration} onClose={() => setShowCollaboration(false)} />
-      <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
-      
-      {showSearchPanel && <SearchPanel />}
+        <Suspense fallback={null}><ShortcutSettingsLazy isOpen={showShortcutSettings} onClose={() => setShowShortcutSettings(false)} /></Suspense>
+       <TemplateSelector isOpen={showTemplateSelector} onClose={() => setShowTemplateSelector(false)} />
+       <BookmarkPanel isOpen={showBookmarkPanel} onClose={() => setShowBookmarkPanel(false)} />
+       <ThemeEditor isOpen={showThemeEditor} onClose={() => setShowThemeEditor(false)} />
+       <VersionHistory isOpen={showVersionHistory} onClose={() => setShowVersionHistory(false)} />
+       <CollaborationPanel isOpen={showCollaboration} onClose={() => setShowCollaboration(false)} />
+       <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
-      {showAboutDialog && (
+       {showAboutDialog && (
         <div className="about-dialog-overlay" onClick={() => setShowAboutDialog(false)}>
           <div className="about-dialog" onClick={(e) => e.stopPropagation()}>
             <h2 className="about-dialog-title">Markhere</h2>

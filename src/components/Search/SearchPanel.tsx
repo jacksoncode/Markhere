@@ -3,6 +3,7 @@ import { useEditorState } from '../../store/editorStore';
 import { useTabsStore, TabInfo } from '../../store/tabsStore';
 import { useFileStore } from '../../store/fileStore';
 import { SearchService, SearchResult, FileSearchResult } from '../../services/SearchService';
+import { setSearchHighlight, clearSearchHighlight } from '../../extensions';
 import { useTranslation } from '../../i18n';
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -40,6 +41,17 @@ export function SearchPanel() {
   // Debounce timer ref
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // --- Search scope change: immediately clear editor highlights ---
+  // This must run BEFORE the per-scope debounced effects so that
+  // switching away from currentFile instantly removes decorations.
+  useEffect(() => {
+    if (searchScope !== 'currentFile') {
+      clearSearchHighlight(editorInstance);
+      setResults([]);
+      setCurrentIndex(0);
+    }
+  }, [searchScope, editorInstance]);
+
   // --- Current File Search ---
   useEffect(() => {
     if (searchScope !== 'currentFile') return;
@@ -54,8 +66,16 @@ export function SearchPanel() {
         const found = SearchService.findInDocument(content, query, { useRegex, caseSensitive });
         setResults(found);
         setCurrentIndex(0);
+        // Highlight matches in the editor itself.
+        setSearchHighlight(editorInstance, {
+          query,
+          useRegex,
+          caseSensitive,
+          activeIndex: 0,
+        });
       } else {
         setResults([]);
+        clearSearchHighlight(editorInstance);
       }
     }, 300);
 
@@ -69,6 +89,9 @@ export function SearchPanel() {
   // --- Open Files Search ---
   useEffect(() => {
     if (searchScope !== 'openFiles') return;
+
+    // In multi-file scopes the user browses results in the panel — no editor highlights.
+    clearSearchHighlight(editorInstance);
 
     if (debounceTimerRef.current !== null) {
       clearTimeout(debounceTimerRef.current);
@@ -110,6 +133,9 @@ export function SearchPanel() {
   // --- Directory Search ---
   useEffect(() => {
     if (searchScope !== 'directory' || !directoryPath) return;
+
+    // In multi-file scopes the user browses results in the panel — no editor highlights.
+    clearSearchHighlight(editorInstance);
 
     if (debounceTimerRef.current !== null) {
       clearTimeout(debounceTimerRef.current);
@@ -168,11 +194,14 @@ export function SearchPanel() {
     if (results.length > 0) {
       const next = (currentIndex + 1) % results.length;
       setCurrentIndex(next);
-      editorInstance?.commands.setTextSelection({
-        from: results[next].from,
-        to: results[next].to,
-      });
-      editorInstance?.commands.focus();
+      if (editorInstance) {
+        editorInstance.commands.setTextSelection({
+          from: results[next].from,
+          to: results[next].to,
+        });
+        editorInstance.commands.focus();
+        setSearchHighlight(editorInstance, { activeIndex: next });
+      }
     }
   }, [results, currentIndex, editorInstance]);
 
@@ -180,11 +209,14 @@ export function SearchPanel() {
     if (results.length > 0) {
       const prev = currentIndex === 0 ? results.length - 1 : currentIndex - 1;
       setCurrentIndex(prev);
-      editorInstance?.commands.setTextSelection({
-        from: results[prev].from,
-        to: results[prev].to,
-      });
-      editorInstance?.commands.focus();
+      if (editorInstance) {
+        editorInstance.commands.setTextSelection({
+          from: results[prev].from,
+          to: results[prev].to,
+        });
+        editorInstance.commands.focus();
+        setSearchHighlight(editorInstance, { activeIndex: prev });
+      }
     }
   }, [results, currentIndex, editorInstance]);
 
@@ -194,6 +226,7 @@ export function SearchPanel() {
       const updated = SearchService.replaceInDocument(content, query, replacement, { useRegex, caseSensitive });
       editorInstance.commands.setContent(updated);
       setResults([]);
+      clearSearchHighlight(editorInstance);
     }
   }, [query, replacement, editorInstance, useRegex, caseSensitive]);
 
@@ -203,6 +236,7 @@ export function SearchPanel() {
       const updated = SearchService.replaceInDocument(content, query, replacement, { useRegex, caseSensitive });
       editorInstance.commands.setContent(updated);
       setResults([]);
+      clearSearchHighlight(editorInstance);
     }
   }, [query, replacement, editorInstance, useRegex, caseSensitive]);
 

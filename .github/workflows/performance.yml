@@ -59,20 +59,35 @@ jobs:
 
       - name: Check bundle sizes
         shell: bash
-        continue-on-error: true
         run: |
           echo "## Bundle Size Report" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           
-          MAIN_BUNDLE=$(find dist -name "*.js" -type f | head -1)
-          if [ -n "$MAIN_BUNDLE" ]; then
-            SIZE=$(du -h "$MAIN_BUNDLE" | cut -f1)
-            SIZE_BYTES=$(stat -c%s "$MAIN_BUNDLE" 2>/dev/null || stat -f%z "$MAIN_BUNDLE" 2>/dev/null)
-            echo "- Main bundle: $SIZE ($SIZE_BYTES bytes)" >> "$GITHUB_STEP_SUMMARY"
-            
-            if [ "$SIZE_BYTES" -gt 600000 ]; then
+          TOTAL_GZIP=0
+          for JSFILE in $(find dist -name "*.js" -type f); do
+            GZIP_SIZE=$(gzip -c "$JSFILE" | wc -c)
+            TOTAL_GZIP=$((TOTAL_GZIP + GZIP_SIZE))
+            RAW_SIZE=$(stat -c%s "$JSFILE" 2>/dev/null || stat -f%z "$JSFILE" 2>/dev/null)
+            echo "- $(basename $JSFILE): raw $(echo $RAW_SIZE | numfmt --to=iec) / gzip $(echo $GZIP_SIZE | numfmt --to=iec)" >> "$GITHUB_STEP_SUMMARY"
+          done
+          
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Total gzipped JS: $(echo $TOTAL_GZIP | numfmt --to=iec)**" >> "$GITHUB_STEP_SUMMARY"
+          
+          # P2 red-line: total gzipped JS < 3MB
+          if [ "$TOTAL_GZIP" -gt 3145728 ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "🔴 **FAIL: Total gzipped JS exceeds 3MB threshold**" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          
+          # P2 warning: main chunk < 400KB gzipped
+          MAIN_CHUNK=$(find dist -name "index*.js" -type f | head -1)
+          if [ -n "$MAIN_CHUNK" ]; then
+            MAIN_GZIP=$(gzip -c "$MAIN_CHUNK" | wc -c)
+            if [ "$MAIN_GZIP" -gt 409600 ]; then
               echo "" >> "$GITHUB_STEP_SUMMARY"
-              echo "⚠️ Warning: Bundle size exceeds 600KB threshold" >> "$GITHUB_STEP_SUMMARY"
+              echo "⚠️ Warning: Main chunk gzipped exceeds 400KB" >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
           

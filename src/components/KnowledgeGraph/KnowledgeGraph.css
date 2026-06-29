@@ -108,10 +108,46 @@
   color: var(--color-text-tertiary);
 }
 
-.graph-canvas {
+.graph-canvas-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   border-radius: 12px;
   background: var(--color-bg-secondary);
+}
+
+.graph-canvas {
+  display: block;
+  border-radius: 12px;
+  background: var(--color-bg-secondary);
+  touch-action: none;
+  cursor: grab;
+}
+
+.graph-canvas:active {
+  cursor: grabbing;
+}
+
+.graph-reset {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 18px;
   cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.graph-reset:hover {
+  background: var(--color-bg-secondary);
 }
 
 .graph-footer {

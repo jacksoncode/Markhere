@@ -161,7 +161,8 @@
     "loadingDirectory": "加载中...",
     "openFileFailed": "打开文件失败",
     "openFileSuccess": "文件已打开",
-    "browseFolderFailed": "读取文件夹内容失败"
+    "browseFolderFailed": "读取文件夹内容失败",
+    "diary": "日记"
   },
   "toolbar": {
     "label": "格式工具栏"
@@ -172,6 +173,34 @@
     "save": "保存",
     "discard": "放弃更改",
     "cancel": "取消"
+  },
+  "fileChanged": {
+    "title": "文件已被外部修改",
+    "message": "此文件已被其他程序修改，但你有未保存的更改。要重新加载磁盘上的版本，还是保留当前编辑内容？",
+    "reload": "重新加载磁盘版本",
+    "keep": "保留当前编辑"
+  },
+  "update": {
+    "title": "检查更新",
+    "checking": "正在检查更新…",
+    "available": "发现新版本 {{version}}",
+    "downloading": "正在下载更新…",
+    "ready": "下载完成，即将安装并重启…",
+    "uptodate": "当前已是最新版本。",
+    "error": "检查失败：{{message}}",
+    "install": "下载并安装",
+    "later": "稍后",
+    "close": "关闭",
+    "relaunching": "正在重启应用"
+  },
+  "backlinks": {
+    "title": "链接",
+    "refresh": "重新扫描",
+    "noFile": "打开一个文件以查看其链接关系。",
+    "linkedMentions": "反向链接",
+    "outgoingLinks": "出链",
+    "scanning": "正在扫描工作区…",
+    "none": "暂无"
   },
   "settings": {
     "title": "设置",
@@ -371,7 +400,17 @@
     "readingTime": "阅读时间",
     "readingSpeed": "阅读速度约 300 字/分钟",
     "speakingSpeed": "朗读速度约 200 字/分钟",
-    "minutes": "分钟"
+    "minutes": "分钟",
+    "readability": "可读性分析",
+    "positive": "正面",
+    "neutral": "中性",
+    "negative": "负面",
+    "sentiment": {
+      "positive": "整体情感倾向：正面 😊",
+      "neutral": "整体情感倾向：中性 😐",
+      "negative": "整体情感倾向：负面 😟"
+    },
+    "writingIssues": "写作建议"
   },
   "quickOpen": {
     "placeholder": "搜索文件或已打开的标签页...",
@@ -572,6 +611,51 @@
     "academic": "学术",
     "personal": "个人",
     "business": "商业",
-    "creative": "创作"
+    "creative": "创作",
+    "writing": "写作"
+  },
+  "diary": {
+    "today": "今天",
+    "loading": "加载中...",
+    "recentEntries": "最近日记",
+    "createEntry": "创建日记",
+    "noEntries": "暂无日记"
+  },
+  "import": {
+    "title": "导入文档",
+    "description": "将各种格式的文档转换为 Markdown",
+    "importing": "导入中...",
+    "noteTitle": "提示",
+    "noteHtml": "HTML：基本标签转换（标题、段落、链接）",
+    "noteDocx": "Word：完整支持需要 pandoc",
+    "notePdf": "PDF：提取文本需要 poppler (pdftotext)",
+    "noteNotion": "Notion：从 Notion 导出页面为 ZIP 文件后导入",
+    "noteTxt": "纯文本：直接导入，保留格式"
+  },
+  "cover": {
+    "editCover": "编辑封面",
+    "preview": "预览",
+    "noCover": "未设置封面",
+    "templates": "模板",
+    "coverImage": "封面图片",
+    "selectImage": "选择图片",
+    "removeImage": "移除图片",
+    "imageSelected": "图片已选择",
+    "selectFailed": "选择图片失败",
+    "icon": "图标",
+    "info": "信息",
+    "title": "标题",
+    "titlePlaceholder": "输入封面标题...",
+    "subtitle": "副标题",
+    "subtitlePlaceholder": "输入副标题...",
+    "author": "作者",
+    "authorPlaceholder": "输入作者名...",
+    "date": "日期",
+    "backgroundColor": "背景颜色",
+    "apply": "应用",
+    "applied": "封面已应用"
+  },
+  "common": {
+    "cancel": "取消"
   }
 }

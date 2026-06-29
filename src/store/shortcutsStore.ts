@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type EditorMode = 'default' | 'vim' | 'emacs';
+
 export interface Shortcut {
   id: string;
   name: string;
@@ -31,7 +33,7 @@ const defaultShortcuts: Shortcut[] = [
   { id: 'toggleSidebar', name: 'Toggle Sidebar', description: 'Show/hide sidebar', defaultKey: 'Cmd+\\', currentKey: 'Cmd+\\', category: 'view' },
   { id: 'focusMode', name: 'Focus Mode', description: 'Enter focus mode', defaultKey: 'Cmd+Shift+F', currentKey: 'Cmd+Shift+F', category: 'view' },
   { id: 'typewriterMode', name: 'Typewriter Mode', description: 'Toggle typewriter mode', defaultKey: 'Cmd+Shift+T', currentKey: 'Cmd+Shift+T', category: 'view' },
-  { id: 'sourceMode', name: 'Source Mode', description: 'Toggle source mode', defaultKey: 'Cmd+/', currentKey: 'Cmd+/', category: 'view' },
+  { id: 'sourceMode', name: 'Full Source Mode', description: 'Switch entire document to source view', defaultKey: 'Cmd+Shift+/', currentKey: 'Cmd+Shift+/', category: 'view' },
   { id: 'preview', name: 'Preview', description: 'Preview document', defaultKey: 'Cmd+P', currentKey: 'Cmd+P', category: 'view' },
   
   // Format
@@ -58,6 +60,7 @@ interface ShortcutsState {
   shortcuts: Shortcut[];
   isRecording: boolean;
   recordingId: string | null;
+  editorMode: EditorMode;
   
   updateShortcut: (id: string, newKey: string) => void;
   resetShortcut: (id: string) => void;
@@ -66,6 +69,7 @@ interface ShortcutsState {
   stopRecording: () => void;
   getShortcut: (id: string) => Shortcut | undefined;
   getShortcutsByCategory: (category: Shortcut['category']) => Shortcut[];
+  setEditorMode: (mode: EditorMode) => void;
 }
 
 export const useShortcutsStore = create<ShortcutsState>()(
@@ -74,6 +78,7 @@ export const useShortcutsStore = create<ShortcutsState>()(
       shortcuts: defaultShortcuts,
       isRecording: false,
       recordingId: null,
+      editorMode: 'default',
       
       updateShortcut: (id, newKey) => set((state) => ({
         shortcuts: state.shortcuts.map((s) =>
@@ -106,6 +111,8 @@ export const useShortcutsStore = create<ShortcutsState>()(
       getShortcut: (id) => get().shortcuts.find((s) => s.id === id),
       
       getShortcutsByCategory: (category) => get().shortcuts.filter((s) => s.category === category),
+      
+      setEditorMode: (mode) => set({ editorMode: mode }),
     }),
     {
       name: 'shortcuts-storage',

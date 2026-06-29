@@ -15,7 +15,7 @@ import { BookmarkList } from '../Bookmarks/BookmarkList';
 import './Sidebar-New.css';
 import { TagPanel } from './TagPanel';
 
-type SidebarTab = 'files' | 'outline' | 'bookmarks' | 'tags' | 'database' | 'dataview' | 'canvas';
+type SidebarTab = 'files' | 'outline' | 'bookmarks' | 'tags' | 'diary' | 'import' | 'database' | 'dataview' | 'canvas' | 'links';
 
 function formatRelativeTime(timestamp: number): string {
   const diffMs = Date.now() - timestamp;
@@ -77,10 +77,13 @@ function findSectionEnd(editor: Editor, headingPos: number, level: number): numb
   return end;
 }
 
-const TAB_ORDER: SidebarTab[] = ['files', 'outline', 'tags', 'bookmarks', 'database', 'dataview', 'canvas'];
+const TAB_ORDER: SidebarTab[] = ['files', 'outline', 'tags', 'diary', 'import', 'bookmarks', 'database', 'dataview', 'canvas', 'links'];
 const DatabasePanelLazy = lazy(() => import('../Database/DatabasePanel').then(m => ({ default: m.DatabasePanel })));
 const DataviewPanelLazy = lazy(() => import('../Dataview/DataviewPanel').then(m => ({ default: m.DataviewPanel })));
 const CanvasBoardLazy = lazy(() => import('../Canvas/CanvasBoard').then(m => ({ default: m.CanvasBoard })));
+const BacklinksPanelLazy = lazy(() => import('./BacklinksPanel').then(m => ({ default: m.BacklinksPanel })));
+const DiaryPanelLazy = lazy(() => import('../Diary/DiaryPanel').then(m => ({ default: m.DiaryPanel })));
+const ImportPanelLazy = lazy(() => import('../Import/ImportPanel').then(m => ({ default: m.ImportPanel })));
 
 export function SidebarNew() {
   const [activeTab, setActiveTab] = useState<SidebarTab>('files');
@@ -464,11 +467,14 @@ export function SidebarNew() {
   const tabs: { key: SidebarTab; label: string }[] = [
     { key: 'files', label: t('sidebar.files') },
     { key: 'outline', label: t('sidebar.outline') },
+    { key: 'diary', label: '📅 Diary' },
+    { key: 'import', label: '📥 Import' },
     { key: 'bookmarks', label: t('sidebar.bookmarks') },
     { key: 'tags', label: '# Tags' },
     { key: 'database', label: '🗄 DB' },
     { key: 'dataview', label: '🔍 Query' },
     { key: 'canvas', label: '🎨 Canvas' },
+    { key: 'links', label: '🔗 Links' },
   ];
 
   /** Recursively render a single directory level for the Browse view. */
@@ -810,6 +816,10 @@ export function SidebarNew() {
         return renderOutlineView();
       case 'bookmarks':
         return renderBookmarksView();
+      case 'diary':
+        return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><DiaryPanelLazy /></Suspense>;
+      case 'import':
+        return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><ImportPanelLazy /></Suspense>;
       case 'database':
         return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><DatabasePanelLazy /></Suspense>;
       case 'dataview':
@@ -818,6 +828,8 @@ export function SidebarNew() {
         return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><TagPanel /></Suspense>;
       case 'canvas':
         return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><CanvasBoardLazy /></Suspense>;
+      case 'links':
+        return <Suspense fallback={<div className="sidebar-loading">Loading...</div>}><BacklinksPanelLazy /></Suspense>;
       case 'files':
       default:
         return renderFileTreeView();

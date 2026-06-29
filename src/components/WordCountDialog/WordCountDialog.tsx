@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from '../../i18n';
 import { useEditorState } from '../../store/editorStore';
+import { WritingDeepAnalyzer, WritingIssue } from '../../services/WritingDeepAnalyzer';
 import './WordCountDialog.css';
 
 interface WordCountDialogProps {
@@ -62,7 +63,33 @@ export function WordCountDialog({ isOpen, onClose }: WordCountDialogProps) {
   }, [editorInstance]);
   
   const stats = useMemo(() => calculateStats(content), [content]);
-  
+
+  const readability = useMemo(() => {
+    if (!content.trim()) return null;
+    return WritingDeepAnalyzer.fleschKincaid(content);
+  }, [content]);
+
+  const sentiment = useMemo(() => {
+    if (!content.trim()) return null;
+    return WritingDeepAnalyzer.analyzeSentiment(content);
+  }, [content]);
+
+  const writingIssues = useMemo(() => {
+    if (!content.trim()) return [];
+    return WritingDeepAnalyzer.findIssues(content);
+  }, [content]);
+
+  const getIssueIcon = (type: WritingIssue['type']): string => {
+    switch (type) {
+      case 'passive': return '📝';
+      case 'longSentence': return '📏';
+      case 'adverb': return '🔤';
+      case 'repetition': return '🔄';
+      case 'jargon': return '📚';
+      default: return '💡';
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -139,6 +166,66 @@ export function WordCountDialog({ isOpen, onClose }: WordCountDialogProps) {
               </div>
             </div>
           </div>
+
+          {readability && (
+            <div className="stats-section">
+              <h3>{t('wordCount.readability')}</h3>
+              <div className="readability-score-container">
+                <div className="readability-score">
+                  <span className="readability-number">{readability.score}</span>
+                  <span className="readability-unit">/100</span>
+                </div>
+                <div className="readability-bar-wrapper">
+                  <div
+                    className="readability-bar"
+                    style={{ width: `${readability.score}%` }}
+                  />
+                </div>
+                <div className="readability-level">{readability.level}</div>
+              </div>
+              {sentiment && (
+                <div className="sentiment-bar-container">
+                  <div className="sentiment-labels">
+                    <span>😊 {t('wordCount.positive')}</span>
+                    <span>😐 {t('wordCount.neutral')}</span>
+                    <span>😟 {t('wordCount.negative')}</span>
+                  </div>
+                  <div className="sentiment-bar">
+                    <div
+                      className="sentiment-positive"
+                      style={{ width: `${sentiment.positive}%` }}
+                    />
+                    <div
+                      className="sentiment-neutral"
+                      style={{ width: `${sentiment.neutral}%` }}
+                    />
+                    <div
+                      className="sentiment-negative"
+                      style={{ width: `${sentiment.negative}%` }}
+                    />
+                  </div>
+                  <div className="sentiment-label">{t(`wordCount.sentiment.${sentiment.label}`)}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {writingIssues.length > 0 && (
+            <div className="stats-section">
+              <h3>{t('wordCount.writingIssues')} ({writingIssues.length})</h3>
+              <div className="issues-list">
+                {writingIssues.slice(0, 5).map((issue, idx) => (
+                  <div key={idx} className="issue-item">
+                    <span className="issue-icon">{getIssueIcon(issue.type)}</span>
+                    <div className="issue-content">
+                      <span className="issue-text">{issue.text}</span>
+                      <span className="issue-suggestion">{issue.suggestion}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

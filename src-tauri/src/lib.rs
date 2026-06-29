@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{Write, BufWriter};
+use std::io::{Write, BufWriter, Read};
 use std::process::Command;
 use base64::{Engine as _, engine::general_purpose};
 use tauri::Manager;
@@ -10,16 +10,67 @@ use serde::{Deserialize, Serialize};
 use printpdf::*;
 use docx_rs::*;
 use pulldown_cmark::{Parser, Options, html};
+use zip::ZipArchive;
 
 mod system_metrics;
 mod file_operations;
 mod clipboard_rs;
 mod data_recovery;
+mod file_watcher;
 
 pub use file_operations::*;
 pub use system_metrics::*;
 pub use clipboard_rs::*;
 pub use data_recovery::*;
+
+// ---- Path validation (defense-in-depth) ----
+
+/// Reject paths that target sensitive system directories.
+fn validate_path(path: &str) -> Result<(), String> {
+    let normalized = path.replace('\\', "/");
+    let lower = normalized.to_lowercase();
+
+    let forbidden_prefixes = [
+        "/etc/", "/proc/", "/sys/", "/dev/",
+        "/usr/", "/var/", "/boot/",
+        "c:/windows/", "c:/program files",
+    ];
+
+    for prefix in &forbidden_prefixes {
+        if lower.starts_with(prefix) {
+            return Err(format!("Access denied: path targets system directory: {}", path));
+        }
+    }
+
+    Ok(())
+}
+
+/// Ensure export output paths have one of the expected extensions.
+fn validate_export_extension(path: &str, allowed: &[&str]) -> Result<(), String> {
+    let ext = std::path::Path::new(path)
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("");
+    if allowed.iter().any(|a| a.eq_ignore_ascii_case(ext)) {
+        Ok(())
+    } else {
+        Err(format!(
+            "Invalid export extension '.{}', expected one of: {:?}",
+            ext, allowed
+        ))
+    }
+}
+
+/// Validate that a git ref (hash or ref name) has a safe format.
+fn validate_git_ref(hash: &str) -> Result<(), String> {
+    if hash.is_empty() || hash.len() > 256 {
+        return Err("Git ref must be between 1 and 256 characters".to_string());
+    }
+    if !hash.chars().all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '/' || c == '-' || c == '_' || c == '^' || c == '~' || c == '@' || c == '{' || c == '}' || c == ':') {
+        return Err(format!("Git ref contains invalid characters: {}", hash));
+    }
+    Ok(())
+}
 
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
@@ -43,6 +94,7 @@ pub struct GitDiff {
 
 #[tauri::command]
 async fn save_file(_app: tauri::AppHandle, path: String, content: String) -> Result<String, String> {
+    validate_path(&path)?;
     let file_path = std::path::Path::new(&path);
 
     if let Some(parent) = file_path.parent() {
@@ -59,18 +111,69 @@ async fn save_file(_app: tauri::AppHandle, path: String, content: String) -> Res
 
 #[tauri::command]
 async fn read_file(path: String) -> Result<String, String> {
+    validate_path(&path)?;
     let content = fs::read_to_string(&path).map_err(|e: std::io::Error| e.to_string())?;
     Ok(content)
 }
 
 #[tauri::command]
 async fn file_exists(path: String) -> Result<bool, String> {
+    validate_path(&path)?;
     let exists = std::path::Path::new(&path).exists();
     Ok(exists)
 }
 
+/// Extract markdown content from a Notion export ZIP file.
+/// Notion exports contain .md files and .csv database files inside a ZIP.
+/// This command reads the ZIP, extracts all .md files, and concatenates them
+/// into a single markdown document (sorted by filename for consistent ordering).
+#[tauri::command]
+async fn extract_notion_zip(path: String) -> Result<String, String> {
+    validate_path(&path)?;
+    
+    let file = fs::File::open(&path).map_err(|e| format!("Failed to open ZIP: {}", e))?;
+    let mut archive = ZipArchive::new(file).map_err(|e| format!("Failed to read ZIP: {}", e))?;
+    
+    let mut md_files: Vec<(String, String)> = Vec::new();
+    
+    for i in 0..archive.len() {
+        let mut zip_file = archive.by_index(i).map_err(|e| format!("ZIP entry error: {}", e))?;
+        
+        let name = zip_file.name().to_string();
+        
+        if name.ends_with(".md") && !zip_file.is_dir() {
+            let mut content = String::new();
+            zip_file.read_to_string(&mut content).map_err(|e| format!("Read error for {}: {}", name, e))?;
+            md_files.push((name, content));
+        }
+    }
+    
+    if md_files.is_empty() {
+        return Err("No markdown files found in Notion export ZIP".to_string());
+    }
+    
+    md_files.sort_by(|a, b| a.0.cmp(&b.0));
+    
+    let mut result = String::new();
+    for (filename, content) in &md_files {
+        let title = filename
+            .trim_end_matches(".md")
+            .replace("%20", " ")
+            .replace("%2F", "/");
+        
+        if !result.is_empty() {
+            result.push_str("\n\n---\n\n");
+        }
+        result.push_str(&format!("## {}\n\n{}", title, content.trim()));
+    }
+    
+    Ok(result)
+}
+
 #[tauri::command]
 async fn export_to_pdf(markdown: String, output_path: String) -> Result<String, String> {
+    validate_path(&output_path)?;
+    validate_export_extension(&output_path, &["pdf"])?;
     let (doc, mut current_page, mut current_layer) = PdfDocument::new(
         "Markhere Export",
         Mm(210.0),
@@ -124,6 +227,8 @@ async fn export_to_pdf(markdown: String, output_path: String) -> Result<String, 
 
 #[tauri::command]
 async fn export_to_word(markdown: String, output_path: String) -> Result<String, String> {
+    validate_path(&output_path)?;
+    validate_export_extension(&output_path, &["docx"])?;
     let mut doc = Docx::new();
 
     for line in markdown.lines() {
@@ -161,6 +266,8 @@ async fn export_to_word(markdown: String, output_path: String) -> Result<String,
 
 #[tauri::command]
 async fn export_to_epub(markdown: String, output_path: String, title: String) -> Result<String, String> {
+    validate_path(&output_path)?;
+    validate_export_extension(&output_path, &["epub", "html"])?;
     let html_body = markdown_to_html(&markdown);
     let date = chrono::Local::now().format("%Y-%m-%d").to_string();
 
@@ -497,6 +604,29 @@ fn make_docx_paragraph(text: &str, size: usize, heading_bold: bool, _heading_ita
     para
 }
 
+/// Returns each subdirectory of `app_data_dir/plugins/` that contains a
+/// `manifest.json`. Skips half-installed folders so the JS loader does not
+/// crash on corrupt plugin directories.
+#[tauri::command]
+async fn list_plugins(app: tauri::AppHandle) -> Result<Vec<String>, String> {
+    let app_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    let plugins_dir = app_dir.join("plugins");
+
+    if !plugins_dir.exists() {
+        return Ok(Vec::new());
+    }
+
+    let mut plugins: Vec<String> = Vec::new();
+    for entry in fs::read_dir(&plugins_dir).map_err(|e| e.to_string())? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let path = entry.path();
+        if path.is_dir() && path.join("manifest.json").exists() {
+            plugins.push(path.to_string_lossy().to_string());
+        }
+    }
+    Ok(plugins)
+}
+
 #[tauri::command]
 async fn save_image(app: tauri::AppHandle, image_data: String, filename: String) -> Result<String, String> {
     let app_dir = app.path().app_data_dir().map_err(|e: tauri::Error| e.to_string())?;
@@ -541,6 +671,7 @@ async fn validate_link(url: String) -> Result<bool, String> {
 
 #[tauri::command]
 async fn get_git_history(file_path: String) -> Result<Vec<GitCommit>, String> {
+    validate_path(&file_path)?;
     let output = Command::new("git")
         .args(["log", "--follow", "--format=%H|%h|%an|%ad|%s", "--date=short"])
         .arg(&file_path)
@@ -572,6 +703,9 @@ async fn get_git_history(file_path: String) -> Result<Vec<GitCommit>, String> {
 
 #[tauri::command]
 async fn get_git_diff(file_path: String, old_hash: String, new_hash: String) -> Result<GitDiff, String> {
+    validate_path(&file_path)?;
+    validate_git_ref(&old_hash)?;
+    validate_git_ref(&new_hash)?;
     // Get old content
     let old_output = Command::new("git")
         .args(["show", &format!("{}:{}", old_hash, file_path)])
@@ -625,6 +759,8 @@ async fn get_git_diff(file_path: String, old_hash: String, new_hash: String) -> 
 
 #[tauri::command]
 async fn get_file_at_commit(file_path: String, hash: String) -> Result<String, String> {
+    validate_path(&file_path)?;
+    validate_git_ref(&hash)?;
     let output = Command::new("git")
         .args(["show", &format!("{}:{}", hash, file_path)])
         .output()
@@ -784,6 +920,8 @@ pub fn run() {
             save_file,
             read_file,
             file_exists,
+            extract_notion_zip,
+            list_plugins,
             export_to_pdf,
             export_to_word,
             export_to_epub,
@@ -801,6 +939,8 @@ pub fn run() {
             data_recovery::create_backup,
             data_recovery::list_backups,
             data_recovery::restore_backup,
+            file_watcher::watch_file,
+            file_watcher::unwatch_file,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

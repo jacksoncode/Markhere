@@ -50,7 +50,7 @@ describe('documentTemplates', () => {
         });
 
         it('has a valid category', () => {
-          expect(['academic', 'personal', 'business', 'creative']).toContain(
+          expect(['academic', 'personal', 'business', 'creative', 'writing']).toContain(
             template.category
           );
         });
@@ -117,11 +117,19 @@ describe('getTemplatesByCategory', () => {
     }
   });
 
+  it('returns templates for the writing category', () => {
+    const writing = getTemplatesByCategory('writing');
+    expect(writing.length).toBeGreaterThan(0);
+    for (const t of writing) {
+      expect(t.category).toBe('writing');
+    }
+  });
+
   it('returns empty array for a non-existent category', () => {
     // Since DocumentTemplate['category'] is strict, no non-existent category exists.
     // But testing with a valid category that may have no templates is fine.
     // All four categories have entries, so this is tested implicitly above.
-    const allCategories = ['academic', 'personal', 'business', 'creative'] as const;
+    const allCategories = ['academic', 'personal', 'business', 'creative', 'writing'] as const;
     let totalByCategory = 0;
     for (const cat of allCategories) {
       totalByCategory += getTemplatesByCategory(cat).length;

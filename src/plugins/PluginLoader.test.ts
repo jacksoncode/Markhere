@@ -82,10 +82,10 @@ describe('loadPluginFromDirectory', () => {
 
     await loadPluginFromDirectory('/plugins/my-plugin');
 
-    expect(mockInvoke).toHaveBeenCalledWith('read_text_file', {
+    expect(mockInvoke).toHaveBeenCalledWith('read_file', {
       path: '/plugins/my-plugin/manifest.json',
     });
-    expect(mockInvoke).toHaveBeenCalledWith('read_text_file', {
+    expect(mockInvoke).toHaveBeenCalledWith('read_file', {
       path: '/plugins/my-plugin/main.js',
     });
   });

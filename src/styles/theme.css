@@ -1,50 +1,27 @@
-:root {
-  --bg-color: #ffffff;
-  --text-color: #24292f;
-  --border-color: #d0d7de;
-  --hover-bg: #f6f8fa;
-  --active-bg: #eaeef2;
-  --primary-color: #0969da;
-  --success-color: #1a7f37;
-  --error-color: #cf222e;
-  --warning-color: #bf8700;
-  --code-bg: #f6f8fa;
-  --shadow-color: rgba(0, 0, 0, 0.1);
-}
-
-[data-theme='dark'] {
-  --bg-color: #0d1117;
-  --text-color: #c9d1d9;
-  --border-color: #30363d;
-  --hover-bg: #161b22;
-  --active-bg: #21262d;
-  --primary-color: #58a6ff;
-  --success-color: #3fb950;
-  --error-color: #f85149;
-  --warning-color: #d29922;
-  --code-bg: #161b22;
-  --shadow-color: rgba(0, 0, 0, 0.3);
-}
+/* ─── Global base element styles ───
+   CSS variables are defined in design-tokens.css.
+   This file applies them to HTML elements.
+   Variables use backward-compatible aliases from design-tokens.css. */
 
 * {
   transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
+  background-color: var(--bg-color, var(--color-bg-primary));
+  color: var(--text-color, var(--color-text-primary));
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-family-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif);
 }
 
 .app-container {
-  background: var(--bg-color);
-  color: var(--text-color);
+  background: var(--bg-color, var(--color-bg-primary));
+  color: var(--text-color, var(--color-text-primary));
 }
 
 .editor-content {
-  background: var(--bg-color);
-  color: var(--text-color);
+  background: var(--bg-color, var(--color-bg-primary));
+  color: var(--text-color, var(--color-text-primary));
 }
 
 .editor-content:focus {
@@ -52,32 +29,32 @@ body {
 }
 
 button {
-  background: var(--bg-color);
-  color: var(--text-color);
-  border-color: var(--border-color);
+  background: var(--bg-color, var(--color-bg-primary));
+  color: var(--text-color, var(--color-text-primary));
+  border-color: var(--border-color, var(--color-border-primary));
 }
 
 button:hover {
-  background: var(--hover-bg);
+  background: var(--hover-bg, var(--color-bg-hover));
 }
 
 button:active {
-  background: var(--active-bg);
+  background: var(--active-bg, var(--color-bg-active));
 }
 
 input, textarea {
-  background: var(--bg-color);
-  color: var(--text-color);
-  border-color: var(--border-color);
+  background: var(--bg-color, var(--color-bg-primary));
+  color: var(--text-color, var(--color-text-primary));
+  border-color: var(--border-color, var(--color-border-primary));
 }
 
 code, pre {
-  background: var(--code-bg);
-  color: var(--text-color);
+  background: var(--code-bg, var(--color-code-bg));
+  color: var(--text-color, var(--color-text-primary));
 }
 
 a {
-  color: var(--primary-color);
+  color: var(--primary-color, var(--color-primary));
 }
 
 @media print {
@@ -85,13 +62,13 @@ a {
     background: white !important;
     color: black !important;
   }
-  
+
   .menu-bar,
   .sidebar,
   .toolbar {
     display: none !important;
   }
-  
+
   .editor-wrapper {
     max-width: 100%;
     padding: 0;

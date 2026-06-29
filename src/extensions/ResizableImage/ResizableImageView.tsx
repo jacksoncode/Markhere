@@ -92,6 +92,8 @@ export function ResizableImageView({ node, updateAttributes, selected }: NodeVie
         className="resizable-image"
         style={{ width: width ? `${width}px` : 'auto', height: height ? `${height}px` : 'auto' }}
         draggable={false}
+        loading="lazy"
+        decoding="async"
       />
 
       {showHandles && (

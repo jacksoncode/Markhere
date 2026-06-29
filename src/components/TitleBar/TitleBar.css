@@ -15,24 +15,12 @@
   padding-left: 78px;
   font-weight: 500;
   box-sizing: border-box;
-  pointer-events: none;
-}
-
-/* Re-enable pointer events for interactive children */
-.typora-titlebar > * {
-  pointer-events: auto;
-}
-
-/* Leave macOS traffic light area (0-78px) completely unblocked */
-.typora-titlebar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 78px;
-  pointer-events: none;
-  z-index: 0;
+  /* DO NOT use pointer-events: none on the titlebar!
+   * In TitleBarStyle::Transparent mode, macOS native traffic lights
+   * (close/minimize/maximize) are rendered inside the webview but
+   * outside the React DOM. pointer-events:none on this div blocks
+   * clicks on those native buttons entirely. Instead, we only
+   * suppress pointer events on non-interactive text content. */
 }
 
 [data-theme="dark"] .typora-titlebar {
@@ -41,6 +29,7 @@
 
 .typora-titlebar-title {
   font-weight: 500;
+  user-select: none;
 }
 
 .typora-titlebar-drag-region {
@@ -51,6 +40,7 @@
   height: 100%;
   cursor: default;
   z-index: 0;
+  -webkit-app-region: drag;
 }
 
 .typora-titlebar-controls {
@@ -59,14 +49,13 @@
   display: flex;
   gap: 10px;
   z-index: 10;
-  pointer-events: auto;
+  -webkit-app-region: no-drag;
 }
 
-/* Fallback close button (right side, macOS traffic light backup) */
 .typora-titlebar-close-btn {
   position: absolute;
   right: 12px;
-  pointer-events: auto;
+  -webkit-app-region: no-drag;
   top: 50%;
   transform: translateY(-50%);
   width: 24px;
@@ -92,6 +81,7 @@
 .typora-titlebar-menu-wrapper {
   position: relative;
   padding: 6px 12px;
+  -webkit-app-region: no-drag;
 }
 
 .typora-titlebar-menu {

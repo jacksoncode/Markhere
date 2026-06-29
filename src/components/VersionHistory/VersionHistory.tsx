@@ -4,6 +4,7 @@ import { useGitStore } from '../../store/gitStore';
 import { useFileStore } from '../../store/fileStore';
 import { useTranslation } from '../../i18n';
 import { useNotificationStore } from '../Notification/Notification';
+import { VersionDiff } from '../../services/VersionDiff';
 import './VersionHistory.css';
 
 interface VersionHistoryProps {
@@ -102,25 +103,73 @@ export function VersionHistory({ isOpen, onClose }: VersionHistoryProps) {
   const renderDiffLines = () => {
     if (!currentDiff) return null;
 
-    const oldLines = currentDiff.old_content.split('\n');
-    const newLines = currentDiff.new_content.split('\n');
+    const diffLines = VersionDiff.lineDiff(currentDiff.old_content, currentDiff.new_content);
+    const stats = VersionDiff.getStats(diffLines);
 
     return (
       <div className="diff-view">
         <div className="diff-stats">
-          <span className="additions">+{currentDiff.additions}</span>
-          <span className="deletions">-{currentDiff.deletions}</span>
+          <span className="additions">+{stats.added}</span>
+          <span className="deletions">-{stats.removed}</span>
+          {stats.changed > 0 && <span className="changes">~{stats.changed}</span>}
         </div>
         <div className="diff-content">
-          {newLines.map((line, i) => {
-            const oldLine = oldLines[i];
-            if (line === oldLine) {
-              return <div key={i} className="diff-line unchanged">{line}</div>;
-            } else if (!oldLine || !oldLines.includes(line)) {
-              return <div key={i} className="diff-line added">+ {line}</div>;
-            } else {
-              return <div key={i} className="diff-line modified">{line}</div>;
+          {diffLines.map((line, i) => {
+            if (line.type === 'same') {
+              return (
+                <div key={i} className="diff-line unchanged">
+                  <span className="diff-linenum">{line.lineNum}</span>
+                  {line.content}
+                </div>
+              );
             }
+
+            if (line.type === 'add') {
+              const prev = i > 0 ? diffLines[i - 1] : null;
+              if (prev && prev.type === 'remove') {
+                // Modified line — show char-level diff
+                const highlighted = VersionDiff.charHighlight(prev.content, line.content);
+                return (
+                  <div key={i} className="diff-line-pair">
+                    <div className="diff-line removed">
+                      <span className="diff-linenum">{prev.lineNum}</span>
+                      <span
+                        dangerouslySetInnerHTML={{ __html: highlighted.old }}
+                        className="diff-line-text"
+                      />
+                    </div>
+                    <div className="diff-line added">
+                      <span className="diff-linenum">{line.lineNum}</span>
+                      <span
+                        dangerouslySetInnerHTML={{ __html: highlighted.new }}
+                        className="diff-line-text"
+                      />
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <div key={i} className="diff-line added">
+                  <span className="diff-linenum">{line.lineNum}</span>
+                  + {line.content}
+                </div>
+              );
+            }
+
+            if (line.type === 'remove') {
+              const next = i + 1 < diffLines.length ? diffLines[i + 1] : null;
+              if (next && next.type === 'add') {
+                return null; // Handled in the 'add' block above
+              }
+              return (
+                <div key={i} className="diff-line removed">
+                  <span className="diff-linenum">{line.lineNum}</span>
+                  - {line.content}
+                </div>
+              );
+            }
+
+            return null;
           })}
         </div>
       </div>

@@ -1,9 +1,10 @@
 import { useDatabaseStore, type Database, type Property, type DbRecord } from '../../store/databaseStore';
 import { useState } from 'react';
+import { getFormulaValue } from '../../services/DatabaseFormula';
 
 interface Props { database: Database; onUpdate?: () => void }
 
-function renderCell(prop: Property, record: DbRecord, onChange: (v: string) => void) {
+function renderCell(prop: Property, record: DbRecord, onChange: (v: string) => void, database: Database) {
   const val = String(record.values[prop.id] ?? '');
   switch (prop.type) {
     case 'checkbox':
@@ -15,6 +16,12 @@ function renderCell(prop: Property, record: DbRecord, onChange: (v: string) => v
       return <input type="date" value={val} onChange={e => onChange(e.target.value)} />;
     case 'number':
       return <input type="number" value={val} onChange={e => onChange(e.target.value)} />;
+    case 'formula':
+      return (
+        <span className="db-formula-cell" title={prop.formula || 'Formula'}>
+          {getFormulaValue(prop.id, prop.formula || '', database)}
+        </span>
+      );
     default:
       return <input type="text" value={val} onChange={e => onChange(e.target.value)} placeholder={prop.name} />;
   }
@@ -50,7 +57,7 @@ export function TableView({ database, onUpdate }: Props) {
           {records.map((rec, idx) => (
             <tr key={rec.id}>
               <td className="col-num">{idx + 1}</td>
-              {visibleProps.map(p => <td key={p.id}>{renderCell(p, rec, v => handleCellEdit(rec.id, p.id, v))}</td>)}
+              {visibleProps.map(p => <td key={p.id}>{renderCell(p, rec, v => handleCellEdit(rec.id, p.id, v), database)}</td>)}
               <td className="col-action"><button className="btn-icon" onClick={() => { deleteRecord(database.id, rec.id); onUpdate?.(); }}>🗑</button></td>
             </tr>
           ))}

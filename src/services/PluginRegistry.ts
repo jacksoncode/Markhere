@@ -98,6 +98,10 @@ export class PluginRegistry {
 
   /** 沙箱安全校验 */
   static validatePermissions(permissions: string[]): { valid: boolean; blocked: string[] } {
+    // NOTE: `shell.run` is intentionally excluded — plugins cannot invoke arbitrary shell
+    // commands. The Tauri capability file only grants `shell:allow-open` (open URLs/files),
+    // not `shell:allow-run`. Code-execution plugins must use a dedicated sandboxed Rust
+    // command with an allowlisted interpreter, not the generic shell plugin.
     const ALLOWED = ['fs.read','fs.write','network','clipboard.read','clipboard.write','ui.render','editor.extend'];
     const blocked = permissions.filter(p => !ALLOWED.includes(p));
     return { valid: blocked.length === 0, blocked };
@@ -120,7 +124,7 @@ export class PluginRegistry {
       { id: 'markhere-export-latex', name: 'LaTeX Exporter', version: '1.0.0', author: 'Markhere Team', description: 'Export as LaTeX for academic writing', category: 'export', tags: ['export', 'latex', 'academic'], permissions: ['fs.write'], main: 'export-latex', rating: 4.3, downloads: 890 },
       { id: 'markhere-mindmap', name: 'Mind Map Generator', version: '1.0.0', author: 'Markhere Team', description: 'Auto-generate mind maps from headings', category: 'editor', tags: ['mindmap', 'visualization'], permissions: [], main: 'mindmap', rating: 4.7, downloads: 2100 },
       { id: 'markhere-grammar', name: 'Grammar Checker', version: '1.0.0', author: 'Markhere Team', description: 'Advanced grammar and spell check using LanguageTool', category: 'ai', tags: ['grammar', 'spell-check', 'ai'], permissions: ['network'], main: 'grammar', rating: 4.1, downloads: 3400 },
-      { id: 'markhere-code-runner', name: 'Code Runner', version: '1.0.0', author: 'Markhere Team', description: 'Execute code blocks directly in the editor', category: 'utility', tags: ['code', 'execute'], permissions: ['shell.run'], main: 'code-runner', rating: 4.8, downloads: 5600 },
+      { id: 'markhere-code-runner', name: 'Code Runner', version: '1.0.0', author: 'Markhere Team', description: 'Execute code blocks directly in the editor (requires sandboxed runtime — not yet wired)', category: 'utility', tags: ['code', 'execute'], permissions: [], main: 'code-runner', rating: 4.8, downloads: 5600 },
     ];
     builtins.forEach(p => this.register(p));
   }

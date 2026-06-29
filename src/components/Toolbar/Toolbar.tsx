@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { invoke } from '@tauri-apps/api/core';
+import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
+import { readFile } from '@tauri-apps/plugin-fs';
 import { useEditorState } from '../../store/editorStore';
 import { useTranslation } from '../../i18n';
 import { useImageStorageStore } from '../../store/imageStorageStore';
@@ -123,55 +126,52 @@ export function Toolbar() {
     {
       icon: ToolbarIcons.Image,
       label: t('format.image'),
-      action: async () => {
-        try {
-          const { open } = await import('@tauri-apps/plugin-dialog');
-          const selected = await open({
-            filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'] }],
-            multiple: false,
-          });
-          if (selected && typeof selected === 'string') {
-            const { readFile } = await import('@tauri-apps/plugin-fs');
-            const contents = await readFile(selected);
-            const bytes = new Uint8Array(contents);
-            const chunks: string[] = [];
-            const chunkSize = 0x8000;
-            for (let i = 0; i < bytes.length; i += chunkSize) {
-              const chunk = bytes.subarray(i, i + chunkSize);
-              chunks.push(String.fromCharCode(...Array.from(chunk)));
-            }
-            const base64 = btoa(chunks.join(''));
+       action: async () => {
+         try {
+           const selected = await dialogOpen({
+             filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'] }],
+             multiple: false,
+           });
+           if (selected && typeof selected === 'string') {
+             const contents = await readFile(selected);
+             const bytes = new Uint8Array(contents);
+             const chunks: string[] = [];
+             const chunkSize = 0x8000;
+             for (let i = 0; i < bytes.length; i += chunkSize) {
+               const chunk = bytes.subarray(i, i + chunkSize);
+               chunks.push(String.fromCharCode(...Array.from(chunk)));
+             }
+             const base64 = btoa(chunks.join(''));
 
-            try {
-              const filename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
-              const imageBlob = new Blob([bytes], { type: 'image/png' });
-              const imageFile = new File([imageBlob], filename, { type: 'image/png' });
-              const { uploadImage } = useImageStorageStore.getState();
-              const uploadedUrl = await uploadImage(imageFile);
-              if (uploadedUrl) {
-                editorInstance.chain().focus().setImage({ src: uploadedUrl }).run();
-                return;
-              }
-            } catch {
-              // Upload failed, fall through to local save
-            }
+             try {
+               const filename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
+               const imageBlob = new Blob([bytes], { type: 'image/png' });
+               const imageFile = new File([imageBlob], filename, { type: 'image/png' });
+               const { uploadImage } = useImageStorageStore.getState();
+               const uploadedUrl = await uploadImage(imageFile);
+               if (uploadedUrl) {
+                 editorInstance.chain().focus().setImage({ src: uploadedUrl }).run();
+                 return;
+               }
+             } catch {
+               // Upload failed, fall through to local save
+             }
 
-            const filename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
-            try {
-              const { invoke } = await import('@tauri-apps/api/core');
-              const savedPath = await invoke<string>('save_image', {
-                imageData: `data:image/png;base64,${base64}`,
-                filename,
-              });
-              editorInstance.chain().focus().setImage({ src: savedPath }).run();
-            } catch {
-              editorInstance.chain().focus().setImage({ src: selected }).run();
-            }
-          }
-        } catch {
-          // Tauri APIs not available – silently ignore
-        }
-      },
+             const filename = `image_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.png`;
+             try {
+               const savedPath = await invoke<string>('save_image', {
+                 imageData: `data:image/png;base64,${base64}`,
+                 filename,
+               });
+               editorInstance.chain().focus().setImage({ src: savedPath }).run();
+             } catch {
+               editorInstance.chain().focus().setImage({ src: selected }).run();
+             }
+           }
+         } catch {
+           // Tauri APIs not available – silently ignore
+         }
+       },
       active: editorInstance.isActive('resizableImage')
     },
     {

@@ -4,7 +4,7 @@
  */
 import { create } from 'zustand';
 
-export type PropertyType = 'text' | 'number' | 'date' | 'select' | 'multi-select' | 'checkbox';
+export type PropertyType = 'text' | 'number' | 'date' | 'select' | 'multi-select' | 'checkbox' | 'formula';
 export type ViewType = 'table' | 'board' | 'calendar' | 'timeline' | 'list';
 
 export interface Property {
@@ -12,6 +12,7 @@ export interface Property {
   name: string;
   type: PropertyType;
   options?: string[]; // for select / multi-select
+  formula?: string;   // for formula type: e.g. "=SUM(Score)"
 }
 
 export interface DbRecord {

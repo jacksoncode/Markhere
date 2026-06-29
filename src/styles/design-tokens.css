@@ -1,0 +1,257 @@
+/* ═══════════════════════════════════════════════════════
+   Markhere Design Tokens (P2-6)
+   
+   Naming convention: `--{category}-{property}-{modifier}`
+   
+   Categories:
+     color    — background, text, border, primary, accent, etc.
+     font     — family, size, weight, line-height
+     radius   — border-radius values
+     space    — spacing / gap values
+     shadow   — box-shadow values
+     z        — z-index layers
+     duration — transition / animation durations
+   
+   All components MUST use tokens from this file only.
+   Old names are aliased for backward compatibility.
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ═══ Colors ═══ */
+
+  /* Background */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f1f5f9;
+  --color-bg-tertiary: #e2e8f0;
+  --color-bg-hover: #eef2ff;
+  --color-bg-active: #dbeafe;
+  --color-bg-inverse: #1e293b;
+
+  /* Text */
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-text-tertiary: #94a3b8;
+  --color-text-inverse: #f1f5f9;
+  --color-text-link: #3b82f6;
+
+  /* Border */
+  --color-border-primary: #e2e8f0;
+  --color-border-secondary: #cbd5e1;
+  --color-border-focus: #3b82f6;
+
+  /* Brand / Semantic */
+  --color-primary: #3b82f6;
+  --color-primary-light: #93c5fd;
+  --color-primary-dark: #1d4ed8;
+  --color-accent: #6366f1;
+  --color-accent-light: #a5b4fc;
+
+  /* Status */
+  --color-success: #22c55e;
+  --color-success-light: #bbf7d0;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fde68a;
+  --color-error: #ef4444;
+  --color-error-light: #fecaca;
+  --color-info: #3b82f6;
+  --color-info-light: #bfdbfe;
+
+  /* Code */
+  --color-code-bg: #1e1e2e;
+  --color-code-text: #cdd6f4;
+  --color-code-toolbar: #181825;
+  --color-code-gutter: rgba(0, 0, 0, 0.15);
+
+  /* Chart / Graph */
+  --color-graph-node: #818cf8;
+  --color-graph-edge: rgba(129, 140, 248, 0.3);
+  --color-graph-highlight: #4ecdc4;
+
+  /* Overlay */
+  --color-overlay: rgba(0, 0, 0, 0.4);
+  --color-overlay-light: rgba(0, 0, 0, 0.2);
+
+  /* ═══ Typography ═══ */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-family-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono',
+    Menlo, Monaco, Consolas, monospace;
+  --font-family-editor: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ═══ Spacing ═══ */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ═══ Border Radius ═══ */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ═══ Shadows ═══ */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-dialog: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+  /* ═══ Z-Index ═══ */
+  --z-base: 0;
+  --z-sidebar: 100;
+  --z-header: 200;
+  --z-toolbar: 300;
+  --z-dropdown: 500;
+  --z-sticky: 600;
+  --z-overlay: 700;
+  --z-modal: 800;
+  --z-dialog: 900;
+  --z-toast: 1000;
+  --z-tooltip: 1100;
+
+  /* ═══ Transitions ═══ */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --ease-default: ease;
+  --ease-out: ease-out;
+  --ease-in-out: ease-in-out;
+
+  /* Transition shorthand shortcuts */
+  --transition-fast: background-color var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default),
+    border-color var(--duration-fast) var(--ease-default);
+  --transition-normal: background-color var(--duration-normal) var(--ease-default),
+    color var(--duration-normal) var(--ease-default),
+    border-color var(--duration-normal) var(--ease-default);
+  --transition-slow: background-color var(--duration-slow) var(--ease-default);
+
+  /* ═══ Layout Sizes ═══ */
+  --sidebar-width: 260px;
+  --sidebar-width-collapsed: 48px;
+  --titlebar-height: 44px;
+  --toolbar-height: 40px;
+  --statusbar-height: 28px;
+  --max-content-width: 720px;
+}
+
+/* ═══ Dark Theme ═══ */
+[data-theme='dark'] {
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-bg-tertiary: #334155;
+  --color-bg-hover: #1e3a5f;
+  --color-bg-active: #1e40af;
+  --color-bg-inverse: #ffffff;
+
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-tertiary: #64748b;
+  --color-text-inverse: #1e293b;
+  --color-text-link: #60a5fa;
+
+  --color-border-primary: #334155;
+  --color-border-secondary: #475569;
+  --color-border-focus: #60a5fa;
+
+  --color-primary: #60a5fa;
+  --color-primary-light: #93c5fd;
+  --color-primary-dark: #3b82f6;
+  --color-accent: #818cf8;
+  --color-accent-light: #a5b4fc;
+
+  --color-success: #4ade80;
+  --color-success-light: #166534;
+  --color-warning: #fbbf24;
+  --color-warning-light: #92400e;
+  --color-error: #f87171;
+  --color-error-light: #991b1b;
+  --color-info: #60a5fa;
+  --color-info-light: #1e3a5f;
+
+  --color-code-bg: #1e1e2e;
+  --color-code-text: #cdd6f4;
+  --color-code-toolbar: #181825;
+  --color-code-gutter: rgba(0, 0, 0, 0.15);
+
+  --color-graph-node: #818cf8;
+  --color-graph-edge: rgba(129, 140, 248, 0.3);
+
+  --color-overlay: rgba(0, 0, 0, 0.6);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow-dialog: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* ═══ Backward Compatibility Aliases ═══
+   These map old token names to new ones so existing CSS works 
+   without changes. New components should use the new names. */
+:root,
+[data-theme='dark'] {
+  /* Old global.css aliases */
+  --color-bg: var(--color-bg-primary);
+  --color-text: var(--color-text-primary);
+  --color-border: var(--color-border-primary);
+
+  /* Old theme.css aliases */
+  --bg-color: var(--color-bg-primary);
+  --text-color: var(--color-text-primary);
+  --border-color: var(--color-border-primary);
+  --primary-color: var(--color-primary);
+  --hover-bg: var(--color-bg-hover);
+  --active-bg: var(--color-bg-active);
+  --success-color: var(--color-success);
+  --error-color: var(--color-error);
+  --warning-color: var(--color-warning);
+  --code-bg: var(--color-code-bg);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+
+  /* Old component-level aliases */
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-tertiary: var(--color-bg-tertiary);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-main: var(--color-text-primary);
+  --border-primary: var(--color-border-primary);
+
+  /* Overrides for dark shadow */
+  --icon-default: var(--color-text-secondary);
+  --icon-hover: var(--color-text-primary);
+
+  /* Font shorthand */
+  --font-family: var(--font-family-sans);
+  --font-size-base: var(--font-size-base);
+  --spacing-unit: var(--space-2);
+}

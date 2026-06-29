@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { documentTemplates, type DocumentTemplate } from '../../data/templates';
+import { expandTemplateVariables } from '../../services/TemplateVariables';
 import './WelcomeDialog.css';
 
 export function WelcomeDialog({ onClose }: { onClose: () => void }) {
@@ -7,7 +8,7 @@ export function WelcomeDialog({ onClose }: { onClose: () => void }) {
 
   const handlePick = async (tpl: DocumentTemplate) => {
     const { useEditorState } = await import('../../store/editorStore');
-    useEditorState.getState().setContent(tpl.content);
+    useEditorState.getState().setContent(expandTemplateVariables(tpl.content));
     onClose();
   };
 

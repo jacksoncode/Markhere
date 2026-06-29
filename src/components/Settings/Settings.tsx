@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation, useLanguageStore } from '../../i18n';
 import { useSettingsStore } from '../../store/settingsStore';
+import { useShortcutsStore, EditorMode } from '../../store/shortcutsStore';
 import './Settings.css';
 
 interface SettingsProps {
@@ -62,6 +63,8 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
     typewriterMode, setTypewriterMode,
     showWordCount, setShowWordCount,
   } = useSettingsStore();
+
+  const { editorMode, setEditorMode } = useShortcutsStore();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -282,6 +285,25 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
 
           {activeTab === 'editor' && (
             <div className="settings-section-container">
+              <section className="settings-section">
+                <h3>{t('settings.editorSection.keybindingsTitle') || 'Keybindings Mode'}</h3>
+                <div className="settings-option">
+                  <label className="settings-label">
+                    <span>{t('settings.editorSection.editorMode') || 'Editor Mode'}</span>
+                    <select 
+                      value={editorMode} 
+                      onChange={(e) => setEditorMode(e.target.value as EditorMode)}
+                      className="settings-select"
+                    >
+                      <option value="default">{t('settings.editorSection.modeDefault') || 'Default'}</option>
+                      <option value="vim">{t('settings.editorSection.modeVim') || 'Vim'}</option>
+                      <option value="emacs">{t('settings.editorSection.modeEmacs') || 'Emacs'}</option>
+                    </select>
+                  </label>
+                  <p className="settings-desc">{t('settings.editorSection.editorModeDesc') || 'Choose editing keybindings mode. Vim: h/j/k/l movement, Escape for normal mode. Emacs: C-a/e for line start/end, C-k for kill line.'}</p>
+                </div>
+              </section>
+
               <section className="settings-section">
                 <h3>{t('settings.editorSection.indentTitle')}</h3>
                 <div className="settings-option">

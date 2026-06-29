@@ -5,11 +5,11 @@ import { usePluginStore } from '../store/pluginStore';
 export async function loadPluginFromDirectory(pluginPath: string): Promise<MarkherePlugin | null> {
   try {
     const manifestPath = `${pluginPath}/manifest.json`;
-    const manifestContent = await invoke<string>('read_text_file', { path: manifestPath });
+    const manifestContent = await invoke<string>('read_file', { path: manifestPath });
     const manifest: PluginMetadata = JSON.parse(manifestContent);
-    
+
     const mainPath = `${pluginPath}/main.js`;
-    const mainContent = await invoke<string>('read_text_file', { path: mainPath });
+    const mainContent = await invoke<string>('read_file', { path: mainPath });
     
     const pluginFunction = new Function('return ' + mainContent)();
     const pluginModule = pluginFunction();

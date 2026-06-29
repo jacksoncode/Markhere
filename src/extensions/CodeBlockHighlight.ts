@@ -1,30 +1,13 @@
 import { Extension } from '@tiptap/core';
-
-// Preload PrismJS in background
-let PrismModule: any = null;
-let prismLoadPromise: Promise<void> | null = null;
-
-function preloadPrism(): Promise<void> {
-  if (!prismLoadPromise) {
-    prismLoadPromise = import('prismjs').then((m) => {
-      PrismModule = m.default;
-    });
-  }
-  return prismLoadPromise;
-}
-
-// Start preloading immediately
-preloadPrism();
+import Prism from 'prismjs';
 
 function highlightCodeBlocks(scope: HTMLElement) {
-  if (!PrismModule) return;
-
   const codeBlocks = scope.querySelectorAll<HTMLElement>('pre code');
 
   codeBlocks.forEach((block) => {
     const language = block.parentElement?.getAttribute('data-language') || 'plaintext';
-    if (PrismModule!.languages[language]) {
-      PrismModule!.highlightElement(block);
+    if (Prism.languages[language]) {
+      Prism.highlightElement(block);
     }
   });
 }
@@ -53,8 +36,7 @@ export const CodeBlockHighlight = Extension.create({
 
   onCreate() {
     const dom = this.editor.view.dom;
-    requestAnimationFrame(async () => {
-      await preloadPrism();
+    requestAnimationFrame(() => {
       highlightCodeBlocks(dom);
     });
   },

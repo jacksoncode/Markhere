@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.set_version.outputs.version }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,7 +36,7 @@ jobs:
 
       - name: Create GitHub Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           body_path: /tmp/CHANGELOG.md
@@ -63,6 +62,11 @@ jobs:
         with:
           target: x86_64-unknown-linux-gnu
 
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
       - name: Install System Dependencies
         run: |
           sudo apt-get update
@@ -70,13 +74,28 @@ jobs:
 
       - run: npm ci
 
-      - run: npx tauri build --target x86_64-unknown-linux-gnu
+      - name: Build Tauri app
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          CARGO_NET_RETRY: '5'
+        run: npx tauri build --target x86_64-unknown-linux-gnu
 
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           files: |
             src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb
             src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload signature files
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/*.deb.sig
+            src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/*.AppImage.sig
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,15 +113,71 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          target: aarch64-apple-darwin
+          targets: aarch64-apple-darwin, x86_64-apple-darwin
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
 
       - run: npm ci
 
-      - run: npx tauri build --target aarch64-apple-darwin
+      - name: Build Tauri app (aarch64)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          CARGO_NET_RETRY: '5'
+        run: npx tauri build --target aarch64-apple-darwin
 
-      - uses: softprops/action-gh-release@v1
+      - name: Build Tauri app (x86_64)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          CARGO_NET_RETRY: '5'
+        run: npx tauri build --target x86_64-apple-darwin
+
+      - name: Create universal binary
+        run: |
+          AARCH64_APP="src-tauri/target/aarch64-apple-darwin/release/bundle/macos/Markhere.app"
+          X86_64_APP="src-tauri/target/x86_64-apple-darwin/release/bundle/macos/Markhere.app"
+          UNIVERSAL_DIR="src-tauri/target/universal-apple-darwin/release/bundle/macos"
+          mkdir -p "$UNIVERSAL_DIR"
+          if [ -d "$AARCH64_APP" ] && [ -d "$X86_64_APP" ]; then
+            cp -R "$AARCH64_APP" "$UNIVERSAL_DIR/Markhere.app"
+            BINARY_PATH="Contents/MacOS/Markhere"
+            lipo -create \
+              "$AARCH64_APP/$BINARY_PATH" \
+              "$X86_64_APP/$BINARY_PATH" \
+              -output "$UNIVERSAL_DIR/Markhere.app/$BINARY_PATH"
+            echo "Universal binary created"
+          else
+            echo "WARNING: One or both arch builds missing, skipping universal binary"
+          fi
+
+      - name: Create universal DMG
+        run: |
+          UNIVERSAL_APP="src-tauri/target/universal-apple-darwin/release/bundle/macos/Markhere.app"
+          if [ -d "$UNIVERSAL_APP" ]; then
+            # Use hdiutil to create a universal DMG
+            DMG_PATH="src-tauri/target/universal-apple-darwin/release/bundle/dmg/Markhere_universal.dmg"
+            mkdir -p "$(dirname "$DMG_PATH")"
+            hdiutil create -volname "Markhere" -srcfolder "$UNIVERSAL_APP" -ov -format UDZO "$DMG_PATH"
+          fi
+
+      - uses: softprops/action-gh-release@v2
         with:
-          files: src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+          files: |
+            src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload signature files
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg.sig
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -122,15 +197,36 @@ jobs:
         with:
           target: x86_64-pc-windows-msvc
 
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
       - run: npm ci
 
-      - run: npx tauri build --target x86_64-pc-windows-msvc
+      - name: Build Tauri app
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          CARGO_BUILD_JOBS: '1'
+          CARGO_NET_RETRY: '5'
+        run: npx tauri build --target x86_64-pc-windows-msvc
 
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           files: |
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload signature files
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi.sig
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe.sig
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -147,39 +243,63 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Download release assets for signatures
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p sigs
+          # Download .sig files from the release
+          gh release download ${{ github.ref_name }} --pattern '*.sig' --dir sigs || true
+          ls -la sigs/ || true
+
       - name: Generate latest.json
         run: |
           VERSION="${{ steps.set_version.outputs.version }}"
           if [ -z "$VERSION" ]; then VERSION="0.0.0"; fi
           PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+          # Read signatures if available
+          LINUX_SIG=""
+          if [ -f sigs/*.AppImage.sig ]; then
+            LINUX_SIG=$(cat sigs/*.AppImage.sig | tr -d '\n')
+          fi
+          MAC_SIG=""
+          if [ -f sigs/*.dmg.sig ]; then
+            MAC_SIG=$(cat sigs/*.dmg.sig | head -1 | tr -d '\n')
+          fi
+          WIN_SIG=""
+          if [ -f sigs/*.exe.sig ]; then
+            WIN_SIG=$(cat sigs/*.exe.sig | tr -d '\n')
+          elif [ -f sigs/*.msi.sig ]; then
+            WIN_SIG=$(cat sigs/*.msi.sig | tr -d '\n')
+          fi
+
           cat > latest.json << MANIFEST
           {
-            "version": "VERSION_PLACEHOLDER",
-            "notes": "See https://github.com/\${{ github.repository }}/releases/tag/\${{ github.ref_name }} for release notes.",
-            "pub_date": "PUB_DATE_PLACEHOLDER",
+            "version": "${VERSION}",
+            "notes": "See https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }} for release notes.",
+            "pub_date": "${PUB_DATE}",
             "platforms": {
               "darwin-aarch64": {
-                "signature": "",
-                "url": "https://github.com/\${{ github.repository }}/releases/download/\${{ github.ref_name }}/Markhere_\${VERSION}_aarch64.dmg"
+                "signature": "${MAC_SIG}",
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Markhere_${VERSION}_aarch64.dmg"
               },
               "linux-x86_64": {
-                "signature": "",
-                "url": "https://github.com/\${{ github.repository }}/releases/download/\${{ github.ref_name }}/Markhere_\${VERSION}_amd64.AppImage"
+                "signature": "${LINUX_SIG}",
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Markhere_${VERSION}_amd64.AppImage"
               },
               "windows-x86_64": {
-                "signature": "",
-                "url": "https://github.com/\${{ github.repository }}/releases/download/\${{ github.ref_name }}/Markhere_\${VERSION}_x64-setup.exe"
+                "signature": "${WIN_SIG}",
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Markhere_${VERSION}_x64-setup.exe"
               }
             }
           }
           MANIFEST
 
-          sed -i "s/VERSION_PLACEHOLDER/$VERSION/g" latest.json
-          sed -i "s/PUB_DATE_PLACEHOLDER/$PUB_DATE/g" latest.json
+          cat latest.json
 
       - name: Upload latest.json to release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: latest.json
         env:

@@ -19,7 +19,7 @@ import { useEditorState } from './store/editorStore';
 import { useUIState } from './store/uiStore';
 import { useAutoSaveStore } from './store/autoSaveStore';
 import { initTheme } from './store/themeStore';
-import { useCommands } from './components/CommandPalette';
+import { useCommands, CommandPalette } from './components/CommandPalette/CommandPalette';
 import { CommentService } from './services/CommentService';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useCustomShortcuts } from './hooks/useCustomShortcuts';
@@ -31,7 +31,7 @@ import './styles/theme.css';
 
 // Lazy-loaded non-critical components
 const SearchPanel = lazy(() => import('./components/Search/SearchPanel').then(m => ({ default: m.SearchPanel })));
-const CommandPalette = lazy(() => import('./components/CommandPalette/CommandPalette').then(m => ({ default: m.CommandPalette })));
+
 const FocusMode = lazy(() => import('./components/FocusMode/FocusMode').then(m => ({ default: m.FocusMode })));
 const AIAssistant = lazy(() => import('./components/AIAssistant/AIAssistant').then(m => ({ default: m.AIAssistant })));
 const WordGoalProgress = lazy(() => import('./components/WordGoalProgress').then(m => ({ default: m.WordGoalProgress })));
@@ -121,7 +121,7 @@ const [showShortcutSettings, setShowShortcutSettings] = useState(false);
 
   const closeWindow = async () => {
     const api = await getWindowApi();
-    await api.getCurrentWindow().close();
+    await api.getCurrentWindow().destroy();
   };
   closeWindowRef.current = closeWindow;
 
@@ -191,16 +191,12 @@ const [showShortcutSettings, setShowShortcutSettings] = useState(false);
 
   // ---- Close guard (OS-native close button  + Cmd+W + custom close button) ----
   useEffect(() => {
-    console.log('[App] Setting up close handlers');
     const onCustomClose = () => {
-      console.log('[App] markhere:close-requested received');
       if (checkUnsavedRef.current()) {
-        console.log('[App] Has unsaved changes, showing dialog');
         pendingCloseRef.current = true;
         setPendingClose(true);
         setShowUnsavedDialog(true);
       } else {
-        console.log('[App] No unsaved changes, calling closeWindow');
         closeWindowRef.current().catch(err => console.error('[App] closeWindow failed:', err));
       }
     };
@@ -208,20 +204,17 @@ const [showShortcutSettings, setShowShortcutSettings] = useState(false);
 
     let unlisten: (() => void) | undefined;
     getWindowApi().then(api => {
-      console.log('[App] Window API loaded, setting up onCloseRequested');
       const currentWindow = api.getCurrentWindow();
-      currentWindow.onCloseRequested((event) => {
-        console.log('[App] onCloseRequested triggered, hasUnsaved:', checkUnsavedRef.current());
+      currentWindow.onCloseRequested(async (event) => {
+        event.preventDefault();
         if (checkUnsavedRef.current()) {
-          console.log('[App] Preventing close, showing save dialog');
-          event.preventDefault();
           pendingCloseRef.current = true;
           setPendingClose(true);
           setShowUnsavedDialog(true);
         } else {
-          console.log('[App] No unsaved, allowing native close');
+          await closeWindowRef.current();
         }
-      }).then(fn => { unlisten = fn; console.log('[App] onCloseRequested registered'); })
+      }).then(fn => { unlisten = fn; })
       .catch((err) => console.error('[App] onCloseRequested registration failed:', err));
     }).catch((err) => console.error('[App] getWindowApi failed:', err));
 
@@ -266,7 +259,7 @@ const [showShortcutSettings, setShowShortcutSettings] = useState(false);
         </main>
         <StatusBar />
         <Suspense fallback={null}><SearchPanel /></Suspense>
-        <Suspense fallback={null}><CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} commands={commands} /></Suspense>
+        <CommandPalette isOpen={showCommandPalette} onClose={() => setShowCommandPalette(false)} commands={commands} />
         <Suspense fallback={null}><FocusMode /></Suspense>
         <Suspense fallback={null}><AIAssistant /></Suspense>
         {wordGoalEnabled && <Suspense fallback={null}><WordGoalProgress /></Suspense>}

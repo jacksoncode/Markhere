@@ -141,6 +141,7 @@
     "files": "FILES",
     "outline": "OUTLINE",
     "bookmarks": "BOOKMARKS",
+    "diary": "DIARY",
     "recentFiles": "Recent Files",
     "currentFile": "Current File",
     "closeSidebar": "Close Sidebar",
@@ -172,6 +173,34 @@
     "save": "Save",
     "discard": "Discard Changes",
     "cancel": "Cancel"
+  },
+  "fileChanged": {
+    "title": "File Changed on Disk",
+    "message": "This file was modified by another program, but you have unsaved changes. Reload the version on disk, or keep your current edits?",
+    "reload": "Reload from Disk",
+    "keep": "Keep My Edits"
+  },
+  "update": {
+    "title": "Check for Updates",
+    "checking": "Checking for updates…",
+    "available": "New version {{version}} is available",
+    "downloading": "Downloading update…",
+    "ready": "Download complete. Installing and restarting…",
+    "uptodate": "You are on the latest version.",
+    "error": "Update check failed: {{message}}",
+    "install": "Download & Install",
+    "later": "Later",
+    "close": "Close",
+    "relaunching": "Restarting app"
+  },
+  "backlinks": {
+    "title": "Links",
+    "refresh": "Rescan",
+    "noFile": "Open a file to see its link relationships.",
+    "linkedMentions": "Backlinks",
+    "outgoingLinks": "Outgoing Links",
+    "scanning": "Scanning workspace…",
+    "none": "None"
   },
   "settings": {
     "title": "Settings",
@@ -371,7 +400,17 @@
     "readingTime": "Reading Time",
     "readingSpeed": "~300 words/min reading speed",
     "speakingSpeed": "~200 words/min speaking speed",
-    "minutes": "min"
+    "minutes": "min",
+    "readability": "Readability",
+    "positive": "Positive",
+    "neutral": "Neutral",
+    "negative": "Negative",
+    "sentiment": {
+      "positive": "Overall tone: Positive 😊",
+      "neutral": "Overall tone: Neutral 😐",
+      "negative": "Overall tone: Negative 😟"
+    },
+    "writingIssues": "Writing Suggestions"
   },
   "quickOpen": {
     "placeholder": "Search files or open tabs...",
@@ -572,6 +611,51 @@
     "academic": "Academic",
     "personal": "Personal",
     "business": "Business",
-    "creative": "Creative"
+    "creative": "Creative",
+    "writing": "Writing"
+  },
+  "diary": {
+    "today": "Today",
+    "loading": "Loading...",
+    "recentEntries": "Recent Entries",
+    "createEntry": "Create Entry",
+    "noEntries": "No diary entries yet"
+  },
+  "import": {
+    "title": "Import Document",
+    "description": "Convert documents from various formats to Markdown",
+    "importing": "Importing...",
+    "noteTitle": "Note",
+    "noteHtml": "HTML: Basic tag conversion (headings, paragraphs, links)",
+    "noteDocx": "Word: Requires pandoc for full support",
+    "notePdf": "PDF: Requires poppler (pdftotext) for extraction",
+    "noteNotion": "Notion: Export your Notion pages as ZIP, then import here",
+    "noteTxt": "Plain Text: Direct import, preserves formatting"
+  },
+  "cover": {
+    "editCover": "Edit Cover",
+    "preview": "Preview",
+    "noCover": "No cover set",
+    "templates": "Templates",
+    "coverImage": "Cover Image",
+    "selectImage": "Select Image",
+    "removeImage": "Remove Image",
+    "imageSelected": "Image selected",
+    "selectFailed": "Failed to select image",
+    "icon": "Icon",
+    "info": "Info",
+    "title": "Title",
+    "titlePlaceholder": "Enter cover title...",
+    "subtitle": "Subtitle",
+    "subtitlePlaceholder": "Enter subtitle...",
+    "author": "Author",
+    "authorPlaceholder": "Enter author name...",
+    "date": "Date",
+    "backgroundColor": "Background Color",
+    "apply": "Apply",
+    "applied": "Cover applied"
+  },
+  "common": {
+    "cancel": "Cancel"
   }
 }

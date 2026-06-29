@@ -27,10 +27,10 @@ export default defineConfig({
     minify: !process.env.TAURI_DEBUG ? 'esbuild' : false,
     sourcemap: !!process.env.TAURI_DEBUG,
     outDir: 'dist',
+    chunkSizeWarningLimit: 1100,
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
           'vendor-tiptap': [
             '@tiptap/react',
             '@tiptap/starter-kit',
@@ -43,14 +43,32 @@ export default defineConfig({
             '@tiptap/extension-task-item',
             '@tiptap/extension-underline',
           ],
+          'vendor-tauri': [
+            '@tauri-apps/api/core',
+            '@tauri-apps/api/event',
+            '@tauri-apps/api/window',
+            '@tauri-apps/api/path',
+            '@tauri-apps/api/dpi',
+            '@tauri-apps/api/image',
+            '@tauri-apps/plugin-dialog',
+            '@tauri-apps/plugin-fs',
+            '@tauri-apps/plugin-shell',
+            '@tauri-apps/plugin-updater',
+          ],
           'vendor-mermaid': ['mermaid'],
           'vendor-katex': ['katex'],
           'vendor-prism': ['prismjs'],
           'vendor-yjs': ['yjs', 'y-webrtc'],
+          'vendor-emoji': ['emoji-picker-react'],
+          'vendor-lodash': ['lodash-es'],
         },
       },
     },
   },
+  esbuild: process.env.NODE_ENV === 'production' ? {
+    pure: ['console.log', 'console.warn', 'console.debug'],
+    drop: ['debugger'],
+  } : {},
   resolve: {
     alias: {
       '@': '/src',

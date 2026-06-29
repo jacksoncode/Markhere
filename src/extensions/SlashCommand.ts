@@ -23,8 +23,9 @@ const SLASH_ITEMS: SlashItem[] = [
   { id: 'callout-info', label: 'Info Callout', icon: '💡', group: 'Callout', action: (e) => e.chain().focus().insertContent('> 💡 **Info**\n> \n').run() },
   { id: 'callout-warn', label: 'Warning Callout', icon: '⚠️', group: 'Callout', action: (e) => e.chain().focus().insertContent('> ⚠️ **Warning**\n> \n').run() },
   { id: 'callout-tip', label: 'Tip Callout', icon: '✅', group: 'Callout', action: (e) => e.chain().focus().insertContent('> ✅ **Tip**\n> \n').run() },
-  { id: 'toggle', label: 'Toggle (Fold)', icon: '▶', group: 'Block', action: (e) => e.chain().focus().insertContent('<details><summary>Click to expand</summary>\n\nContent here\n</details>').run() },
+  { id: 'toggle', label: 'Toggle Block', icon: '▶', group: 'Block', action: (e) => e.chain().focus().wrapIn('toggleBlock').run() },
   { id: 'image', label: 'Image', icon: '🖼', group: 'Media', action: (_e) => {} },
+  { id: 'dataview', label: 'Dataview Query', icon: '🔍', group: 'Block', action: (e) => e.chain().focus().insertDataview().run() },
 ];
 
 export const SlashCommand = Extension.create({

@@ -65,6 +65,7 @@ if (!isProduction) {
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './styles/design-tokens.css';
 import './styles/global.css';
 import './styles/themes/dark-contrast.css';
 import './styles/themes/high-contrast.css';
