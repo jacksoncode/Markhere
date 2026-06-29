@@ -464,17 +464,17 @@ export function SidebarNew() {
     editorInstance?.chain().focus().setTextSelection(position).run();
   };
 
-  const tabs: { key: SidebarTab; label: string }[] = [
-    { key: 'files', label: t('sidebar.files') },
-    { key: 'outline', label: t('sidebar.outline') },
-    { key: 'diary', label: '📅 Diary' },
-    { key: 'import', label: '📥 Import' },
-    { key: 'bookmarks', label: t('sidebar.bookmarks') },
-    { key: 'tags', label: '# Tags' },
-    { key: 'database', label: '🗄 DB' },
-    { key: 'dataview', label: '🔍 Query' },
-    { key: 'canvas', label: '🎨 Canvas' },
-    { key: 'links', label: '🔗 Links' },
+  const tabs: { key: SidebarTab; icon: string; label: string }[] = [
+    { key: 'files', icon: '📁', label: t('sidebar.files') },
+    { key: 'outline', icon: '📋', label: t('sidebar.outline') },
+    { key: 'diary', icon: '📅', label: 'Diary' },
+    { key: 'import', icon: '📥', label: 'Import' },
+    { key: 'bookmarks', icon: '🔖', label: t('sidebar.bookmarks') },
+    { key: 'tags', icon: '#', label: 'Tags' },
+    { key: 'database', icon: '🗄', label: 'Database' },
+    { key: 'dataview', icon: '🔍', label: 'Query' },
+    { key: 'canvas', icon: '🎨', label: 'Canvas' },
+    { key: 'links', icon: '🔗', label: 'Links' },
   ];
 
   /** Recursively render a single directory level for the Browse view. */
@@ -877,15 +877,18 @@ export function SidebarNew() {
                 onKeyDown={handleTabKeyDown}
                 role="tab"
                 aria-selected={activeTab === tab.key}
+                aria-label={tab.label}
                 aria-controls={`sidebar-panel-${tab.key}`}
+                title={tab.label}
                 tabIndex={activeTab === tab.key ? 0 : -1}
               >
-                {tab.label}
+                <span className="sidebar-tab-icon" aria-hidden="true">{tab.icon}</span>
               </button>
             ))}
           </div>
 
           <div className="sidebar-content" role="tabpanel" id={`sidebar-panel-${activeTab}`} aria-labelledby={`sidebar-tab-${activeTab}`}>
+            <div className="sidebar-panel-header">{tabs.find(t => t.key === activeTab)?.label}</div>
             {renderView()}
           </div>
 
