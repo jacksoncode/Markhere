@@ -21,6 +21,12 @@ coverage
 
 *.tar.gz
 *.zip
+
+# Playwright test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+
 BUILD_SUCCESS.md
 FINAL_VERIFICATION.md
 INSTALL_GUIDE.md
