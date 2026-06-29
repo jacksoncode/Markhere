@@ -13,6 +13,7 @@ import Highlight from '@tiptap/extension-highlight';
 import { TaskList } from '@tiptap/extension-task-list';
 import { TaskItem } from '@tiptap/extension-task-item';
 import { Markdown } from 'tiptap-markdown';
+import { EditorErrorBoundary } from './EditorErrorBoundary';
 import { MathExtension, InlineMathExtension, MermaidExtension, FootnoteExtension, AutocompleteExtension, AutoPairExtension, ParagraphFocusExtension, paragraphFocusPluginKey, BlockDragHandleExtension, DataviewBlock, SearchHighlightExtension, InlineSourceExtension, ToggleBlock, VimKeymapExtension, EmacsKeymapExtension, POSHighlightExtension } from '../../extensions';
 import { CodeBlockToolbar } from '../../extensions/CodeBlockToolbar';
 import { MediaEmbed, MediaAutoEmbed } from '../../extensions/MediaEmbed';
@@ -342,7 +343,14 @@ export function MainEditor() {
             </div>
           </div>
         )}
-        <EditorContent editor={editor} />
+        <EditorErrorBoundary onError={() => {
+          try {
+            const md = (editor?.storage as any)?.markdown?.getMarkdown?.() || '';
+            console.error('[EditorErrorBoundary] Content that caused error (first 500 chars):', md.slice(0, 500));
+          } catch {}
+        }}>
+          <EditorContent editor={editor} />
+        </EditorErrorBoundary>
         <PropertiesEditor editor={editor} filePath={currentPath} />
         <SlashMenu editor={editor} />
         <AIInlineMenu editor={editor} />

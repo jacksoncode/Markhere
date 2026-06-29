@@ -49,14 +49,23 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         return this.props.fallback;
       }
 
+      const err = this.state.error;
+      const found = (err as any)?.found ?? (err as any)?.reason ?? null;
+      const foundStr = found === null ? '' : typeof found === 'object' ? JSON.stringify(found, null, 2).slice(0, 300) : String(found);
+
       return (
         <div className="error-boundary">
           <div className="error-boundary__card">
             <div className="error-boundary__icon">!</div>
             <h2 className="error-boundary__title">Something went wrong</h2>
             <p className="error-boundary__message">
-              {this.state.error?.message ?? 'An unexpected error occurred while rendering the application.'}
+              {err?.message ?? 'An unexpected error occurred while rendering the application.'}
             </p>
+            {foundStr && (
+              <pre className="error-boundary__found" style={{ background: 'var(--color-bg-secondary)', padding: 8, borderRadius: 4, fontSize: 11, overflow: 'auto', maxHeight: 120, margin: '8px 0' }}>
+                {foundStr}
+              </pre>
+            )}
             <button
               className="error-boundary__reload"
               onClick={this.handleReload}
