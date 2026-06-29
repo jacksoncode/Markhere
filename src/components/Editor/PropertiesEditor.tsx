@@ -32,10 +32,6 @@ export function PropertiesEditor({ editor, filePath }: { editor: Editor | null; 
     } catch { setFields({}); }
   }, [editor, filePath]);
 
-  if (!filePath) return null;
-
-  const entries = Object.entries(fields).filter(([k]) => k !== 'path');
-
   const handleApply = useCallback(() => {
     if (!editor) return;
     const yaml = Object.entries(fields)
@@ -56,6 +52,10 @@ export function PropertiesEditor({ editor, filePath }: { editor: Editor | null; 
     }
     setEditing(false);
   }, [editor, fields]);
+
+  if (!filePath) return null;
+
+  const entries = Object.entries(fields).filter(([k]) => k !== 'path');
 
   return (
     <div className="properties-editor" style={{ position: 'fixed', bottom: 0, left: 260, right: 0, background: 'var(--color-bg)', borderTop: '1px solid var(--color-border)', padding: '8px 20px', fontSize: 13, zIndex: 500, maxHeight: visible ? '36vh' : '32px', overflowY: 'auto', transition: 'max-height 0.2s ease' }}>
