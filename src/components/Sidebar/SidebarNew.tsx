@@ -97,6 +97,39 @@ export function SidebarNew() {
   const sidebarRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('markhere-sidebar-width');
+    const w = saved ? parseInt(saved, 10) : 260;
+    return Number.isFinite(w) ? Math.max(180, Math.min(500, w)) : 260;
+  });
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    if (isMobile) return;
+    e.preventDefault();
+    setIsDragging(true);
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+    let newWidth = startWidth;
+    const onMove = (ev: globalThis.MouseEvent) => {
+      const delta = ev.clientX - startX;
+      newWidth = Math.max(180, Math.min(500, startWidth + delta));
+      setSidebarWidth(newWidth);
+    };
+    const onUp = () => {
+      setIsDragging(false);
+      localStorage.setItem('markhere-sidebar-width', String(newWidth));
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }, [isMobile, sidebarWidth]);
+
   /* ── Browse mode state ── */
   const [isBrowseMode, setIsBrowseMode] = useState(() => {
     const saved = localStorage.getItem('markhere-browse-mode');
@@ -847,7 +880,8 @@ export function SidebarNew() {
 
       <aside
         ref={sidebarRef}
-        className={`sidebar ${sidebarOpen ? 'open' : 'closed'}${isMobile ? ' sidebar-mobile' : ''}`}
+        className={`sidebar ${sidebarOpen ? 'open' : 'closed'}${isMobile ? ' sidebar-mobile' : ''}${isDragging ? ' dragging' : ''}`}
+        style={sidebarOpen && !isMobile ? { width: sidebarWidth } : undefined}
         role="navigation"
         aria-label={t('sidebar.label') || 'Sidebar'}
       >
@@ -892,32 +926,41 @@ export function SidebarNew() {
             {renderView()}
           </div>
 
-          <div className="sidebar-footer">
-            <button
-              className="sidebar-footer-btn"
-              onClick={toggleSidebar}
-              aria-label={t('sidebar.closeSidebar')}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-              </svg>
-              {t('sidebar.closeSidebar')}
-            </button>
-          </div>
-        </>
-      ) : (
-        <button
-          className="sidebar-expand-btn"
-          onClick={toggleSidebar}
-          title={t('sidebar.showSidebar')}
-          aria-label={t('sidebar.showSidebar')}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-          </svg>
-        </button>
-      )}
-    </aside>
+           <div className="sidebar-footer">
+             <button
+               className="sidebar-footer-btn"
+               onClick={toggleSidebar}
+               aria-label={t('sidebar.closeSidebar')}
+             >
+               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                 <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+               </svg>
+               {t('sidebar.closeSidebar')}
+             </button>
+           </div>
+         </>
+       ) : (
+         <button
+           className="sidebar-expand-btn"
+           onClick={toggleSidebar}
+           title={t('sidebar.showSidebar')}
+           aria-label={t('sidebar.showSidebar')}
+         >
+           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+           </svg>
+         </button>
+       )}
+       {sidebarOpen && !isMobile && (
+         <div
+           className="sidebar-resize-handle"
+           onMouseDown={handleResizeStart}
+           role="separator"
+           aria-orientation="vertical"
+           aria-label="Resize sidebar"
+         />
+       )}
+     </aside>
     </>
   );
 }
