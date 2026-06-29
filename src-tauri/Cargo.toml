@@ -23,6 +23,11 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "time", 
 chrono = "0.4"
 uuid = { version = "1", features = ["v4"] }
 base64 = "0.22"
+# printpdf 0.7 pulls lopdf 0.31 which carries RUSTSEC-2026-0187 (stack overflow
+# in `load_mem` PDF parser). Kept on 0.7 because:
+#   1. printpdf 0.9 still pins lopdf ^0.39 (fix is in 0.42, API-incompatible)
+#   2. Markhere only WRITES PDFs via printpdf — never calls `load_mem`
+# See SECURITY.md for full risk assessment.
 printpdf = "0.7"
 docx-rs = "0.4"
 html2text = "0.12"
