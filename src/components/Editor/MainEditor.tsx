@@ -349,7 +349,9 @@ export function MainEditor() {
             console.error('[EditorErrorBoundary] Content that caused error (first 500 chars):', md.slice(0, 500));
           } catch {}
         }}>
-          <EditorContent editor={editor} />
+          <div className="editor-scroll-container">
+            <EditorContent editor={editor} />
+          </div>
         </EditorErrorBoundary>
         <PropertiesEditor editor={editor} filePath={currentPath} />
         <SlashMenu editor={editor} />

@@ -11,32 +11,38 @@
 }
 
 /* Tiptap wrapper div — the direct child of editor-wrapper.
-   This is .editor-wysiwyg-container. It's a flex column wrapper;
-   overflow: hidden clips, scrolling is delegated to the child. */
+   This is .editor-wysiwyg-container. Flex column wrapper, clips overflow. */
 .editor-wrapper > div:first-of-type {
   flex: 1;
   min-height: 0;
   overflow: hidden;
 }
 
-/* EditorContent wrapper — the actual scroll container.
-   min-height:0 is required so the flex child doesn't grow to fit
-   content, which would prevent the parent from scrolling. */
-.editor-wysiwyg-container > div:first-of-type {
+/* Scroll container wrapping EditorContent.
+   A plain div (not contenteditable) handles overflow reliably;
+   WebKit has issues with overflow on contenteditable .ProseMirror. */
+.editor-scroll-container {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: none;
+  scrollbar-width: auto;
 }
 
-.editor-wysiwyg-container > div:first-of-type::-webkit-scrollbar { display: none; }
-.editor-wysiwyg-container > div:first-of-type::-webkit-scrollbar-thumb { display: none; }
-.editor-wysiwyg-container > div:first-of-type::-webkit-scrollbar-track { display: none; }
+.editor-scroll-container::-webkit-scrollbar { width: 10px; }
+.editor-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--color-border, #ccc);
+  border-radius: 5px;
+}
+.editor-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary, #999);
+}
+.editor-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
 
-/* ProseMirror — the actual editable area (editor.view.dom).
-   min-height: 100% ensures the typing surface fills the wrapper
-   even when content is shorter than the viewport. */
+/* ProseMirror — the actual editable area. No overflow; grows with content.
+   min-height:100% fills the scroll container even when content is short. */
 .editor-wrapper .ProseMirror {
   min-height: 100%;
   width: 100%;
