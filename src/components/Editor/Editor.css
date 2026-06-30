@@ -104,10 +104,9 @@
 }
 
 /* ─── Virtual scrolling ─── */
-.editor-wrapper[data-virtual-scroll="true"] .editor-content > * {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 200px;
-}
+/* content-visibility: auto removed — WebView2 (Windows) has a bug where
+   unrendered elements get 0 height, hiding most content. The virtual
+   scroll hook still tracks scroll position but no longer skips rendering. */
 
 /* ─── Loading ─── */
 .editor-loading {
