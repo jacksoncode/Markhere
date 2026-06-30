@@ -24,7 +24,7 @@
 .editor-scroll-container {
   flex: 1;
   min-height: 0;
-  max-height: calc(100vh - 120px);
+  height: calc(100vh - 120px);
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: auto;
