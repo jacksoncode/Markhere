@@ -27,6 +27,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: auto;
+  outline: 2px solid red !important;
 }
 
 .editor-scroll-container::-webkit-scrollbar { width: 10px; }
