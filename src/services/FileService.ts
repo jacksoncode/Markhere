@@ -8,10 +8,17 @@ export interface FileResult {
   content: string;
 }
 
+// File dialog filters. Include .md/.markdown/.txt so common note formats are
+// visible and selectable; "All Files" keeps the picker usable for anything else.
+export const FILE_FILTERS = [
+  { name: 'Markdown', extensions: ['md', 'markdown', 'txt'] },
+  { name: 'All Files', extensions: ['*'] },
+];
+
 export class FileService {
   static async openFile(): Promise<FileResult | null> {
     const path = await open({
-      filters: [{ name: 'Markdown', extensions: ['md'] }],
+      filters: FILE_FILTERS,
       multiple: false,
     });
 
@@ -30,7 +37,7 @@ export class FileService {
 
   static async newFile(): Promise<string | null> {
     const path = await save({
-      filters: [{ name: 'Markdown', extensions: ['md'] }],
+      filters: FILE_FILTERS,
       defaultPath: 'untitled.md',
     });
 

@@ -37,6 +37,8 @@ pulldown-cmark = { version = "0.12", default-features = false, features = ["html
 notify = "6"
 notify-debouncer-mini = "0.4"
 zip = "2"
+# charset detection/decoding for non-UTF-8 files (GBK/GB18030 on Windows)
+encoding_rs = "0.8"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = { version = "2", features = ["rustls-tls"] }

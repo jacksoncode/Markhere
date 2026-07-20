@@ -14,6 +14,8 @@ import { useNotificationStore } from '../Notification/Notification';
 import { BookmarkList } from '../Bookmarks/BookmarkList';
 import './Sidebar-New.css';
 import { TagPanel } from './TagPanel';
+import { loadFileIntoEditor } from '../../services/fileOpen';
+import { basenameOf } from '../../utils/pathUtils';
 
 type SidebarTab = 'files' | 'outline' | 'bookmarks' | 'tags' | 'diary' | 'import' | 'database' | 'dataview' | 'canvas' | 'links';
 
@@ -288,26 +290,17 @@ export function SidebarNew() {
   const handleBrowseFileClick = useCallback(async (filePath: string) => {
     try {
       const content = await invoke<string>('read_file', { path: filePath });
-      // Load into editor — setContent may throw NodeViewWrapper when content
-      // contains nodes (images, mermaid, wiki-links) whose React renderer
-      // is not yet ready, but the content usually loads correctly nonetheless.
+      loadFileIntoEditor(filePath, content);
       try {
-        editorInstance?.commands.setContent(content);
-      } catch (nodeViewErr) {
-        console.warn('setContent NodeView warning (non-fatal):', nodeViewErr);
-      }
-      setCurrentPath(filePath);
-      setSavedContent(content);
-      try {
-        addFile(filePath, filePath.split('/').pop() || 'Untitled');
-        notify('success', `${t('sidebar.openFileSuccess')}: ${filePath.split('/').pop()}`);
+        addFile(filePath, basenameOf(filePath) || 'Untitled');
+        notify('success', `${t('sidebar.openFileSuccess')}: ${basenameOf(filePath)}`);
       } catch { /* non-critical */ }
       closeOnMobile();
     } catch (err) {
       console.error('Failed to open file:', err);
       notify('error', `${t('sidebar.openFileFailed')}: ${(err as Error).message || String(err)}`);
     }
-  }, [editorInstance, setCurrentPath, setSavedContent, addFile, notify, t, closeOnMobile]);
+  }, [addFile, notify, t, closeOnMobile]);
 
   const handleNavigateUp = useCallback(() => {
     if (!browsePath) return;
@@ -449,19 +442,10 @@ export function SidebarNew() {
       });
       if (!selected || typeof selected !== 'string') return;
       const content = await invoke<string>('read_file', { path: selected });
-      // setContent may throw NodeViewWrapper when content contains nodes
-      // (images/mermaid/wiki-links) whose React renderers aren't ready yet.
-      // The content still loads — catch this gracefully.
+      loadFileIntoEditor(selected, content);
       try {
-        editorInstance?.commands.setContent(content);
-      } catch (nodeViewErr) {
-        console.warn('setContent NodeView warning (non-fatal):', nodeViewErr);
-      }
-      setCurrentPath(selected);
-      setSavedContent(content);
-      try {
-        addFile(selected, selected.split('/').pop() || 'Untitled');
-        notify('success', `${t('sidebar.openFileSuccess')}: ${selected.split('/').pop()}`);
+        addFile(selected, basenameOf(selected) || 'Untitled');
+        notify('success', `${t('sidebar.openFileSuccess')}: ${basenameOf(selected)}`);
       } catch { /* non-critical */ }
       closeOnMobile();
     } catch (err) {
@@ -473,18 +457,9 @@ export function SidebarNew() {
   const handleRecentFileClick = async (path: string) => {
     try {
       const content = await invoke<string>('read_file', { path });
-      // setContent may throw NodeViewWrapper when content contains nodes
-      // (images/mermaid/wiki-links) whose React renderers aren't ready yet.
-      // The content still loads — catch this gracefully.
+      loadFileIntoEditor(path, content);
       try {
-        editorInstance?.commands.setContent(content);
-      } catch (nodeViewErr) {
-        console.warn('setContent NodeView warning (non-fatal):', nodeViewErr);
-      }
-      setCurrentPath(path);
-      setSavedContent(content);
-      try {
-        addFile(path, path.split('/').pop() || 'Untitled');
+        addFile(path, basenameOf(path) || 'Untitled');
       } catch { /* non-critical */ }
       closeOnMobile();
     } catch (err) {
@@ -707,7 +682,7 @@ export function SidebarNew() {
                     <svg className="file-tree-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
                     </svg>
-                    <span className="file-tree-name">{currentPath.split('/').pop()}</span>
+                    <span className="file-tree-name">{basenameOf(currentPath)}</span>
                   </div>
                 </li>
               </ul>
@@ -726,7 +701,7 @@ export function SidebarNew() {
                     <svg className="file-tree-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                       <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
                     </svg>
-                    <span className="file-tree-name">{currentPath.split('/').pop()}</span>
+                    <span className="file-tree-name">{basenameOf(currentPath)}</span>
                   </div>
                 </li>
               </ul>

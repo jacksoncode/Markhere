@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { basenameOf } from '../utils/pathUtils';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 export interface Draft {
@@ -67,7 +68,7 @@ export const useAutoSaveStore = create<AutoSaveState>()(
           content,
           path,
           timestamp: Date.now(),
-          title: title || (path ? path.split('/').pop() : 'Untitled'),
+          title: title || (path ? basenameOf(path) : 'Untitled'),
         };
         
         set((state) => {

@@ -11,7 +11,7 @@ vi.mock('@tauri-apps/plugin-dialog', () => ({
 
 import { invoke } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
-import { FileService } from './FileService';
+import { FileService, FILE_FILTERS } from './FileService';
 
 const mockInvoke = vi.mocked(invoke);
 const mockOpen = vi.mocked(open);
@@ -20,6 +20,25 @@ const mockSave = vi.mocked(save);
 describe('FileService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  // -----------------------------------------------------------------------
+  // FILE_FILTERS
+  // -----------------------------------------------------------------------
+  describe('FILE_FILTERS', () => {
+    it('includes markdown, markdown and txt extensions', () => {
+      const markdown = FILE_FILTERS.find((f) => f.name === 'Markdown');
+      expect(markdown).toBeDefined();
+      expect(markdown!.extensions).toEqual(
+        expect.arrayContaining(['md', 'markdown', 'txt'])
+      );
+    });
+
+    it('offers an All Files option', () => {
+      const all = FILE_FILTERS.find((f) => f.name === 'All Files');
+      expect(all).toBeDefined();
+      expect(all!.extensions).toContain('*');
+    });
   });
 
   // -----------------------------------------------------------------------
@@ -37,7 +56,7 @@ describe('FileService', () => {
       const result = await FileService.openFile();
 
       expect(mockOpen).toHaveBeenCalledWith({
-        filters: [{ name: 'Markdown', extensions: ['md'] }],
+        filters: FILE_FILTERS,
         multiple: false,
       });
       expect(mockInvoke).toHaveBeenCalledWith('get_file_size', { path: '/path/to/document.md' });
@@ -110,7 +129,7 @@ describe('FileService', () => {
       const result = await FileService.newFile();
 
       expect(mockSave).toHaveBeenCalledWith({
-        filters: [{ name: 'Markdown', extensions: ['md'] }],
+        filters: FILE_FILTERS,
         defaultPath: 'untitled.md',
       });
       expect(result).toBe('/path/to/new-file.md');

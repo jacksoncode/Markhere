@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useEditorState } from '../../store/editorStore';
 import { useTabsStore, TabInfo } from '../../store/tabsStore';
-import { useFileStore } from '../../store/fileStore';
+import { loadFileIntoEditor } from '../../services/fileOpen';
 import { SearchService, SearchResult, FileSearchResult } from '../../services/SearchService';
 import { setSearchHighlight, clearSearchHighlight } from '../../extensions';
 import { useTranslation } from '../../i18n';
@@ -15,7 +15,6 @@ export function SearchPanel() {
   const { t } = useTranslation();
   const { editorInstance } = useEditorState();
   const { tabs, switchTab } = useTabsStore();
-  const { setCurrentPath, setSavedContent } = useFileStore();
 
   // Core search state
   const [isOpen, setIsOpen] = useState(true);
@@ -258,31 +257,21 @@ export function SearchPanel() {
   const handleOpenFile = useCallback(
     async (filePath: string) => {
       try {
-        // Check if the file is already open in a tab
+        // If the file is already open in a tab, just load it into the editor
         const existingTab = tabs.find((tab) => tab.path === filePath);
         if (existingTab) {
-          switchTab(existingTab.id);
-          setCurrentPath(filePath);
-          setSavedContent(existingTab.content);
+          loadFileIntoEditor(existingTab.path, existingTab.content);
           return;
         }
 
         // Read file content and open in a new tab
         const content = await invoke<string>('read_file', { path: filePath });
-        const fileName = filePath.split('/').pop() || filePath;
-
-        setCurrentPath(filePath);
-        setSavedContent(content);
-        editorInstance?.commands.setContent(content);
-
-        // Also register in tabsStore via openTab
-        const { openTab } = useTabsStore.getState();
-        openTab(filePath, fileName, content);
+        loadFileIntoEditor(filePath, content);
       } catch (err) {
         console.error('Failed to open file:', err);
       }
     },
-    [tabs, switchTab, setCurrentPath, setSavedContent, editorInstance],
+    [tabs, switchTab],
   );
 
   // --- Toggle file group expansion ---

@@ -1,6 +1,7 @@
 import { useFileStore } from '../../store/fileStore';
 import { useEditorState } from '../../store/editorStore';
 import { FileService } from '../../services/FileService';
+import { loadFileIntoEditor } from '../../services/fileOpen';
 import { saveWorker } from '../../workers/SaveWorker';
 import { ExportMenu } from '../Export/ExportMenu';
 import { ThemeToggle } from '../Theme/ThemeToggle';
@@ -22,9 +23,7 @@ export function MenuBar() {
   const handleOpenFile = async () => {
     const result = await FileService.openFile();
     if (result) {
-      setCurrentPath(result.path);
-      editorInstance?.commands.setContent(result.content);
-      setSavedContent(result.content);
+      loadFileIntoEditor(result.path, result.content);
     }
   };
 

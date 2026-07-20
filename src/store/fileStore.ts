@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { fileNameOf } from '../utils/pathUtils';
 
 interface FileState {
   currentPath: string | null;
@@ -26,7 +27,7 @@ export const useFileStore = create<FileState & FileActions>((set) => ({
   ...initialState,
 
   setCurrentPath: (path) => {
-    const fileName = path ? path.split('/').pop()?.replace('.md', '') || null : null;
+    const fileName = path ? fileNameOf(path) || null : null;
     set({ currentPath: path, fileName, isNewFile: false });
   },
 

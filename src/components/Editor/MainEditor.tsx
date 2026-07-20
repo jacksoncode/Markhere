@@ -329,22 +329,24 @@ export function MainEditor() {
       onDrop={handleWrapperDrop}
       aria-label="Editor workspace"
     >
-      <div style={{ position: 'fixed', top: 60, right: 16, background: '#000', color: '#0f0', padding: 12, fontSize: 11, fontFamily: 'monospace', zIndex: 99999, pointerEvents: 'none', borderRadius: 4, maxWidth: 360, lineHeight: 1.6, whiteSpace: 'pre-wrap' } as React.CSSProperties}>
-        {(() => {
-          const el = document.querySelector('.editor-scroll-container') as HTMLElement;
-          const parent = el?.parentElement as HTMLElement;
-          const grand = parent?.parentElement as HTMLElement;
-          const great = grand?.parentElement as HTMLElement;
-          const r = (e: HTMLElement | null) => e ? `${e.clientHeight}px` : 'null';
-          return [
-            `scroll: ${r(el)}`,
-            `parent: ${r(parent)}`,
-            `grand: ${r(grand)}`,
-            `great: ${r(great)}`,
-            `html len: ${editor?.getHTML()?.length ?? 0}`,
-          ].join('\n');
-        })()}
-      </div>
+      {import.meta.env.DEV && (
+        <div style={{ position: 'fixed', top: 60, right: 16, background: '#000', color: '#0f0', padding: 12, fontSize: 11, fontFamily: 'monospace', zIndex: 99999, pointerEvents: 'none', borderRadius: 4, maxWidth: 360, lineHeight: 1.6, whiteSpace: 'pre-wrap' } as React.CSSProperties}>
+          {(() => {
+            const el = document.querySelector('.editor-scroll-container') as HTMLElement;
+            const parent = el?.parentElement as HTMLElement;
+            const grand = parent?.parentElement as HTMLElement;
+            const great = grand?.parentElement as HTMLElement;
+            const r = (e: HTMLElement | null) => e ? `${e.clientHeight}px` : 'null';
+            return [
+              `scroll: ${r(el)}`,
+              `parent: ${r(parent)}`,
+              `grand: ${r(grand)}`,
+              `great: ${r(great)}`,
+              `html len: ${editor?.getHTML()?.length ?? 0}`,
+            ].join('\n');
+          })()}
+        </div>
+      )}
       {/* WYSIWYG editor — hidden in source mode via CSS (keeps editor mounted) */}
       <div className="editor-wysiwyg-container" aria-hidden={sourceMode} style={sourceMode ? { display: 'none' } : undefined}>
         {isDragging && (

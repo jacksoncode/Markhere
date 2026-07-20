@@ -78,7 +78,7 @@ const [showShortcutSettings, setShowShortcutSettings] = useState(false);
   const [showMerge, setShowMerge] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showEncryption, setShowEncryption] = useState(false);
-  const setPendingClose = useState(false)[1];
+  const [, setPendingClose] = useState(false);
   
   const commentService = new CommentService(currentPath || 'default');
   
@@ -155,7 +155,7 @@ const [showShortcutSettings, setShowShortcutSettings] = useState(false);
     pendingCloseRef.current = false;
   };
 
-  const handleCancelClose = () => { setShowUnsavedDialog(false); setPendingClose(false); };
+  const handleCancelClose = () => { setShowUnsavedDialog(false); setPendingClose(false); pendingCloseRef.current = false; };
 
   // ---- useKeyboardShortcuts (#6) ----
   useKeyboardShortcuts({
@@ -226,7 +226,8 @@ const [showShortcutSettings, setShowShortcutSettings] = useState(false);
 
   const handleRecover = () => {
     setShowRecovery(false);
-    if (savedPath) setCurrentPath(savedPath);
+    if (!savedPath) return;
+    setCurrentPath(savedPath);
     if (editorInstance && content && typeof content === 'string') {
       editorInstance.commands.setContent(content);
       setSavedContent(content);

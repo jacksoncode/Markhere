@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { applyThemeVariables } from './themeApplication';
 
 /* ------------------------------------------------------------------ */
 /*  ThemeConfig – colours grouped by role, plus fonts                 */
@@ -483,45 +484,48 @@ const DEFAULT_FONTS: ThemeFonts = {
 };
 
 function applyCssFromConfig(theme: ThemeConfig): void {
-  const root = document.documentElement;
   const c = theme.colors;
   const f = theme.fonts;
 
-  /* New CSS variable naming */
-  root.style.setProperty('--bg-primary', c.bgPrimary);
-  root.style.setProperty('--bg-secondary', c.bgSecondary);
-  root.style.setProperty('--bg-tertiary', c.bgTertiary);
-  root.style.setProperty('--text-primary', c.textPrimary);
-  root.style.setProperty('--text-secondary', c.textSecondary);
-  root.style.setProperty('--text-muted', c.textMuted);
-  root.style.setProperty('--primary-color', c.primaryColor);
-  root.style.setProperty('--primary-hover', c.primaryHover);
-  root.style.setProperty('--accent-color', c.accentColor);
-  root.style.setProperty('--accent-hover', c.accentHover);
-  root.style.setProperty('--border-color', c.borderColor);
-  root.style.setProperty('--border-light', c.borderLight);
-  root.style.setProperty('--code-bg', c.codeBg);
-  root.style.setProperty('--code-text', c.codeText);
-  root.style.setProperty('--heading-color', c.headingColor);
-  root.style.setProperty('--link-color', c.linkColor);
-  root.style.setProperty('--toolbar-bg', c.toolbarBg);
-  root.style.setProperty('--sidebar-bg', c.sidebarBg);
-  root.style.setProperty('--statusbar-bg', c.statusbarBg);
+  const vars: Record<string, string> = {
+    /* New CSS variable naming */
+    '--bg-primary': c.bgPrimary,
+    '--bg-secondary': c.bgSecondary,
+    '--bg-tertiary': c.bgTertiary,
+    '--text-primary': c.textPrimary,
+    '--text-secondary': c.textSecondary,
+    '--text-muted': c.textMuted,
+    '--primary-color': c.primaryColor,
+    '--primary-hover': c.primaryHover,
+    '--accent-color': c.accentColor,
+    '--accent-hover': c.accentHover,
+    '--border-color': c.borderColor,
+    '--border-light': c.borderLight,
+    '--code-bg': c.codeBg,
+    '--code-text': c.codeText,
+    '--heading-color': c.headingColor,
+    '--link-color': c.linkColor,
+    '--toolbar-bg': c.toolbarBg,
+    '--sidebar-bg': c.sidebarBg,
+    '--statusbar-bg': c.statusbarBg,
+    /* Backward compatibility with legacy variable names */
+    '--color-primary': c.primaryColor,
+    '--color-bg-primary': c.bgPrimary,
+    '--color-bg-secondary': c.bgSecondary,
+    '--color-text-primary': c.textPrimary,
+    '--color-text-secondary': c.textSecondary,
+    '--color-border': c.borderColor,
+    '--color-success': c.success,
+    '--color-warning': c.warning,
+    '--color-error': c.error,
+    '--font-family': f.family,
+    '--font-size': f.size,
+    '--line-height': f.lineHeight,
+  };
 
-  /* Backward compatibility with legacy variable names */
-  root.style.setProperty('--color-primary', c.primaryColor);
-  root.style.setProperty('--color-bg-primary', c.bgPrimary);
-  root.style.setProperty('--color-bg-secondary', c.bgSecondary);
-  root.style.setProperty('--color-text-primary', c.textPrimary);
-  root.style.setProperty('--color-text-secondary', c.textSecondary);
-  root.style.setProperty('--color-border', c.borderColor);
-  root.style.setProperty('--color-success', c.success);
-  root.style.setProperty('--color-warning', c.warning);
-  root.style.setProperty('--color-error', c.error);
-
-  root.style.setProperty('--font-family', f.family);
-  root.style.setProperty('--font-size', f.size);
-  root.style.setProperty('--line-height', f.lineHeight);
+  // Funnel through the shared channel so dark/light detection matches the
+  // preset store exactly (DESIGN.md §3 "合并主题双轨").
+  applyThemeVariables(vars, c.bgPrimary);
 }
 
 /* ------------------------------------------------------------------ */

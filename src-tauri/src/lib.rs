@@ -33,7 +33,7 @@ fn validate_path(path: &str) -> Result<(), String> {
     let forbidden_prefixes = [
         "/etc/", "/proc/", "/sys/", "/dev/",
         "/usr/", "/var/", "/boot/",
-        "c:/windows/", "c:/program files",
+        "c:/windows/",
     ];
 
     for prefix in &forbidden_prefixes {
@@ -109,11 +109,44 @@ async fn save_file(_app: tauri::AppHandle, path: String, content: String) -> Res
     Ok(path)
 }
 
+/// Decode raw file bytes into a Rust `String`, handling BOM, UTF-8 and legacy
+/// Chinese encodings (GBK/GB18030, a.k.a. ANSI on Windows).
+/// Exposed for reuse by chunked readers in other modules.
+///
+/// This replaces the strict UTF-8 requirement of `fs::read_to_string`, which
+/// fails on GBK/ANSI files that are very common for Chinese text on Windows.
+pub fn decode_file_bytes(bytes: &[u8]) -> String {
+    // Strip UTF-8 BOM if present.
+    if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) {
+        return String::from_utf8_lossy(&bytes[3..]).into_owned();
+    }
+    // Most markdown files are UTF-8; prefer that when valid.
+    if let Ok(s) = std::str::from_utf8(bytes) {
+        return s.to_string();
+    }
+    // Fallback: decode as GB18030 (superset of GBK/GB2312). This can decode any
+    // byte sequence without hard-failing, replacing invalid sequences with U+FFFD.
+    let (cow, _encoding, _had_errors) = encoding_rs::GB18030.decode(bytes);
+    cow.into_owned()
+}
+
+/// Clamp `pos` down to the nearest char boundary in `s` (returns `s.len()` if
+/// `pos` is out of range). Used to keep chunk boundaries on valid UTF-8 chars.
+fn clamp_char_boundary(s: &str, mut pos: usize) -> usize {
+    if pos >= s.len() {
+        return s.len();
+    }
+    while pos > 0 && !s.is_char_boundary(pos) {
+        pos -= 1;
+    }
+    pos
+}
+
 #[tauri::command]
 async fn read_file(path: String) -> Result<String, String> {
     validate_path(&path)?;
-    let content = fs::read_to_string(&path).map_err(|e: std::io::Error| e.to_string())?;
-    Ok(content)
+    let bytes = fs::read(&path).map_err(|e: std::io::Error| e.to_string())?;
+    Ok(decode_file_bytes(&bytes))
 }
 
 #[tauri::command]
@@ -1018,5 +1051,33 @@ mod tests {
         let input = "- [x] Done\n- [ ] Todo";
         let output = markdown_to_html(input);
         assert!(output.contains("checkbox"));
+    }
+
+    #[test]
+    fn test_decode_file_bytes_utf8() {
+        assert_eq!(decode_file_bytes(b"hello"), "hello");
+        assert_eq!(decode_file_bytes("中文".as_bytes()), "中文");
+    }
+
+    #[test]
+    fn test_decode_file_bytes_bom() {
+        // UTF-8 BOM (EF BB BF) must be stripped.
+        let bytes = [0xEF, 0xBB, 0xBF, b'h', b'i'];
+        assert_eq!(decode_file_bytes(&bytes), "hi");
+    }
+
+    #[test]
+    fn test_decode_file_bytes_gbk() {
+        // "中文" in GBK: D6 D0 (中) CE C4 (文)
+        let gbk = [0xD6, 0xD0, 0xCE, 0xC4];
+        assert_eq!(decode_file_bytes(&gbk), "中文");
+    }
+
+    #[test]
+    fn test_decode_file_bytes_invalid_utf8_falls_back() {
+        // Invalid UTF-8 bytes must not panic / error; fallback decodes best-effort.
+        let bytes = [b'a', 0xFF, b'b'];
+        let s = decode_file_bytes(&bytes);
+        assert!(s.contains('a') && s.contains('b'));
     }
 }

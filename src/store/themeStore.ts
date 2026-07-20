@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { themes, ThemeName } from './themes';
+import { applyThemeVariables } from './themeApplication';
 
 interface ThemeState {
   currentTheme: ThemeName;
@@ -9,28 +10,47 @@ interface ThemeState {
 
 export const useThemeStore = create<ThemeState>((set, get) => ({
   currentTheme: 'github',
-  
+
   setTheme: (theme) => {
     set({ currentTheme: theme });
     localStorage.setItem('markhere-theme', theme);
     get().applyTheme();
   },
-  
+
   applyTheme: () => {
     const theme = themes[get().currentTheme];
-    const root = document.documentElement;
+    if (!theme) return;
+    const { bg, text, border, primary, codeBg, hoverBg } = theme.colors;
 
-    // Use CSS custom properties so they can be overridden by .dark-contrast.css
-    root.style.setProperty('--theme-bg', theme.colors.bg);
-    root.style.setProperty('--theme-text', theme.colors.text);
-    root.style.setProperty('--theme-border', theme.colors.border);
-    root.style.setProperty('--theme-primary', theme.colors.primary);
-    root.style.setProperty('--theme-code-bg', theme.colors.codeBg);
-    root.style.setProperty('--theme-hover-bg', theme.colors.hoverBg);
-    root.style.setProperty('--theme-shadow', `${theme.colors.border}40`);
+    // Drive the canonical token set so presets actually theme the UI.
+    // Previously only the orphaned `--theme-*` vars were written, which no
+    // component consumed — see DESIGN.md §3 "合并主题双轨".
+    const vars: Record<string, string> = {
+      // Canonical tokens (design-tokens.css)
+      '--color-bg-primary': bg,
+      '--color-text-primary': text,
+      '--color-border-primary': border,
+      '--color-primary': primary,
+      '--color-code-bg': codeBg,
+      '--color-bg-hover': hoverBg,
+      // Aliases consumed by theme.css / components
+      '--bg-primary': bg,
+      '--text-primary': text,
+      '--border-color': border,
+      '--primary-color': primary,
+      '--code-bg': codeBg,
+      '--hover-bg': hoverBg,
+      // Legacy `--theme-*` names kept for backward compatibility
+      '--theme-bg': bg,
+      '--theme-text': text,
+      '--theme-border': border,
+      '--theme-primary': primary,
+      '--theme-code-bg': codeBg,
+      '--theme-hover-bg': hoverBg,
+      '--theme-shadow': `${border}40`,
+    };
 
-    const isDark = theme.colors.bg.toLowerCase() < '#888888';
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    applyThemeVariables(vars, bg);
   },
 }));
 

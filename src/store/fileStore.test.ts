@@ -30,4 +30,35 @@ describe('FileStore', () => {
       savedContent: '',
     });
   });
+
+  it('derives fileName from a Windows backslash path and strips .md', () => {
+    const { setCurrentPath } = useFileStore.getState();
+    setCurrentPath('C:\\Users\\alice\\Project\\Notes.md');
+    const s = useFileStore.getState();
+    expect(s.currentPath).toBe('C:\\Users\\alice\\Project\\Notes.md');
+    expect(s.fileName).toBe('Notes');
+    expect(s.isNewFile).toBe(false);
+    useFileStore.setState({ currentPath: null, fileName: null, isNewFile: true, savedContent: '' });
+  });
+
+  it('derives fileName from a POSIX path and strips .markdown/.txt', () => {
+    const { setCurrentPath } = useFileStore.getState();
+    setCurrentPath('/home/user/readme.markdown');
+    expect(useFileStore.getState().fileName).toBe('readme');
+    setCurrentPath('/home/user/note.txt');
+    expect(useFileStore.getState().fileName).toBe('note');
+    useFileStore.setState({ currentPath: null, fileName: null, isNewFile: true, savedContent: '' });
+  });
+
+  it('reset() restores the initial state', () => {
+    const { setCurrentPath, setSavedContent, reset } = useFileStore.getState();
+    setCurrentPath('/a/b.md');
+    setSavedContent('# x');
+    reset();
+    const s = useFileStore.getState();
+    expect(s.currentPath).toBeNull();
+    expect(s.fileName).toBeNull();
+    expect(s.savedContent).toBe('');
+    expect(s.isNewFile).toBe(true);
+  });
 });

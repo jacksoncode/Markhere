@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useTranslation } from '../../i18n';
 import { useTabsStore, TabInfo } from '../../store/tabsStore';
-import { useFileStore } from '../../store/fileStore';
 import { useNotificationStore } from '../Notification/Notification';
+import { loadFileIntoEditor } from '../../services/fileOpen';
+import { basenameOf } from '../../utils/pathUtils';
 import './QuickOpenPanel.css';
 
 interface QuickOpenPanelProps {
@@ -20,8 +21,7 @@ interface SearchResult {
 
 export function QuickOpenPanel({ isOpen, onClose }: QuickOpenPanelProps) {
   const { t } = useTranslation();
-  const { tabs, switchTab } = useTabsStore();
-  const { setCurrentPath, setSavedContent } = useFileStore();
+  const { tabs } = useTabsStore();
   const notify = useNotificationStore((s) => s.notify);
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -73,7 +73,7 @@ export function QuickOpenPanel({ isOpen, onClose }: QuickOpenPanelProps) {
     });
     
     files.forEach((file: string) => {
-      const name = file.split('/').pop() || file;
+      const name = basenameOf(file) || file;
       if (name.toLowerCase().includes(lowerQuery) || 
           file.toLowerCase().includes(lowerQuery)) {
         const isAlreadyOpen = tabs.some((t: TabInfo) => t.path === file);
@@ -113,15 +113,12 @@ export function QuickOpenPanel({ isOpen, onClose }: QuickOpenPanelProps) {
     if (result.type === 'tab') {
       const tab = tabs.find((t: TabInfo) => t.path === result.path);
       if (tab) {
-        switchTab(tab.id);
-        setCurrentPath(tab.path);
-        setSavedContent(tab.content);
+        loadFileIntoEditor(tab.path, tab.content);
       }
     } else {
       try {
         const content = await invoke<string>('read_file', { path: result.path });
-        setCurrentPath(result.path);
-        setSavedContent(content);
+        loadFileIntoEditor(result.path, content);
       } catch (err) {
         console.error('Open file failed:', err);
         notify('error', `Failed to open file: ${(err as Error).message || String(err)}`);

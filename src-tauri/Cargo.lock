@@ -2237,6 +2237,7 @@ dependencies = [
  "base64 0.22.1",
  "chrono",
  "docx-rs",
+ "encoding_rs",
  "html2text",
  "notify",
  "notify-debouncer-mini",

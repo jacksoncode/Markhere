@@ -2,6 +2,8 @@ use std::fs::{self, File};
 use std::io::{Read, Seek, SeekFrom};
 use std::path::Path;
 
+use crate::decode_file_bytes;
+
 #[tauri::command]
 pub async fn get_file_size(path: String) -> Result<u64, String> {
     let metadata = std::fs::metadata(&path)
@@ -10,22 +12,53 @@ pub async fn get_file_size(path: String) -> Result<u64, String> {
     Ok(metadata.len())
 }
 
+/// Clamp `pos` down to the nearest UTF-8 char boundary in `bytes` (valid UTF-8
+/// assumed). Used so chunk ranges never cut a multibyte character in half.
+fn clamp_utf8_boundary(bytes: &[u8], pos: usize) -> usize {
+    if pos >= bytes.len() {
+        return bytes.len();
+    }
+    let s = std::str::from_utf8(bytes).unwrap();
+    let mut p = pos;
+    while p > 0 && !s.is_char_boundary(p) {
+        p -= 1;
+    }
+    p
+}
+
 #[tauri::command]
 pub async fn read_file_chunk(
     path: String,
     offset: u64,
     length: usize,
 ) -> Result<String, String> {
-    let mut file = File::open(&path)
-        .map_err(|e| format!("Failed to open file: {}", e))?;
-    file.seek(SeekFrom::Start(offset))
-        .map_err(|e| format!("Failed to seek: {}", e))?;
-    let mut buffer = vec![0u8; length];
-    let bytes_read = file.read(&mut buffer)
-        .map_err(|e| format!("Failed to read: {}", e))?;
-    buffer.truncate(bytes_read);
-    String::from_utf8(buffer)
-        .map_err(|e| format!("Invalid UTF-8: {}", e))
+    let offset = offset as usize;
+    let bytes = fs::read(&path).map_err(|e| format!("Failed to read file: {}", e))?;
+    let total = bytes.len();
+
+    if offset >= total {
+        return Ok(String::new());
+    }
+    let end = std::cmp::min(offset + length, total);
+
+    // Fast path: UTF-8 files. Byte offsets map directly to char boundaries, so
+    // we clamp both ends and slice losslessly (no truncation errors).
+    if std::str::from_utf8(&bytes).is_ok() {
+        let s = clamp_utf8_boundary(&bytes, offset);
+        let e = clamp_utf8_boundary(&bytes, end);
+        return Ok(String::from_utf8_lossy(&bytes[s..e]).into_owned());
+    }
+
+    // Non-UTF-8 (e.g. GBK/ANSI): decode with a small leading overlap so a
+    // multibyte character straddling the start of the range is not truncated.
+    // The trailing edge may produce at most one replacement char when a
+    // character spills into the next chunk.
+    let overlap = std::cmp::min(offset, 4);
+    let start = offset - overlap;
+    let decoded = decode_file_bytes(&bytes[start..end]);
+    let overlap_chars = decode_file_bytes(&bytes[start..offset]).chars().count();
+    let content: String = decoded.chars().skip(overlap_chars).collect();
+    Ok(content)
 }
 
 /// 递归扫描目录中所有 .md 文件，返回完整路径列表
@@ -86,6 +119,32 @@ mod tests {
         let path = file.path().to_str().unwrap().to_string();
         assert_eq!(read_file_chunk(path.clone(), 0, 10).await.unwrap(), "0123456789");
         assert_eq!(read_file_chunk(path, 10, 10).await.unwrap(), "ABCDEFGHIJ");
+    }
+
+    #[tokio::test]
+    async fn test_read_file_chunk_gbk_boundary() {
+        // "A中B" where 中 is GBK bytes [0xD6, 0xD0].
+        let gbk = [0x41u8, 0xD6, 0xD0, 0x42];
+        let mut file = NamedTempFile::new().unwrap();
+        file.write_all(&gbk).unwrap();
+        let path = file.path().to_str().unwrap().to_string();
+
+        // Normal UTF-8 path is untouched.
+        let mut f2 = NamedTempFile::new().unwrap();
+        f2.write_all("0123456789ABCDEFGHIJ".as_bytes()).unwrap();
+        let p2 = f2.path().to_str().unwrap().to_string();
+        assert_eq!(read_file_chunk(p2.clone(), 0, 10).await.unwrap(), "0123456789");
+        assert_eq!(read_file_chunk(p2, 10, 10).await.unwrap(), "ABCDEFGHIJ");
+
+        // GBK: a whole-file read decodes correctly.
+        assert_eq!(read_file_chunk(path.clone(), 0, 4).await.unwrap(), "A中B");
+        // Chunk covering the complete 中 (bytes 1..3) decodes to "中".
+        assert_eq!(read_file_chunk(path.clone(), 1, 2).await.unwrap(), "中");
+        // Chunk starting mid-character (bytes 2..4) drops the partial leading
+        // byte and yields "B" instead of hard-failing.
+        assert_eq!(read_file_chunk(path.clone(), 2, 2).await.unwrap(), "B");
+        // Offset past EOF returns empty instead of erroring.
+        assert_eq!(read_file_chunk(path, 100, 10).await.unwrap(), "");
     }
 
     #[tokio::test]
