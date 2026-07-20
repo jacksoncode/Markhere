@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { QuickOpenPanel } from './QuickOpenPanel';
 import { useEditorState } from '../../store/editorStore';
 import { useTabsStore } from '../../store/tabsStore';
@@ -52,7 +52,7 @@ describe('QuickOpenPanel (open-file entry)', () => {
 
   it('switching to an already-open tab loads its content (regression for P0)', async () => {
     useTabsStore.setState({
-      tabs: [{ id: 't1', path: '/docs/open.md', name: 'open.md', content: '# already open' }],
+      tabs: [{ id: 't1', path: '/docs/open.md', name: 'open.md', content: '# already open', isDirty: false, lastAccessed: Date.now() }],
       activeTabId: null,
     });
 
