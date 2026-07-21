@@ -39,8 +39,13 @@ import 'prismjs/components/prism-kotlin';
 import 'prismjs/components/prism-graphql';
 import 'prismjs/components/prism-docker';
 import 'prismjs/components/prism-nginx';
+import 'prismjs/components/prism-toml';
+import 'prismjs/components/prism-lua';
+import 'prismjs/components/prism-scala';
+import 'prismjs/components/prism-r';
+import 'prismjs/components/prism-dart';
 
-const POPULAR_LANGUAGES = [
+export const POPULAR_LANGUAGES = [
   'plaintext', 'javascript', 'typescript', 'jsx', 'tsx', 'python', 'rust',
   'json', 'bash', 'css', 'markdown', 'yaml', 'sql', 'go', 'java', 'c', 'cpp',
   'ruby', 'php', 'swift', 'kotlin', 'graphql', 'docker', 'nginx', 'html',
@@ -108,19 +113,19 @@ export const CodeBlockToolbar = Node.create({
 
   addNodeView() {
     return ({ node, getPos, editor }) => {
-      const lang = node.attrs.language || 'plaintext';
+      let activeLang = node.attrs.language || 'plaintext';
       const wrapper = document.createElement('div');
       wrapper.className = 'code-block-wrapper';
 
       // --- Toolbar ---
       const toolbar = document.createElement('div');
       toolbar.className = 'code-block-toolbar';
-      toolbar.setAttribute('data-language', lang);
+      toolbar.setAttribute('data-language', activeLang);
 
       // Language badge
       const langBadge = document.createElement('span');
       langBadge.className = 'code-block-lang-badge';
-      langBadge.textContent = lang;
+      langBadge.textContent = activeLang;
       langBadge.title = 'Click to change language';
       toolbar.appendChild(langBadge);
 
@@ -149,7 +154,7 @@ export const CodeBlockToolbar = Node.create({
         item.className = 'code-block-lang-item';
         item.textContent = l;
         item.setAttribute('data-lang', l);
-        if (l === lang) item.classList.add('selected');
+        if (l === activeLang) item.classList.add('selected');
         langList.appendChild(item);
       });
       
@@ -187,7 +192,7 @@ export const CodeBlockToolbar = Node.create({
       // Code element
       const pre = document.createElement('pre');
       const code = document.createElement('code');
-      code.className = getLanguageClass(lang);
+      code.className = getLanguageClass(activeLang);
       pre.appendChild(code);
       contentArea.appendChild(pre);
 
@@ -227,23 +232,38 @@ export const CodeBlockToolbar = Node.create({
 
       // Language badge click -> toggle dropdown
       let dropdownOpen = false;
+      const openDropdown = () => {
+        dropdownOpen = true;
+        langDropdown.style.display = 'block';
+        wrapper.classList.add('dropdown-open');
+        langSearch.focus();
+        langSearch.value = '';
+        updateLangList(langList, displayLanguages, '');
+      };
+      const closeDropdown = () => {
+        dropdownOpen = false;
+        langDropdown.style.display = 'none';
+        wrapper.classList.remove('dropdown-open');
+      };
       langBadge.addEventListener('click', (e) => {
         e.stopPropagation();
-        dropdownOpen = !dropdownOpen;
-        langDropdown.style.display = dropdownOpen ? 'block' : 'none';
         if (dropdownOpen) {
-          langSearch.focus();
-          // Filter list based on search
-          langSearch.value = '';
-          updateLangList(langList, displayLanguages, '');
+          closeDropdown();
+        } else {
+          openDropdown();
         }
       });
+
+      // Prevent the editor/page from capturing wheel events while the user
+      // scrolls the language list (otherwise the list can't scroll down).
+      langDropdown.addEventListener('wheel', (e) => {
+        e.stopPropagation();
+      }, { passive: true });
 
       // Close dropdown on outside click
       document.addEventListener('click', (e) => {
         if (!wrapper.contains(e.target as globalThis.Node)) {
-          dropdownOpen = false;
-          langDropdown.style.display = 'none';
+          closeDropdown();
         }
       });
 
@@ -272,15 +292,13 @@ export const CodeBlockToolbar = Node.create({
             .run();
         }
 
-        dropdownOpen = false;
-        langDropdown.style.display = 'none';
+        closeDropdown();
       });
 
       // Keyboard navigation in dropdown
       langSearch.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-          dropdownOpen = false;
-          langDropdown.style.display = 'none';
+          closeDropdown();
         } else if (e.key === 'Enter') {
           const selected = langList.querySelector('.code-block-lang-item.selected') as HTMLElement;
           if (selected) {
@@ -305,7 +323,7 @@ export const CodeBlockToolbar = Node.create({
 
       // --- Highlighting ---
       function highlightCode() {
-        highlightInto(code, node.textContent || '', lang);
+        highlightInto(code, node.textContent || '', activeLang);
       }
 
       // --- Line numbers ---
@@ -329,11 +347,14 @@ export const CodeBlockToolbar = Node.create({
 
         update(updatedNode) {
           if (updatedNode.type !== node.type) return false;
-          
+
           const newLang = updatedNode.attrs.language || 'plaintext';
-          
+          const textChanged = updatedNode.textContent !== node.textContent;
+          const langChanged = newLang !== activeLang;
+
           // Update language if changed
-          if (newLang !== lang) {
+          if (langChanged) {
+            activeLang = newLang;
             code.className = getLanguageClass(newLang);
             langBadge.textContent = newLang;
             toolbar.setAttribute('data-language', newLang);
@@ -342,16 +363,18 @@ export const CodeBlockToolbar = Node.create({
               item.classList.toggle('selected', item.getAttribute('data-lang') === newLang);
             });
           }
-          
-          // Re-highlight and re-number when text changes
-          if (updatedNode.textContent !== node.textContent) {
+
+          // Re-highlight and re-number when text OR language changes.
+          // Language change alone must re-tokenize (e.g. switching to bash),
+          // otherwise the old (plaintext) tokens are kept and colors don't update.
+          if (langChanged || textChanged) {
             requestAnimationFrame(() => {
-              const currentLang = updatedNode.attrs.language || 'plaintext';
+              const currentLang = activeLang;
               highlightInto(code, updatedNode.textContent || '', currentLang);
               // Update line numbers
               const text = updatedNode.textContent || '';
               const lines = text.split('\n');
-              gutter.innerHTML = lines.map((_, i) => 
+              gutter.innerHTML = lines.map((_, i) =>
                 `<span class="code-block-line-num">${i + 1}</span>`
               ).join('');
               lineBadge.textContent = `${lines.length} lines`;

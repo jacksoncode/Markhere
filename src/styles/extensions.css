@@ -240,20 +240,30 @@
   position: relative;
   margin: 16px 0;
   border-radius: 8px;
-  overflow: hidden;
+  /* Keep overflow visible so the language dropdown can escape the wrapper
+     and be scrolled; inner corners are rounded via the toolbar/content rules. */
+  overflow: visible;
   border: 1px solid var(--border-color, #e0e0e0);
   background: var(--code-bg, #1e1e2e);
   font-family: var(--font-mono, 'SF Mono', 'Fira Code', 'Cascadia Code', monospace);
 }
 
+/* Raise stacking when the language dropdown is open so it paints above
+   following code blocks instead of being covered by them. */
+.code-block-wrapper.dropdown-open {
+  z-index: 50;
+}
+
 /* -- Toolbar -- */
 .code-block-toolbar {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
   background: var(--code-toolbar-bg, #181825);
   border-bottom: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px 8px 0 0;
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 12px;
   user-select: none;
@@ -355,6 +365,7 @@
 .code-block-content {
   display: flex;
   overflow-x: auto;
+  border-radius: 0 0 8px 8px;
 }
 
 .code-block-gutter {
