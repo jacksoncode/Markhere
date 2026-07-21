@@ -248,12 +248,6 @@
   font-family: var(--font-mono, 'SF Mono', 'Fira Code', 'Cascadia Code', monospace);
 }
 
-/* Raise stacking when the language dropdown is open so it paints above
-   following code blocks instead of being covered by them. */
-.code-block-wrapper.dropdown-open {
-  z-index: 50;
-}
-
 /* -- Toolbar -- */
 .code-block-toolbar {
   position: relative;

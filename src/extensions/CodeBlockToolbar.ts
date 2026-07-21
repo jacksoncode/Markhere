@@ -235,7 +235,6 @@ export const CodeBlockToolbar = Node.create({
       const openDropdown = () => {
         dropdownOpen = true;
         langDropdown.style.display = 'block';
-        wrapper.classList.add('dropdown-open');
         langSearch.focus();
         langSearch.value = '';
         updateLangList(langList, displayLanguages, '');
@@ -243,7 +242,6 @@ export const CodeBlockToolbar = Node.create({
       const closeDropdown = () => {
         dropdownOpen = false;
         langDropdown.style.display = 'none';
-        wrapper.classList.remove('dropdown-open');
       };
       // Toggle on mousedown directly. Inside a `contenteditable`, a `mousedown`
       // whose default is prevented can suppress the subsequent `click` event —
@@ -406,9 +404,15 @@ export const CodeBlockToolbar = Node.create({
         },
 
         ignoreMutation(mutation: any) {
-          // Ignore mutations in toolbar/gutter, only track code content changes
+          // Ignore mutations in toolbar/gutter, only track code content changes.
+          // We must also ignore mutations on the wrapper itself (the NodeView
+          // root): toggling the dropdown adds the `dropdown-open` style/class or
+          // changes focus, and if ProseMirror sees an un-ignored mutation on the
+          // NodeView root it rebuilds the whole NodeView — which re-initializes
+          // the dropdown to `display:none` and makes the just-opened menu vanish.
           const target = mutation.target as HTMLElement;
           return (
+            target === wrapper ||
             target.closest('.code-block-toolbar') !== null ||
             target.closest('.code-block-gutter') !== null ||
             target.closest('.code-block-lang-dropdown') !== null

@@ -191,6 +191,13 @@ describe('CodeBlockToolbar dropdown interaction', () => {
     badge.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
     expect(dropdown.style.display).toBe('block');
 
+    // Regression: opening must NOT add a `dropdown-open` class to the NodeView
+    // wrapper. Mutating the wrapper makes ProseMirror's MutationObserver treat
+    // it as a change to the NodeView root and rebuild the whole NodeView, which
+    // re-initializes the dropdown to display:none and makes it vanish.
+    const wrapper = editor.view.dom.querySelector('.code-block-wrapper') as HTMLElement;
+    expect(wrapper.classList.contains('dropdown-open')).toBe(false);
+
     // Clicking inside the dropdown (the list) must NOT close it
     list.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(dropdown.style.display).toBe('block');
