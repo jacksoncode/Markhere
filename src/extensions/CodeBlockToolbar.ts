@@ -245,6 +245,16 @@ export const CodeBlockToolbar = Node.create({
         langDropdown.style.display = 'none';
         wrapper.classList.remove('dropdown-open');
       };
+      // Prevent the editor from hijacking the click: a mousedown inside the
+      // NodeView is otherwise processed by ProseMirror (which sets the
+      // selection / steals focus), racing with the dropdown's <input>.focus()
+      // and making the just-opened dropdown flicker closed. Intercepting
+      // mousedown stops ProseMirror from touching selection/focus here.
+      langBadge.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
       langBadge.addEventListener('click', (e) => {
         e.stopPropagation();
         if (dropdownOpen) {
@@ -252,6 +262,16 @@ export const CodeBlockToolbar = Node.create({
         } else {
           openDropdown();
         }
+      });
+
+      // Keep interactions inside the dropdown from bubbling to the document
+      // "outside click" handler (which would close it), and from reaching the
+      // editor's mousedown/selection logic.
+      langDropdown.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+      });
+      langDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
       });
 
       // Prevent the editor/page from capturing wheel events while the user

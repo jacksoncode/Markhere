@@ -157,3 +157,67 @@ describe('CodeBlockToolbar language grammars', () => {
     });
   }
 });
+
+// Regression coverage for the "language badge flickers closed / can't pick a
+// language" bug. The dropdown must open on badge click, stay open while the
+// user interacts inside it, and only close on an outside click. The mousedown
+// handler must also preventDefault so ProseMirror doesn't steal focus (which
+// caused the flicker).
+describe('CodeBlockToolbar dropdown interaction', () => {
+  let editor: Editor;
+  afterEach(() => editor?.destroy());
+
+  function els() {
+    const root = editor.view.dom;
+    return {
+      badge: root.querySelector('.code-block-lang-badge') as HTMLElement,
+      dropdown: root.querySelector('.code-block-lang-dropdown') as HTMLElement,
+      list: root.querySelector('.code-block-lang-list') as HTMLElement,
+    };
+  }
+
+  it('opens on badge click and stays open on internal clicks, closes on outside click', async () => {
+    editor = makeEditor(codeBlock('javascript', 'const a = 1;'));
+    await tick();
+    const { badge, dropdown, list } = els();
+
+    // Initially closed
+    expect(dropdown.style.display).not.toBe('block');
+
+    // Open it by clicking the language badge
+    badge.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(dropdown.style.display).toBe('block');
+
+    // Clicking inside the dropdown (the list) must NOT close it
+    list.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(dropdown.style.display).toBe('block');
+
+    // Clicking outside the wrapper closes it
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(dropdown.style.display).toBe('none');
+  });
+
+  it('prevents default on mousedown of the language badge (stops editor stealing focus)', async () => {
+    editor = makeEditor(codeBlock('javascript', 'const a = 1;'));
+    await tick();
+    const { badge } = els();
+    const ev = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    badge.dispatchEvent(ev);
+    expect(ev.defaultPrevented).toBe(true);
+  });
+
+  it('stops the mousedown from bubbling to the document (no selection/focus race)', async () => {
+    editor = makeEditor(codeBlock('javascript', 'const a = 1;'));
+    await tick();
+    const { badge } = els();
+    let reachedDocument = false;
+    const onDoc = () => {
+      reachedDocument = true;
+    };
+    document.addEventListener('mousedown', onDoc);
+    badge.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+    document.removeEventListener('mousedown', onDoc);
+    // stopPropagation on mousedown means the event never reaches the document
+    expect(reachedDocument).toBe(false);
+  });
+});
