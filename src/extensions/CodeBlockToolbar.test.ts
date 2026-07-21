@@ -158,11 +158,13 @@ describe('CodeBlockToolbar language grammars', () => {
   }
 });
 
-// Regression coverage for the "language badge flickers closed / can't pick a
-// language" bug. The dropdown must open on badge click, stay open while the
-// user interacts inside it, and only close on an outside click. The mousedown
-// handler must also preventDefault so ProseMirror doesn't steal focus (which
-// caused the flicker).
+// Regression coverage for the "language badge flickers closed / does nothing
+// on click / can't pick a language" bug. The dropdown must open on badge
+// mousedown, stay open while the user interacts inside it, and only close on
+// an outside click. The mousedown handler must also preventDefault so
+// ProseMirror doesn't steal focus (which caused the flicker), and the toggle
+// must happen on mousedown (a preventDefault'd mousedown inside a
+// contenteditable can suppress the subsequent click).
 describe('CodeBlockToolbar dropdown interaction', () => {
   let editor: Editor;
   afterEach(() => editor?.destroy());
@@ -184,8 +186,9 @@ describe('CodeBlockToolbar dropdown interaction', () => {
     // Initially closed
     expect(dropdown.style.display).not.toBe('block');
 
-    // Open it by clicking the language badge
-    badge.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    // Open it by mousing down on the language badge (the toggle now lives on
+    // mousedown so it works even though preventDefault suppresses the click)
+    badge.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
     expect(dropdown.style.display).toBe('block');
 
     // Clicking inside the dropdown (the list) must NOT close it

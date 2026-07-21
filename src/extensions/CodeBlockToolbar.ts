@@ -245,17 +245,14 @@ export const CodeBlockToolbar = Node.create({
         langDropdown.style.display = 'none';
         wrapper.classList.remove('dropdown-open');
       };
-      // Prevent the editor from hijacking the click: a mousedown inside the
-      // NodeView is otherwise processed by ProseMirror (which sets the
-      // selection / steals focus), racing with the dropdown's <input>.focus()
-      // and making the just-opened dropdown flicker closed. Intercepting
-      // mousedown stops ProseMirror from touching selection/focus here.
+      // Toggle on mousedown directly. Inside a `contenteditable`, a `mousedown`
+      // whose default is prevented can suppress the subsequent `click` event —
+      // so relying on a `click` handler would leave the badge unresponsive (it
+      // would "do nothing" when clicked). Handling the toggle on `mousedown`
+      // also blocks ProseMirror from touching selection/focus here, which is
+      // what previously made the dropdown flicker closed on open.
       langBadge.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        e.stopPropagation();
-      });
-
-      langBadge.addEventListener('click', (e) => {
         e.stopPropagation();
         if (dropdownOpen) {
           closeDropdown();
