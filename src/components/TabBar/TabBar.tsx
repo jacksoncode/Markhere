@@ -1,9 +1,10 @@
 import { useCallback, useRef, useEffect } from 'react';
 import { useTabsStore, TabInfo } from '../../store/tabsStore';
+import { switchToTab } from '../../services/tabSwitch';
 import './TabBar.css';
 
 export function TabBar() {
-  const { tabs, activeTabId, switchTab, closeTab, reorderTabs } = useTabsStore();
+  const { tabs, activeTabId, closeTab, reorderTabs } = useTabsStore();
   const tabRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
 
   // Focus the newly active tab after switching
@@ -46,13 +47,13 @@ export function TabBar() {
         e.preventDefault();
         nextIndex = (currentIndex + 1) % tabs.length;
         const nextTab = tabs[nextIndex];
-        switchTab(nextTab.id);
+        switchToTab(nextTab.id);
         tabRefs.current.get(nextTab.id)?.focus();
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
         const prevTab = tabs[nextIndex];
-        switchTab(prevTab.id);
+        switchToTab(prevTab.id);
         tabRefs.current.get(prevTab.id)?.focus();
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
@@ -60,7 +61,7 @@ export function TabBar() {
         // Focus will move to the newly active tab via the useEffect above
       }
     },
-    [tabs, switchTab, closeTab]
+    [tabs, closeTab]
   );
 
   if (tabs.length === 0) return null;
@@ -78,7 +79,7 @@ export function TabBar() {
             ref={(el) => { tabRefs.current.set(tab.id, el); }}
             id={`tab-${tab.id}`}
             className={`tab ${tab.id === activeTabId ? 'active' : ''} ${tab.isDirty ? 'dirty' : ''}`}
-            onClick={() => switchTab(tab.id)}
+            onClick={() => switchToTab(tab.id)}
             onKeyDown={(e) => handleTabKeyDown(e, tab.id)}
             draggable
             onDragStart={(e) => handleDragStart(e, index)}
