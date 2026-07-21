@@ -2,6 +2,7 @@ export { MathExtension, InlineMathExtension } from './MathExtension';
 export { MermaidExtension } from './MermaidExtension';
 export { CodeBlockHighlight } from './CodeBlockHighlight';
 export { CodeBlockToolbar } from './CodeBlockToolbar';
+export { TocExtension } from './TocExtension';
 export { MediaEmbed, MediaAutoEmbed } from './MediaEmbed';
 export { FootnoteExtension } from './FootnoteExtension';
 export { FrontmatterExtension } from './FrontmatterExtension';

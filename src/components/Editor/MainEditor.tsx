@@ -16,6 +16,7 @@ import { Markdown } from 'tiptap-markdown';
 import { EditorErrorBoundary } from './EditorErrorBoundary';
 import { MathExtension, InlineMathExtension, MermaidExtension, FootnoteExtension, AutocompleteExtension, AutoPairExtension, ParagraphFocusExtension, paragraphFocusPluginKey, BlockDragHandleExtension, DataviewBlock, SearchHighlightExtension, InlineSourceExtension, ToggleBlock, VimKeymapExtension, EmacsKeymapExtension, POSHighlightExtension } from '../../extensions';
 import { CodeBlockToolbar } from '../../extensions/CodeBlockToolbar';
+import { TocExtension } from '../../extensions/TocExtension';
 import { MediaEmbed, MediaAutoEmbed } from '../../extensions/MediaEmbed';
 import { ResizableImageExtension } from '../../extensions/ResizableImage';
 import { TableOperations } from '../TableOperations/TableOperations';
@@ -39,6 +40,8 @@ import { useEditorCollaboration } from './useEditorCollaboration';
 import './Editor.css';
 import '../../styles/extensions.css';
 import '../../styles/callout.css';
+import '../../styles/prism-theme.css';
+import '../../styles/toc.css';
 
 export function MainEditor() {
   const { setContent, setEditorInstance } = useEditorState();
@@ -110,6 +113,7 @@ export function MainEditor() {
       InlineMathExtension,
       MermaidExtension,
       CodeBlockToolbar,
+      TocExtension,
       FootnoteExtension,
       AutocompleteExtension,
       AutoPairExtension,

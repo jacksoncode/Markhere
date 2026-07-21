@@ -1,0 +1,139 @@
+/*
+ * ═══ Markhere · Prism 语法高亮主题 ═══
+ * 为代码块内 Prism 生成的 .token 配色，按语言/语法区分。
+ *
+ * 代码块背景在深色主题下为深色、浅色主题下为浅色（见 extensions.css），
+ * 因此两套调色板与主题“反向”对应：深色主题用明亮配色，浅色主题用饱和深色。
+ * 配色以 CSS 变量声明（不直接在组件选择器里写裸 hex），跟随 data-theme 切换。
+ */
+
+/* ---- 深色应用主题：代码块深色背景 → 明亮配色（Catppuccin Mocha 风格）---- */
+[data-theme='dark'] {
+  --syntax-code: #cdd6f4;
+  --syntax-comment: #6c7086;
+  --syntax-punctuation: #cdd6f4;
+  --syntax-keyword: #cba6f7;
+  --syntax-string: #a6e3a1;
+  --syntax-function: #89b4fa;
+  --syntax-number: #fab387;
+  --syntax-operator: #94e2d5;
+  --syntax-class: #f9e2af;
+  --syntax-tag: #f38ba8;
+  --syntax-attr: #f9e2af;
+  --syntax-builtin: #fab387;
+  --syntax-regex: #f5c2e7;
+  --syntax-deleted: #f38ba8;
+  --syntax-inserted: #a6e3a1;
+  --syntax-property: #89b4fa;
+  --syntax-constant: #fab387;
+  --syntax-url: #89b4fa;
+}
+
+/* ---- 浅色应用主题：代码块浅色背景 → 饱和深色（GitHub Light 风格）---- */
+[data-theme='light'] {
+  --syntax-code: #1e1e2e;
+  --syntax-comment: #6a737d;
+  --syntax-punctuation: #24292e;
+  --syntax-keyword: #cf222e;
+  --syntax-string: #0a3069;
+  --syntax-function: #8250df;
+  --syntax-number: #0550ae;
+  --syntax-operator: #d73a49;
+  --syntax-class: #953800;
+  --syntax-tag: #116329;
+  --syntax-attr: #0550ae;
+  --syntax-builtin: #953800;
+  --syntax-regex: #116329;
+  --syntax-deleted: #cf222e;
+  --syntax-inserted: #116329;
+  --syntax-property: #0550ae;
+  --syntax-constant: #953800;
+  --syntax-url: #0969da;
+}
+
+/* 代码块基础文本色 */
+.code-block-content code {
+  color: var(--syntax-code, #cdd6f4);
+}
+
+/* 注释 / 说明类 */
+.code-block-content code .token.comment,
+.code-block-content code .token.prolog,
+.code-block-content code .token.doctype,
+.code-block-content code .token.cdata {
+  color: var(--syntax-comment, #6c7086);
+  font-style: italic;
+}
+
+/* 标点 */
+.code-block-content code .token.punctuation {
+  color: var(--syntax-punctuation, #cdd6f4);
+}
+
+/* 关键字 / atrule / important */
+.code-block-content code .token.keyword,
+.code-block-content code .token.atrule,
+.code-block-content code .token.important {
+  color: var(--syntax-keyword, #cba6f7);
+}
+
+/* 字符串 / 字符 / 属性值 / 插入内容 */
+.code-block-content code .token.string,
+.code-block-content code .token.char,
+.code-block-content code .token.attr-value,
+.code-block-content code .token.inserted {
+  color: var(--syntax-string, #a6e3a1);
+}
+
+/* 函数 / 类名 */
+.code-block-content code .token.function,
+.code-block-content code .token.class-name,
+.code-block-content code .token.maybe-class-name {
+  color: var(--syntax-function, #89b4fa);
+}
+
+/* 数字 / 布尔 / 常量 / 符号 */
+.code-block-content code .token.number,
+.code-block-content code .token.boolean,
+.code-block-content code .token.constant,
+.code-block-content code .token.symbol {
+  color: var(--syntax-number, #fab387);
+}
+
+/* 运算符 / 实体 / url */
+.code-block-content code .token.operator,
+.code-block-content code .token.entity,
+.code-block-content code .token.url {
+  color: var(--syntax-operator, #94e2d5);
+}
+
+/* 标签 / 选择器 / 删除内容 */
+.code-block-content code .token.tag,
+.code-block-content code .token.selector,
+.code-block-content code .token.deleted {
+  color: var(--syntax-tag, #f38ba8);
+}
+
+/* 属性名 / 变量 / 参数 */
+.code-block-content code .token.attr-name,
+.code-block-content code .token.property,
+.code-block-content code .token.variable,
+.code-block-content code .token.parameter {
+  color: var(--syntax-attr, #f9e2af);
+}
+
+/* 内置 / 正则 / 命名空间 */
+.code-block-content code .token.builtin,
+.code-block-content code .token.regex,
+.code-block-content code .token.namespace {
+  color: var(--syntax-builtin, #fab387);
+}
+
+/* 强调 */
+.code-block-content code .token.bold {
+  font-weight: 700;
+}
+
+.code-block-content code .token.italic {
+  font-style: italic;
+}
