@@ -8,6 +8,13 @@
 import { Node } from '@tiptap/core';
 import Prism from 'prismjs';
 
+// `prism-markup-templating` MUST be imported before languages that depend on
+// it (php, twig, django, …). Those grammars register an `after-tokenize` hook
+// that references `tokenizePlaceholders`; without this plugin the hook throws
+// on EVERY highlight (even for `js`), which crashes the code-block NodeView
+// and leaves the editor in a broken/partial state. See issue with [TOC] files.
+import 'prismjs/components/prism-markup-templating';
+
 // Pre-load common languages
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-typescript';
@@ -44,6 +51,25 @@ function getLanguageClass(lang: string): string {
   return `language-${lang}`;
 }
 
+/**
+ * Highlight `text` for `lang` into `el`. Never throws: if the grammar is
+ * missing or a Prism plugin hook fails (e.g. `tokenizePlaceholders` for
+ * templating languages), fall back to plain text so the editor/NodeView can
+ * never be left in a broken state.
+ */
+function highlightInto(el: HTMLElement, text: string, lang: string): void {
+  try {
+    const grammar = Prism.languages[lang];
+    if (grammar) {
+      el.innerHTML = Prism.highlight(text, grammar, lang);
+      return;
+    }
+  } catch {
+    // fall through to plain-text fallback below
+  }
+  el.textContent = text;
+}
+
 export const CodeBlockToolbar = Node.create({
   name: 'codeBlock',
 
@@ -74,6 +100,10 @@ export const CodeBlockToolbar = Node.create({
 
   parseHTML() {
     return [{ tag: 'pre', preserveWhitespace: 'full' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['pre', ['code', HTMLAttributes, 0]];
   },
 
   addNodeView() {
@@ -275,12 +305,7 @@ export const CodeBlockToolbar = Node.create({
 
       // --- Highlighting ---
       function highlightCode() {
-        if (Prism.languages[lang]) {
-          const result = Prism.highlight(node.textContent || '', Prism.languages[lang], lang);
-          code.innerHTML = result;
-        } else {
-          code.textContent = node.textContent;
-        }
+        highlightInto(code, node.textContent || '', lang);
       }
 
       // --- Line numbers ---
@@ -322,16 +347,7 @@ export const CodeBlockToolbar = Node.create({
           if (updatedNode.textContent !== node.textContent) {
             requestAnimationFrame(() => {
               const currentLang = updatedNode.attrs.language || 'plaintext';
-              if (Prism.languages[currentLang]) {
-                const result = Prism.highlight(
-                  updatedNode.textContent || '',
-                  Prism.languages[currentLang],
-                  currentLang
-                );
-                code.innerHTML = result;
-              } else {
-                code.textContent = updatedNode.textContent;
-              }
+              highlightInto(code, updatedNode.textContent || '', currentLang);
               // Update line numbers
               const text = updatedNode.textContent || '';
               const lines = text.split('\n');
