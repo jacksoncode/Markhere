@@ -6,6 +6,8 @@
  *   [toolbar: language badge + copy btn] [gutter: line numbers] [code content]
  */
 import { Node } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import Prism from 'prismjs';
 
 // `prism-markup-templating` MUST be imported before languages that depend on
@@ -57,22 +59,72 @@ function getLanguageClass(lang: string): string {
 }
 
 /**
- * Highlight `text` for `lang` into `el`. Never throws: if the grammar is
- * missing or a Prism plugin hook fails (e.g. `tokenizePlaceholders` for
- * templating languages), fall back to plain text so the editor/NodeView can
- * never be left in a broken state.
+ * Syntax highlighting for code blocks.
+ *
+ * We do NOT write highlighted HTML into the NodeView's `contentDOM` (the
+ * `<code>` element): ProseMirror owns that DOM and reverts any `<span>` tokens
+ * back to plain text on the next sync, so the colors never persist. Instead we
+ * return ProseMirror *inline decorations* — spans ProseMirror renders itself
+ * (and re-applies on every update), so they survive editing and never fight
+ * the contentDOM.
  */
-function highlightInto(el: HTMLElement, text: string, lang: string): void {
-  try {
-    const grammar = Prism.languages[lang];
-    if (grammar) {
-      el.innerHTML = Prism.highlight(text, grammar, lang);
-      return;
+function flattenTokens(
+  tokens: any[],
+  typePath: string[],
+  base: number,
+  decorations: any[],
+  posRef: { offset: number }
+): void {
+  for (const token of tokens) {
+    if (typeof token === 'string') {
+      const len = token.length;
+      if (len > 0 && typePath.length) {
+        decorations.push(
+          Decoration.inline(base + posRef.offset, base + posRef.offset + len, {
+            class: 'token ' + typePath.join(' '),
+          })
+        );
+      }
+      posRef.offset += len;
+    } else {
+      const type = Array.isArray(token.type) ? token.type.join(' ') : token.type;
+      const nextPath = typePath.concat(type);
+      if (typeof token.content === 'string') {
+        const len = token.content.length;
+        if (len > 0) {
+          decorations.push(
+            Decoration.inline(base + posRef.offset, base + posRef.offset + len, {
+              class: 'token ' + nextPath.join(' '),
+            })
+          );
+        }
+        posRef.offset += len;
+      } else if (Array.isArray(token.content)) {
+        flattenTokens(token.content, nextPath, base, decorations, posRef);
+      } else {
+        // Token content is itself a Token; advance by its flattened length.
+        posRef.offset += token.length;
+      }
     }
-  } catch {
-    // fall through to plain-text fallback below
   }
-  el.textContent = text;
+}
+
+function buildCodeBlockDecorations(doc: any): DecorationSet {
+  const decorations: any[] = [];
+  doc.descendants((node: any, pos: number) => {
+    if (node.type.name !== 'codeBlock') return true;
+    const lang = node.attrs.language || 'plaintext';
+    const text = node.textContent;
+    if (!text) return true;
+    const grammar = Prism.languages[lang] || Prism.languages[lang.toLowerCase()];
+    if (!grammar) return true;
+    const tokens = Prism.tokenize(text, grammar);
+    const base = pos + 1; // code content starts right after the node opening
+    const posRef = { offset: 0 };
+    flattenTokens(tokens, [], base, decorations, posRef);
+    return true;
+  });
+  return DecorationSet.create(doc, decorations);
 }
 
 export const CodeBlockToolbar = Node.create({
@@ -109,6 +161,19 @@ export const CodeBlockToolbar = Node.create({
 
   renderHTML({ HTMLAttributes }) {
     return ['pre', ['code', HTMLAttributes, 0]];
+  },
+
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey('codeBlockHighlight'),
+        props: {
+          decorations(state) {
+            return buildCodeBlockDecorations(state.doc);
+          },
+        },
+      }),
+    ];
   },
 
   addNodeView() {
@@ -234,7 +299,10 @@ export const CodeBlockToolbar = Node.create({
       let dropdownOpen = false;
       const openDropdown = () => {
         dropdownOpen = true;
-        langDropdown.style.display = 'block';
+        // Must be `flex` (not `block`) to match the CSS, otherwise the flex
+        // layout that constrains the language list to the dropdown's max-height
+        // (and makes it scrollable) is lost and the list can't be wheel-scrolled.
+        langDropdown.style.display = 'flex';
         langSearch.focus();
         langSearch.value = '';
         updateLangList(langList, displayLanguages, '');
@@ -336,11 +404,6 @@ export const CodeBlockToolbar = Node.create({
         }
       });
 
-      // --- Highlighting ---
-      function highlightCode() {
-        highlightInto(code, node.textContent || '', activeLang);
-      }
-
       // --- Line numbers ---
       function updateLineNumbers() {
         const text = node.textContent || '';
@@ -352,8 +415,11 @@ export const CodeBlockToolbar = Node.create({
         lineBadge.textContent = `${lineCount} lines`;
       }
 
+      // Syntax highlighting is provided by the codeBlockHighlight ProseMirror
+      // plugin via inline decorations (see buildCodeBlockDecorations). Writing
+      // tokens into the contentDOM here would be reverted by ProseMirror.
+
       // Initial render
-      highlightCode();
       updateLineNumbers();
 
       return {
@@ -379,23 +445,21 @@ export const CodeBlockToolbar = Node.create({
             });
           }
 
-          // Re-highlight and re-number when text OR language changes.
-          // Language change alone must re-tokenize (e.g. switching to bash),
-          // otherwise the old (plaintext) tokens are kept and colors don't update.
-          if (langChanged || textChanged) {
-            requestAnimationFrame(() => {
-              const currentLang = activeLang;
-              highlightInto(code, updatedNode.textContent || '', currentLang);
-              // Update line numbers
-              const text = updatedNode.textContent || '';
-              const lines = text.split('\n');
-              gutter.innerHTML = lines.map((_, i) =>
-                `<span class="code-block-line-num">${i + 1}</span>`
-              ).join('');
-              lineBadge.textContent = `${lines.length} lines`;
-            });
+          // Re-number lines when the text changes. Language/syntax highlighting
+          // is handled by the codeBlockHighlight decoration plugin, which picks
+          // up both text and language changes automatically.
+          if (textChanged) {
+            const text = updatedNode.textContent || '';
+            const lines = text.split('\n');
+            gutter.innerHTML = lines.map((_, i) =>
+              `<span class="code-block-line-num">${i + 1}</span>`
+            ).join('');
+            lineBadge.textContent = `${lines.length} lines`;
           }
 
+          // Keep our NodeView's `node` reference in sync so subsequent
+          // change detection stays correct.
+          node = updatedNode;
           return true;
         },
 

@@ -91,6 +91,23 @@ describe('CodeBlockToolbar', () => {
     expect(getCodeEl(editor).className).toContain('language-toml');
   });
 
+  it('renders Prism token spans after switching to a highlighting language (fixes no-highlight)', async () => {
+    editor = makeEditor(codeBlock('plaintext', 'for x in 1 2 3; do echo $x; done'));
+    await tick();
+    // plaintext has no grammar tokens
+    expect(getCodeEl(editor).innerHTML).not.toContain('token');
+
+    switchLang(editor, 'bash');
+    await tick();
+
+    // Highlighting is provided by ProseMirror inline decorations, which render
+    // <span class="token ..."> into the code content and survive ProseMirror's
+    // contentDOM sync (writing innerHTML directly gets reverted to plain text).
+    const code = getCodeEl(editor);
+    expect(code.innerHTML).toContain('token');
+    expect(code.innerHTML).toContain('keyword');
+  });
+
   it('renders a scrollable language dropdown list with every popular language', async () => {
     editor = makeEditor(codeBlock('javascript', 'const a = 1;'));
     await tick();
@@ -184,12 +201,12 @@ describe('CodeBlockToolbar dropdown interaction', () => {
     const { badge, dropdown, list } = els();
 
     // Initially closed
-    expect(dropdown.style.display).not.toBe('block');
+    expect(dropdown.style.display).not.toBe('flex');
 
     // Open it by mousing down on the language badge (the toggle now lives on
     // mousedown so it works even though preventDefault suppresses the click)
     badge.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    expect(dropdown.style.display).toBe('block');
+    expect(dropdown.style.display).toBe('flex');
 
     // Regression: opening must NOT add a `dropdown-open` class to the NodeView
     // wrapper. Mutating the wrapper makes ProseMirror's MutationObserver treat
@@ -200,7 +217,7 @@ describe('CodeBlockToolbar dropdown interaction', () => {
 
     // Clicking inside the dropdown (the list) must NOT close it
     list.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(dropdown.style.display).toBe('block');
+    expect(dropdown.style.display).toBe('flex');
 
     // Clicking outside the wrapper closes it
     document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));

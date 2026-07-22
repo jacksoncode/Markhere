@@ -311,6 +311,10 @@
 .code-block-lang-list {
   overflow-y: auto;
   flex: 1;
+  /* Without min-height:0 a flex item won't shrink below its content height,
+     so the list would overflow the dropdown's max-height and never become a
+     scroll container (you couldn't wheel-scroll the language list). */
+  min-height: 0;
 }
 
 .code-block-lang-item {
