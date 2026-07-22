@@ -1,6 +1,9 @@
 use std::fs;
 use std::io::{Write, BufWriter, Read};
 use std::process::Command;
+use std::sync::Mutex;
+use std::thread;
+use std::time::Duration;
 use base64::{Engine as _, engine::general_purpose};
 use tauri::Manager;
 use tauri::Emitter;
@@ -92,6 +95,11 @@ pub struct GitDiff {
     pub deletions: usize,
 }
 
+// 串行化所有 save_file 调用，避免并发写同一文件（自动保存防抖与手动保存
+// 可能同时触发）。Windows 上 fs::File::create 默认以不共享方式打开，并发写
+// 会因 os error 32 (ERROR_SHARING_VIOLATION) 失败。
+static SAVE_LOCK: Mutex<()> = Mutex::new(());
+
 #[tauri::command]
 async fn save_file(_app: tauri::AppHandle, path: String, content: String) -> Result<String, String> {
     validate_path(&path)?;
@@ -103,10 +111,62 @@ async fn save_file(_app: tauri::AppHandle, path: String, content: String) -> Res
         }
     }
 
-    let mut file = fs::File::create(file_path).map_err(|e: std::io::Error| e.to_string())?;
-    file.write_all(content.as_bytes()).map_err(|e: std::io::Error| e.to_string())?;
+    // 串行化：同一时刻只有一个保存在执行，杜绝并发写冲突。
+    let _guard = SAVE_LOCK
+        .lock()
+        .map_err(|_| "save lock poisoned".to_string())?;
+
+    // 以可共享模式写入，并在遇到 Windows 共享冲突时重试，容忍杀软 / 云同步
+    // 在保存瞬间以独占方式短暂打开文件（os error 32）。
+    write_file_with_retry(file_path, content.as_bytes())?;
 
     Ok(path)
+}
+
+/// 以可共享模式写文件；遇到 Windows 共享冲突（os error 32）时按指数退避重试，
+/// 最多重试 5 次（覆盖杀软扫描等数百毫秒级的瞬时独占）。
+fn write_file_with_retry(path: &std::path::Path, bytes: &[u8]) -> Result<(), String> {
+    const MAX_ATTEMPTS: u32 = 5;
+    let mut attempt: u32 = 0;
+    loop {
+        match open_for_write(path) {
+            Ok(mut file) => {
+                file.write_all(bytes)
+                    .map_err(|e: std::io::Error| e.to_string())?;
+                file.flush().map_err(|e: std::io::Error| e.to_string())?;
+                return Ok(());
+            }
+            Err(e) => {
+                // raw_os_error() == Some(32) 即 Windows 的 ERROR_SHARING_VIOLATION。
+                let is_sharing_violation = e.raw_os_error() == Some(32);
+                attempt += 1;
+                if is_sharing_violation && attempt < MAX_ATTEMPTS {
+                    // 退避：25ms, 50ms, 100ms, 200ms
+                    thread::sleep(Duration::from_millis(25 * attempt as u64));
+                    continue;
+                }
+                return Err(e.to_string());
+            }
+        }
+    }
+}
+
+/// 以可共享模式打开文件用于写入（截断 + 创建）。非 Windows 平台等价于
+/// `fs::File::create`；Windows 平台显式允许其他进程/线程同时读、写、删除，
+/// 避免 os error 32。
+#[cfg(windows)]
+fn open_for_write(path: &std::path::Path) -> std::io::Result<std::fs::File> {
+    use std::os::windows::fs::OpenOptionsExt;
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true).create(true).truncate(true);
+    // FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE
+    opts.share_mode(0x00000001u32 | 0x00000002u32 | 0x00000004u32);
+    opts.open(path)
+}
+
+#[cfg(not(windows))]
+fn open_for_write(path: &std::path::Path) -> std::io::Result<std::fs::File> {
+    std::fs::File::create(path)
 }
 
 /// Decode raw file bytes into a Rust `String`, handling BOM, UTF-8 and legacy
