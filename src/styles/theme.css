@@ -3,8 +3,41 @@
    This file applies them to HTML elements.
    Variables use backward-compatible aliases from design-tokens.css. */
 
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+/* Theme transition: only theme-aware surfaces animate on theme switch.
+   Interactive elements get a snappy, short transition (no lag on hover/focus).
+   A universal `*` transition is intentionally avoided — it makes every
+   hover/focus feel delayed and costs performance on large documents. */
+body,
+.app-container,
+.editor-content,
+.sidebar,
+.titlebar,
+.toolbar,
+.status-bar,
+.tab-bar,
+.main-editor,
+.prose,
+.split-view {
+  transition: background-color var(--duration-normal) var(--ease-default),
+              color var(--duration-normal) var(--ease-default),
+              border-color var(--duration-normal) var(--ease-default);
+}
+
+button,
+a,
+.menu-item,
+.tab,
+.sidebar-item,
+.sidebar-tab,
+.toolbar-btn,
+.icon-btn,
+.dropdown-item,
+input,
+select,
+textarea {
+  transition: background-color var(--duration-fast) var(--ease-default),
+              color var(--duration-fast) var(--ease-default),
+              border-color var(--duration-fast) var(--ease-default);
 }
 
 body {
@@ -50,7 +83,7 @@ input, textarea {
 
 code, pre {
   background: var(--code-bg, var(--color-code-bg));
-  color: var(--text-color, var(--color-text-primary));
+  color: var(--color-code-text, #cdd6f4);
 }
 
 a {

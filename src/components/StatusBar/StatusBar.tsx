@@ -3,8 +3,10 @@ import type { Editor } from '@tiptap/react';
 import { useEditorState } from '../../store/editorStore';
 import { useFileStore } from '../../store/fileStore';
 import { useUIState } from '../../store/uiStore';
+import { useAutoSaveStore } from '../../store/autoSaveStore';
 import { useTranslation } from '../../i18n';
 import { SelectionWordCount } from '../Editor/SelectionWordCount';
+import { Icon } from '../Icon/Icon';
 import './StatusBar.css';
 
 /** Calculate line and column from cursor's ProseMirror position. */
@@ -32,18 +34,13 @@ function countWords(text: string): number {
   return cjkChars + latinWords;
 }
 
-/** Detect line ending from document text. */
-function detectLineEnding(text: string): 'CRLF' | 'LF' {
-  return text.includes('\r\n') ? 'CRLF' : 'LF';
-}
-
 const WORDS_PER_MINUTE_READ = 200;
-const WORDS_PER_MINUTE_SPEAK = 130;
 
 export function StatusBar() {
   const { t } = useTranslation();
   const editorInstance = useEditorState(s => s.editorInstance);
   const currentPath = useFileStore(s => s.currentPath);
+  const { hasUnsavedChanges, lastSaved } = useAutoSaveStore();
   const [, forceUpdate] = useReducer((n: number) => n + 1, 0);
 
   // Re-render on every editor state change (content and selection)
@@ -61,9 +58,7 @@ export function StatusBar() {
   const words = countWords(text);
   const characters = text.length;
   const { line, col } = getCursorPosition(editorInstance);
-  const lineEnding = detectLineEnding(text);
   const readingTime = Math.ceil(words / WORDS_PER_MINUTE_READ);
-  const speakingTime = Math.ceil(words / WORDS_PER_MINUTE_SPEAK);
   const fileName = currentPath
     ? currentPath.split('/').pop()!
     : t('statusBar.untitled');
@@ -84,10 +79,6 @@ export function StatusBar() {
         <span className="status-bar-item" title={t('statusBar.readingTimeTitle', undefined, { speed: WORDS_PER_MINUTE_READ })} aria-label={t('statusBar.readingTime', undefined, { count: readingTime })}>
           {t('statusBar.readingTime', undefined, { count: readingTime })}
         </span>
-        <span className="status-bar-separator" aria-hidden="true" />
-        <span className="status-bar-item" title={t('statusBar.speakingTimeTitle', undefined, { speed: WORDS_PER_MINUTE_SPEAK })} aria-label={t('statusBar.speakingTime', undefined, { count: speakingTime })}>
-          {t('statusBar.speakingTime', undefined, { count: speakingTime })}
-        </span>
       </div>
 
       {/* Center: cursor position */}
@@ -97,24 +88,52 @@ export function StatusBar() {
         </span>
       </div>
 
-      {/* Right: mode switcher + file info */}
+      {/* Right: save status + mode switcher + file info */}
       <div className="status-bar-right">
+        <SaveStatus dirty={hasUnsavedChanges} lastSaved={lastSaved} t={t} />
+        <span className="status-bar-separator" aria-hidden="true" />
         {/* Mode switcher (Typora-style) */}
         <ModeSwitcher />
         <span className="status-bar-separator" aria-hidden="true" />
-        <span className="status-bar-item" title={t('statusBar.fileNameTitle')}>
+        <span className="status-bar-item status-bar-filename" title={t('statusBar.fileNameTitle')}>
           {fileName}
-        </span>
-        <span className="status-bar-separator" aria-hidden="true" />
-        <span className="status-bar-item" title={t('statusBar.encodingTitle')}>
-          {t('statusBar.encoding')}
-        </span>
-        <span className="status-bar-separator" aria-hidden="true" />
-        <span className="status-bar-item" title={t('statusBar.lineEndingTitle')}>
-          {lineEnding}
         </span>
       </div>
     </div>
+  );
+}
+
+/** Lightweight save-state indicator so users get feedback on persistence. */
+function SaveStatus({
+  dirty,
+  lastSaved,
+  t,
+}: {
+  dirty: boolean;
+  lastSaved: number | null;
+  t: (key: string, fallback?: string, params?: Record<string, string | number>) => string;
+}) {
+  if (dirty) {
+    return (
+      <span
+        className="status-bar-save status-bar-save--dirty"
+        title={t('statusBar.saveDirtyTitle')}
+        aria-label={t('statusBar.saveDirty')}
+      >
+        <span className="status-bar-save-dot" aria-hidden="true" />
+        {t('statusBar.saveDirty')}
+      </span>
+    );
+  }
+  return (
+    <span
+      className="status-bar-save status-bar-save--saved"
+      title={lastSaved ? t('statusBar.saveTimeTitle', undefined, { time: new Date(lastSaved).toLocaleTimeString() }) : t('statusBar.saveSavedTitle')}
+      aria-label={t('statusBar.saveSaved')}
+    >
+      <Icon name="check" size={13} />
+      {t('statusBar.saveSaved')}
+    </span>
   );
 }
 
@@ -130,7 +149,7 @@ function ModeSwitcher() {
         title="Focus Mode (Cmd+Shift+F)"
         aria-pressed={focusMode}
       >
-        👁
+        <Icon name="eye" size={15} />
       </button>
       <button
         className={`status-bar-mode-btn${typewriterMode ? ' active' : ''}`}
@@ -138,7 +157,7 @@ function ModeSwitcher() {
         title="Typewriter Mode (Cmd+Shift+T)"
         aria-pressed={typewriterMode}
       >
-        ⌨
+        <Icon name="keyboard" size={15} />
       </button>
       <button
         className={`status-bar-mode-btn${sourceMode ? ' active' : ''}`}
@@ -146,7 +165,7 @@ function ModeSwitcher() {
         title="Source Mode (Cmd+/)"
         aria-pressed={sourceMode}
       >
-        {'</>'}
+        <Icon name="code" size={15} />
       </button>
     </div>
   );

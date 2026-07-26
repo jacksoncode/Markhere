@@ -536,7 +536,12 @@
     "cursorTitle": "Cursor position (line, column)",
     "fileNameTitle": "File name",
     "encodingTitle": "Text encoding",
-    "lineEndingTitle": "Line ending type"
+    "lineEndingTitle": "Line ending type",
+    "saveDirty": "Unsaved",
+    "saveDirtyTitle": "You have unsaved changes",
+    "saveSaved": "Saved",
+    "saveSavedTitle": "All changes saved",
+    "saveTimeTitle": "Last saved at {{time}}"
   },
   "export": {
     "export": "Export",

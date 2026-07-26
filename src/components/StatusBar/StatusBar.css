@@ -65,6 +65,32 @@
   gap: 2px;
 }
 
+/* ── Save status indicator ── */
+.status-bar-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-bar-save--dirty {
+  color: var(--color-warning, #d97706);
+}
+
+.status-bar-save--saved {
+  color: var(--color-success, #16a34a);
+}
+
+.status-bar-save-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
 .status-bar-mode-btn {
   padding: 3px 8px;
   border: none;

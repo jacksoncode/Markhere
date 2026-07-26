@@ -14,6 +14,7 @@ import { useNotificationStore } from '../Notification/Notification';
 import { BookmarkList } from '../Bookmarks/BookmarkList';
 import './Sidebar-New.css';
 import { TagPanel } from './TagPanel';
+import { Icon, type IconName } from '../Icon/Icon';
 import { loadFileIntoEditor } from '../../services/fileOpen';
 import { basenameOf } from '../../utils/pathUtils';
 
@@ -472,17 +473,17 @@ export function SidebarNew() {
     editorInstance?.chain().focus().setTextSelection(position).run();
   };
 
-  const tabs: { key: SidebarTab; icon: string; label: string }[] = [
-    { key: 'files', icon: '📁', label: t('sidebar.files') },
-    { key: 'outline', icon: '📋', label: t('sidebar.outline') },
-    { key: 'diary', icon: '📅', label: 'Diary' },
-    { key: 'import', icon: '📥', label: 'Import' },
-    { key: 'bookmarks', icon: '🔖', label: t('sidebar.bookmarks') },
-    { key: 'tags', icon: '#', label: 'Tags' },
-    { key: 'database', icon: '🗄', label: 'Database' },
-    { key: 'dataview', icon: '🔍', label: 'Query' },
-    { key: 'canvas', icon: '🎨', label: 'Canvas' },
-    { key: 'links', icon: '🔗', label: 'Links' },
+  const tabs: { key: SidebarTab; icon: IconName; label: string }[] = [
+    { key: 'files', icon: 'folder', label: t('sidebar.files') },
+    { key: 'outline', icon: 'outline', label: t('sidebar.outline') },
+    { key: 'diary', icon: 'calendar', label: 'Diary' },
+    { key: 'import', icon: 'inbox', label: 'Import' },
+    { key: 'bookmarks', icon: 'bookmark', label: t('sidebar.bookmarks') },
+    { key: 'tags', icon: 'tag', label: 'Tags' },
+    { key: 'database', icon: 'database', label: 'Database' },
+    { key: 'dataview', icon: 'search', label: 'Query' },
+    { key: 'canvas', icon: 'palette', label: 'Canvas' },
+    { key: 'links', icon: 'link', label: 'Links' },
   ];
 
   /** Recursively render a single directory level for the Browse view. */
@@ -891,7 +892,9 @@ export function SidebarNew() {
                 title={tab.label}
                 tabIndex={activeTab === tab.key ? 0 : -1}
               >
-                <span className="sidebar-tab-icon" aria-hidden="true">{tab.icon}</span>
+                <span className="sidebar-tab-icon" aria-hidden="true">
+                  <Icon name={tab.icon} size={18} />
+                </span>
               </button>
             ))}
           </div>

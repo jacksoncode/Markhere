@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { listen } from '@tauri-apps/api/event';
+import { getVersion } from '@tauri-apps/api/app';
 import { useFileStore } from '../../store/fileStore';
 import { useEditorState } from '../../store/editorStore';
 import { useUIState } from '../../store/uiStore';
@@ -49,6 +50,11 @@ export function TitleBar({ onCheckUpdates }: TitleBarProps) {
   const [showCollaboration, setShowCollaboration] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
+  const [appVersion, setAppVersion] = useState('1.1.7');
+  useEffect(() => {
+    // Read the real version from Tauri (falls back to the build-time constant).
+    getVersion().then(setAppVersion).catch(() => {});
+  }, []);
   const [recentFiles, setRecentFiles] = useState<string[]>([]);
   const [showAboutDialog, setShowAboutDialog] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -1320,7 +1326,7 @@ tags: []
         <div className="about-dialog-overlay" onClick={() => setShowAboutDialog(false)}>
           <div className="about-dialog" onClick={(e) => e.stopPropagation()}>
             <h2 className="about-dialog-title">Markhere</h2>
-            <div className="about-dialog-version">Version 0.4.8</div>
+            <div className="about-dialog-version">Version {appVersion}</div>
             <p className="about-dialog-desc">A modern WYSIWYG Markdown editor with cross-platform support</p>
             <div className="about-dialog-tech">
               <span>Tauri 2.5</span>

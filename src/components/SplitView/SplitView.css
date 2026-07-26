@@ -90,6 +90,7 @@
 
 .split-preview-content code {
   background: var(--hover-bg);
+  color: var(--color-text-primary);
   padding: 2px 6px;
   border-radius: 3px;
   font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;

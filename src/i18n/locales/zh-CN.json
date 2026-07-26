@@ -536,7 +536,12 @@
     "cursorTitle": "光标位置（行, 列）",
     "fileNameTitle": "文件名",
     "encodingTitle": "文本编码",
-    "lineEndingTitle": "换行符类型"
+    "lineEndingTitle": "换行符类型",
+    "saveDirty": "未保存",
+    "saveDirtyTitle": "有未保存的更改",
+    "saveSaved": "已保存",
+    "saveSavedTitle": "所有更改已保存",
+    "saveTimeTitle": "上次保存于 {{time}}"
   },
   "export": {
     "export": "导出",
