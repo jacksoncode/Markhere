@@ -32,7 +32,7 @@ function getEditorMarkdown(editor: unknown): string {
   return (editor as any)?.storage?.markdown?.getMarkdown?.() ?? '';
 }
 
-export function switchToTab(id: string): void {
+export async function switchToTab(id: string): Promise<void> {
   const tabs = useTabsStore.getState();
   const activeTabId = tabs.activeTabId;
 
@@ -78,9 +78,22 @@ export function switchToTab(id: string): void {
   const target = useTabsStore.getState().getTabById(id);
   if (!target) return;
 
+  // Restored tabs persist only id/path/name/lastAccessed (not content), so their
+  // in-memory `content` is empty after a restart. Re-read the file from disk so
+  // clicking the tab actually shows its content instead of a blank editor.
+  const content =
+    target.content && target.content.length > 0
+      ? target.content
+      : target.path
+        ? await FileService.readFile(target.path).catch((err) => {
+            console.warn('switchToTab: failed to read restored file', target.path, err);
+            return '';
+          })
+        : '';
+
   if (editor) {
     try {
-      editor.commands.setContent(target.content ?? '');
+      editor.commands.setContent(content);
     } catch (err) {
       // setContent may emit a NodeView warning for nodes whose React renderers
       // aren't mounted yet. The content still loads — swallow it.
@@ -89,7 +102,7 @@ export function switchToTab(id: string): void {
   }
 
   fileStore.setCurrentPath(target.path);
-  fileStore.setSavedContent(target.content ?? '');
+  fileStore.setSavedContent(content);
 
   if (target.isDirty) {
     autoSave.markDirty();

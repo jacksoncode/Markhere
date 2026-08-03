@@ -47,4 +47,9 @@ export class FileService {
   static async fileExists(path: string): Promise<boolean> {
     return await safeInvoke<boolean>('file_exists', { path });
   }
+
+  /** Read raw file content from disk without touching the editor state. */
+  static async readFile(path: string): Promise<string> {
+    return await safeInvoke<string>('read_file', { path });
+  }
 }
